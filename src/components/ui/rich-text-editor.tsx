@@ -117,6 +117,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     extensions: [
       (StarterKit.configure({
         codeBlock: false,
+        gapcursor: false,
         // Explicitly configure list extensions
         bulletList: {
           HTMLAttributes: {
