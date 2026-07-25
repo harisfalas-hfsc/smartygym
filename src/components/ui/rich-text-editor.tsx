@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Blockquote } from '@tiptap/extension-blockquote';
-import { Bold } from '@tiptap/extension-bold';
+import { Bold as BoldExtension } from '@tiptap/extension-bold';
 import { Document } from '@tiptap/extension-document';
 import { HardBreak } from '@tiptap/extension-hard-break';
 import { Heading } from '@tiptap/extension-heading';
 import { HorizontalRule } from '@tiptap/extension-horizontal-rule';
-import { Italic } from '@tiptap/extension-italic';
+import { Italic as ItalicExtension } from '@tiptap/extension-italic';
 import { BulletList, ListItem, ListKeymap, OrderedList } from '@tiptap/extension-list';
 import { Paragraph } from '@tiptap/extension-paragraph';
 import { Strike } from '@tiptap/extension-strike';
@@ -135,8 +135,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       Heading.configure({
         levels: [1, 2, 3],
       }),
-      Bold,
-      Italic,
+      BoldExtension,
+      ItalicExtension,
       Strike,
       Blockquote,
       HardBreak,
