@@ -1,6 +1,16 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { Blockquote } from '@tiptap/extension-blockquote';
+import { Bold as BoldExtension } from '@tiptap/extension-bold';
+import { Document } from '@tiptap/extension-document';
+import { HardBreak } from '@tiptap/extension-hard-break';
+import { Heading } from '@tiptap/extension-heading';
+import { HorizontalRule } from '@tiptap/extension-horizontal-rule';
+import { Italic as ItalicExtension } from '@tiptap/extension-italic';
+import { BulletList, ListItem, ListKeymap, OrderedList } from '@tiptap/extension-list';
+import { Paragraph } from '@tiptap/extension-paragraph';
+import { Strike } from '@tiptap/extension-strike';
+import { Text } from '@tiptap/extension-text';
 import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
@@ -115,37 +125,42 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const editor = useEditor({
     extensions: [
-      (StarterKit.configure({
-        codeBlock: false,
-        // Explicitly configure list extensions
-        bulletList: {
-          HTMLAttributes: {
-            class: 'tiptap-bullet-list',
-          },
-          keepMarks: true,
-          keepAttributes: false,
+      Document,
+      Text,
+      Paragraph.configure({
+        HTMLAttributes: {
+          class: 'tiptap-paragraph',
         },
-        orderedList: {
-          HTMLAttributes: {
-            class: 'tiptap-ordered-list',
-          },
-          keepMarks: true,
-          keepAttributes: false,
+      }),
+      Heading.configure({
+        levels: [1, 2, 3],
+      }),
+      BoldExtension,
+      ItalicExtension,
+      Strike,
+      Blockquote,
+      HardBreak,
+      HorizontalRule,
+      BulletList.configure({
+        HTMLAttributes: {
+          class: 'tiptap-bullet-list',
         },
-        listItem: {
-          HTMLAttributes: {
-            class: 'tiptap-list-item',
-          },
+        keepMarks: true,
+        keepAttributes: false,
+      }),
+      OrderedList.configure({
+        HTMLAttributes: {
+          class: 'tiptap-ordered-list',
         },
-        heading: {
-          levels: [1, 2, 3],
+        keepMarks: true,
+        keepAttributes: false,
+      }),
+      ListItem.configure({
+        HTMLAttributes: {
+          class: 'tiptap-list-item',
         },
-        paragraph: {
-          HTMLAttributes: {
-            class: 'tiptap-paragraph',
-          },
-        },
-      }) as any),
+      }),
+      ListKeymap,
       Underline,
       TextStyle,
       Color,
