@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
@@ -9,7 +9,9 @@ interface AdminRouteProps {
 
 export const AdminRoute = ({ children }: AdminRouteProps) => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     checkAdminStatus();
@@ -20,10 +22,13 @@ export const AdminRoute = ({ children }: AdminRouteProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
+        setIsAuthenticated(false);
         setIsAdmin(false);
         setIsLoading(false);
         return;
       }
+
+      setIsAuthenticated(true);
 
       // Check if user has admin role
       const { data, error } = await supabase
@@ -56,6 +61,11 @@ export const AdminRoute = ({ children }: AdminRouteProps) => {
   }
 
   if (!isAdmin) {
+    if (isAuthenticated === false) {
+      const redirect = encodeURIComponent(location.pathname + location.search);
+      return <Navigate to={`/auth?redirect=${redirect}`} replace />;
+    }
+
     return <Navigate to="/" replace />;
   }
 
