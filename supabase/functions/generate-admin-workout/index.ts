@@ -220,6 +220,25 @@ interface WorkoutContent {
 // wastes credits when validation/parsing fails downstream.
 const AI_MODEL = "google/gemini-3-flash-preview";
 
+function aiGatewayFailureMessage(status: number, body: string): string {
+  try {
+    const parsed = JSON.parse(body);
+    const message = parsed?.message || parsed?.title || parsed?.error;
+    if (status === 402) {
+      return "Lovable AI credits are exhausted. Add workspace credits, then try Generate & Review again.";
+    }
+    if (status === 429) {
+      return "Lovable AI is rate limited right now. Wait a moment, then try Generate & Review again.";
+    }
+    return message ? `Lovable AI request failed (${status}): ${message}` : `Lovable AI request failed (${status})`;
+  } catch {
+    if (status === 402) {
+      return "Lovable AI credits are exhausted. Add workspace credits, then try Generate & Review again.";
+    }
+    return `Lovable AI request failed (${status})`;
+  }
+}
+
 function contentToText(content: unknown): string {
   if (typeof content === "string") return content;
   if (Array.isArray(content)) {
@@ -264,7 +283,7 @@ async function callAI(apiKey: string, prompt: string): Promise<WorkoutContent | 
     const raw = await r.text();
     if (!r.ok) {
       log("AI request failed", { model: AI_MODEL, status: r.status, body: raw.slice(0, 300) });
-      return null;
+      throw new Error(aiGatewayFailureMessage(r.status, raw));
     }
     const d = JSON.parse(raw);
     const message = d.choices?.[0]?.message;

@@ -73,6 +73,25 @@ function difficultyLabel(stars: number) {
 // only if Pro rate-limits/errors. All prompts/rules unchanged.
 const AI_MODELS = ["google/gemini-2.5-pro", "google/gemini-2.5-flash"];
 
+function aiGatewayFailureMessage(status: number, body: string): string {
+  try {
+    const parsed = JSON.parse(body);
+    const message = parsed?.message || parsed?.title || parsed?.error;
+    if (status === 402) {
+      return "Lovable AI credits are exhausted. Add workspace credits, then try Generate & Review again.";
+    }
+    if (status === 429) {
+      return "Lovable AI is rate limited right now. Wait a moment, then try Generate & Review again.";
+    }
+    return message ? `Lovable AI request failed (${status}): ${message}` : `Lovable AI request failed (${status})`;
+  } catch {
+    if (status === 402) {
+      return "Lovable AI credits are exhausted. Add workspace credits, then try Generate & Review again.";
+    }
+    return `Lovable AI request failed (${status})`;
+  }
+}
+
 async function callAI(apiKey: string, system: string, user: string, maxTokens = 16000): Promise<string | null> {
   for (const model of AI_MODELS) {
     try {
@@ -94,7 +113,9 @@ async function callAI(apiKey: string, system: string, user: string, maxTokens = 
         const c = d.choices?.[0]?.message?.content;
         if (c) return c;
       } else {
-        log("AI non-OK", { model, status: r.status });
+        const raw = await r.text();
+        log("AI non-OK", { model, status: r.status, body: raw.slice(0, 300) });
+        if (r.status === 402) throw new Error(aiGatewayFailureMessage(r.status, raw));
         if (r.status === 429) await new Promise((s) => setTimeout(s, 8000));
       }
     } catch (e: any) {
