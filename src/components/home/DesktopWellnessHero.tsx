@@ -173,7 +173,7 @@ export const DesktopWellnessHero = ({
         ))}
         <div className="absolute inset-0 bg-black/55" />
 
-        <div className="relative z-10 h-full flex items-center px-6 lg:px-0">
+        <div className="relative z-10 h-full px-6 lg:px-0">
           <div className="absolute bottom-10 left-0 right-0 z-20 px-6">
             <div className="mx-auto w-full max-w-[1080px]">
               <div className="flex items-center justify-end gap-3">
@@ -195,7 +195,7 @@ export const DesktopWellnessHero = ({
             </div>
           </div>
 
-          <div className="w-full max-w-[1080px] mx-auto px-6">
+          <div className="w-full max-w-[1080px] mx-auto px-6 pt-36">
             <div className="text-left">
               <h1 className="text-[38px] lg:text-[60px] font-extrabold leading-[1.05] tracking-tight text-white">
                 <span className="block whitespace-nowrap">Your Gym Re-imagined</span>
