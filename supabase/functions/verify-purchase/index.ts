@@ -33,6 +33,7 @@ const periodIso = (ts: number | null): string | null =>
 const planTypeFromPriceId = (priceId: string | undefined | null): 'premium' | 'legacy_premium' | null => {
   if (!priceId) return null;
   if (priceId === 'price_1Tr93GIxQYg9inGKhIZLvoB2') return 'premium';
+  if (priceId === 'price_1Tqn9EIxQYg9inGKWXTdr3bS') return 'legacy_premium';
   if (priceId === 'price_1SJ9q1IxQYg9inGKZzxxqPbD') return 'legacy_premium';
   if (priceId === 'price_1SJ9qGIxQYg9inGKFbgqVRjj') return 'legacy_premium';
   return null;
