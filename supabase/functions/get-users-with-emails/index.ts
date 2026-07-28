@@ -67,7 +67,7 @@ async function syncRecentSubscriptionFromStripe({
     });
 
     const activeSubscription = subscriptions.data.find(
-      (sub) => sub.status === "active" || sub.status === "trialing",
+      (sub: Stripe.Subscription) => sub.status === "active" || sub.status === "trialing",
     );
 
     if (!activeSubscription) {
