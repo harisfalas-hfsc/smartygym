@@ -168,13 +168,13 @@ export const DesktopWellnessHero = ({
               transitionDuration: "2600ms",
               animation: "heroKenBurns 20s ease-in-out infinite alternate",
               transformOrigin: i % 2 === 0 ? "center center" : "center 40%",
+              filter: "brightness(1.08) contrast(1.05) saturate(1.05)",
             }}
           />
         ))}
-        <div className="absolute inset-0 bg-black/55" />
         <div
-          className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-background from-0% via-background/0 via-[66%] to-transparent to-100%"
-          style={{ height: "100%" }}
+          className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-background via-background/0 to-transparent"
+          style={{ height: "22%" }}
           aria-hidden="true"
         />
 
