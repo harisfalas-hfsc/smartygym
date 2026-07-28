@@ -171,7 +171,7 @@ export const DesktopWellnessHero = ({
             }}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent bg-black/45 dark:from-black/25 dark:bg-black/25" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent bg-black/55 dark:from-black/25 dark:bg-black/25" />
         <div
           className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-background from-0% via-background/0 via-[82%] to-transparent to-100%"
           style={{ height: "22%" }}
