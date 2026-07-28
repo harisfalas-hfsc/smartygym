@@ -195,8 +195,8 @@ export const DesktopWellnessHero = ({
             </div>
           </div>
 
-          <div className="w-full max-w-[1080px] mx-auto px-6 pt-36">
-            <div className="text-left">
+          <div className="w-full max-w-[1080px] mx-auto px-6 pt-[188px]">
+            <div className="text-left w-[576px] max-w-full">
               <h1 className="text-[38px] lg:text-[60px] font-extrabold leading-[1.05] tracking-tight text-white">
                 <span className="block whitespace-nowrap">Your Gym Re-imagined</span>
                 <span className="block whitespace-nowrap text-primary">Anywhere, Anytime.</span>
