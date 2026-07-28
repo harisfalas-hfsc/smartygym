@@ -172,6 +172,11 @@ export const DesktopWellnessHero = ({
           />
         ))}
         <div className="absolute inset-0 bg-black/55" />
+        <div
+          className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-background from-0% via-background/0 via-[66%] to-transparent to-100%"
+          style={{ height: "100%" }}
+          aria-hidden="true"
+        />
 
         <div className="relative z-10 h-full px-6 lg:px-0">
           <div className="absolute bottom-10 left-0 right-0 z-20 px-6">
