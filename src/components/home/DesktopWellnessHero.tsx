@@ -195,20 +195,20 @@ export const DesktopWellnessHero = ({
             </div>
           </div>
 
-          <div className="w-full max-w-[1080px] mx-auto px-6 pt-[188px]">
+          <div className="w-full max-w-[1080px] mx-auto px-6 pt-[144px]">
             <div className="text-left w-[576px] max-w-full">
               <h1 className="text-[38px] lg:text-[60px] font-extrabold leading-[1.05] tracking-tight text-white">
                 <span className="block whitespace-nowrap">Your Gym Re-imagined</span>
                 <span className="block whitespace-nowrap text-primary">Anywhere, Anytime.</span>
               </h1>
-              <p className="mt-5 lg:mt-6 text-base lg:text-lg leading-relaxed text-white/80">
+              <p className="mt-4 text-base lg:text-lg leading-relaxed text-white/80">
                 Expert-designed workouts, structured programs, blog insights and smart tools.
               </p>
               <p className="mt-1 text-base lg:text-lg leading-relaxed text-white/80">
                 <span className="font-bold">100% Human</span>,{" "}
                 <span className="font-bold text-red-400">0% AI</span>.
               </p>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
+              <div className="mt-5 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={() => navigate("/smarty-premium")}
