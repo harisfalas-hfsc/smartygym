@@ -174,9 +174,9 @@ export const DesktopWellnessHero = ({
         <div className="absolute inset-0 bg-black/55" />
 
         <div className="relative z-10 h-full flex items-center px-6 lg:px-0">
-          <div className="absolute top-10 left-0 right-0 z-20 px-6 lg:px-0">
-            <div className="max-w-7xl mx-auto">
-              <div className="lg:ml-16 xl:ml-24 flex items-center gap-3">
+          <div className="absolute bottom-10 left-0 right-0 z-20 px-6">
+            <div className="mx-auto w-full max-w-[1080px]">
+              <div className="flex items-center justify-end gap-3">
                 <a href="https://www.facebook.com/profile.php?id=61579302997368" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                   <Facebook className="h-5 w-5" />
                 </a>
@@ -195,31 +195,30 @@ export const DesktopWellnessHero = ({
             </div>
           </div>
 
-          <div className="w-full max-w-7xl mx-auto">
-            <div className="max-w-2xl text-left lg:ml-16 xl:ml-24 -translate-y-20">
-              <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-tight whitespace-nowrap">
-                Your Gym <span className="text-primary">Re-imagined.</span>
+          <div className="w-full max-w-[1080px] mx-auto px-6">
+            <div className="max-w-xl text-left">
+              <h1 className="text-[38px] lg:text-[60px] font-extrabold leading-[1.05] tracking-tight text-white">
+                Your Gym re-imagined,
+                <br />
+                <span className="text-primary">anywhere, anytime.</span>
               </h1>
-              <p className="mt-2 text-white/80 text-lg md:text-xl font-semibold tracking-wide">
-                Anywhere, Anytime.
-              </p>
-              <p className="mt-6 max-w-xl text-white/90 text-base md:text-lg leading-relaxed">
+              <p className="mt-5 lg:mt-6 text-base lg:text-lg leading-relaxed text-white/80">
                 Expert-designed workouts, structured programs, blog insights and smart tools —{" "}
                 <span className="font-bold">100% Human</span>,{" "}
                 <span className="font-bold text-red-400">0% AI</span>.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-7 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={() => navigate("/smarty-premium")}
-                  className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white bg-primary hover:gap-3 transition-all"
+                  className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground hover:opacity-95 transition-all"
                 >
                   Get Premium <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate("/workout")}
-                  className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white border border-white/60 hover:bg-white/10 hover:gap-3 transition-all"
+                  className="inline-flex h-12 items-center gap-2 rounded-full border-2 border-primary px-8 text-base font-bold text-primary hover:bg-primary/10 transition-all"
                 >
                   Browse Workouts <ArrowRight className="w-4 h-4" />
                 </button>
