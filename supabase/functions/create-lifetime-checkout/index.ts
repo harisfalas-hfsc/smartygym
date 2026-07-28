@@ -11,6 +11,12 @@ const corsHeaders = {
 // (Function name kept for backward compatibility with existing clients.)
 const PREMIUM_MONTHLY_PRICE_ID = "price_1Tr93GIxQYg9inGKhIZLvoB2";
 const PREMIUM_MONTHLY_PRODUCT_ID = "prod_UqU78UzgA2ckcP";
+const ALL_SMARTYGYM_SUBSCRIPTION_PRICE_IDS = new Set([
+  PREMIUM_MONTHLY_PRICE_ID,
+  "price_1Tqn9EIxQYg9inGKWXTdr3bS", // [RETIRED] Premium Monthly €6.99
+  "price_1SJ9q1IxQYg9inGKZzxxqPbD", // [LEGACY] Gold Monthly
+  "price_1SJ9qGIxQYg9inGKFbgqVRjj", // [LEGACY] Platinum Yearly
+]);
 
 const logStep = (step: string, details?: unknown) => {
   const d = details ? ` - ${JSON.stringify(details)}` : "";
@@ -60,6 +66,30 @@ serve(async (req) => {
 
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
+
+    if (customerId) {
+      const existingSubscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "all",
+        limit: 100,
+        expand: ["data.items.data.price"],
+      });
+      const hasLiveSmartyGymSubscription = existingSubscriptions.data.some((sub: any) => {
+        if (!["active", "trialing", "past_due", "unpaid"].includes(sub.status)) return false;
+        const priceId = sub.items?.data?.[0]?.price?.id;
+        return typeof priceId === "string" && ALL_SMARTYGYM_SUBSCRIPTION_PRICE_IDS.has(priceId);
+      });
+
+      if (hasLiveSmartyGymSubscription) {
+        return new Response(
+          JSON.stringify({
+            error: "You already have an active subscription. Please manage your existing subscription instead.",
+            alreadyPremium: true,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        );
+      }
+    }
 
     const origin = req.headers.get("origin") || "https://smartygym.com";
     const safeCancel =
