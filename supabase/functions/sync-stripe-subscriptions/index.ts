@@ -66,8 +66,10 @@ serve(async (req) => {
 
     const { data: rows, error: rowsError } = await supabase
       .from("user_subscriptions")
-      .select("user_id, plan_type, status, stripe_customer_id, stripe_subscription_id, current_period_start, current_period_end")
-      .not("stripe_customer_id", "is", null);
+      .select("user_id, plan_type, status, subscription_source, stripe_customer_id, stripe_subscription_id, current_period_start, current_period_end")
+      .not("stripe_customer_id", "is", null)
+      // Never let Stripe history override a complimentary/admin-granted membership.
+      .or("subscription_source.is.null,subscription_source.neq.admin_grant");
     if (rowsError) throw rowsError;
 
     log("Loaded local subscription rows", { count: rows?.length ?? 0 });
@@ -121,12 +123,23 @@ serve(async (req) => {
         cancel_at_period_end: (live as any).cancel_at_period_end ?? false,
       };
 
+      // Compare timestamps by absolute value: Postgres returns
+      // "2026-07-08 04:55:40+00" while Stripe gives "2026-07-08T04:55:40.000Z".
+      // A raw string compare would report every row as changed on every run.
+      const sameInstant = (a: string | null, b: string | null) => {
+        if (!a && !b) return true;
+        if (!a || !b) return false;
+        const ta = new Date(a).getTime();
+        const tb = new Date(b).getTime();
+        return Number.isFinite(ta) && Number.isFinite(tb) && ta === tb;
+      };
+
       const changed =
         row.plan_type !== next.plan_type ||
         row.status !== next.status ||
         row.stripe_subscription_id !== next.stripe_subscription_id ||
-        row.current_period_start !== next.current_period_start ||
-        row.current_period_end !== next.current_period_end;
+        !sameInstant(row.current_period_start as string | null, next.current_period_start) ||
+        !sameInstant(row.current_period_end as string | null, next.current_period_end);
 
       if (!changed) {
         unchanged++;
