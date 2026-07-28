@@ -42,6 +42,7 @@ const mapStatus = (status: string): "active" | "past_due" | "canceled" => {
 };
 
 const LEGACY_PRICE_IDS = new Set([
+  "price_1Tqn9EIxQYg9inGKWXTdr3bS", // [RETIRED] Premium Monthly €6.99 — grandfathered Premium access
   "price_1SJ9q1IxQYg9inGKZzxxqPbD",
   "price_1SJ9qGIxQYg9inGKFbgqVRjj",
 ]);

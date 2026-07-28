@@ -10,7 +10,9 @@ const corsHeaders = {
 const RECENT_SYNC_WINDOW_DAYS = 45;
 const MAX_SYNC_CANDIDATES = 30;
 
-const PLAN_BY_PRICE_ID: Record<string, "legacy_premium"> = {
+const PLAN_BY_PRICE_ID: Record<string, "premium" | "legacy_premium"> = {
+  "price_1Tr93GIxQYg9inGKhIZLvoB2": "premium",
+  "price_1Tqn9EIxQYg9inGKWXTdr3bS": "legacy_premium",
   "price_1SJ9q1IxQYg9inGKZzxxqPbD": "legacy_premium",
   "price_1SJ9qGIxQYg9inGKFbgqVRjj": "legacy_premium",
 };
@@ -28,7 +30,7 @@ const isRecentlyJoined = (createdAt: string | null | undefined) => {
   return Date.now() - created <= windowMs;
 };
 
-const resolvePlanType = (priceId?: string | null): "legacy_premium" | "free" => {
+const resolvePlanType = (priceId?: string | null): "premium" | "legacy_premium" | "free" => {
   if (!priceId) return "free";
   return PLAN_BY_PRICE_ID[priceId] ?? "free";
 };

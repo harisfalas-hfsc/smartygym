@@ -207,6 +207,7 @@ serve(async (req) => {
         planType = 'premium';
         logStep("Matched active Premium Monthly subscription", { priceId });
       } else if (productMetaPlan === 'gold' || productMetaPlan === 'platinum' ||
+          priceId === 'price_1Tqn9EIxQYg9inGKWXTdr3bS' ||
           priceId === 'price_1SJ9q1IxQYg9inGKZzxxqPbD' ||
           priceId === 'price_1SJ9qGIxQYg9inGKFbgqVRjj') {
         planType = 'legacy_premium';

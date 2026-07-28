@@ -7,14 +7,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// SmartyGym recurring-subscription price IDs (LEGACY).
-// Gold/Platinum subscriptions are no longer offered. The current product
-// is Premium Monthly, which uses the create-lifetime-checkout function name
-// for backward compatibility. These IDs are kept here only to detect
-// historical recurring subs when blocking duplicate checkouts.
-const LEGACY_SMARTYGYM_SUBSCRIPTION_PRICE_IDS = [
+// SmartyGym recurring-subscription price IDs.
+// Current Premium checkout is handled by create-lifetime-checkout for
+// backward compatibility, but this generic checkout path must still block
+// duplicate subscriptions for every active/grandfathered Premium price.
+const CURRENT_PREMIUM_PRICE_ID = "price_1Tr93GIxQYg9inGKhIZLvoB2"; // Premium Monthly €9.99
+const RETIRED_SMARTYGYM_SUBSCRIPTION_PRICE_IDS = [
+  "price_1Tqn9EIxQYg9inGKWXTdr3bS", // [RETIRED] Premium Monthly €6.99
   "price_1SJ9q1IxQYg9inGKZzxxqPbD", // [LEGACY] Gold Monthly
   "price_1SJ9qGIxQYg9inGKFbgqVRjj", // [LEGACY] Platinum Yearly
+];
+const ALL_SMARTYGYM_SUBSCRIPTION_PRICE_IDS = [
+  CURRENT_PREMIUM_PRICE_ID,
+  ...RETIRED_SMARTYGYM_SUBSCRIPTION_PRICE_IDS,
 ];
 
 const logStep = (step: string, details?: unknown) => {
@@ -42,7 +47,7 @@ serve(async (req) => {
 
     // Block any attempt to create a NEW Gold/Platinum subscription.
     // The old tiers were retired; only Premium Monthly and Corporate plans are offered going forward.
-    if (LEGACY_SMARTYGYM_SUBSCRIPTION_PRICE_IDS.includes(priceId)) {
+    if (RETIRED_SMARTYGYM_SUBSCRIPTION_PRICE_IDS.includes(priceId)) {
       logStep("Blocked attempt to checkout a retired subscription tier", { priceId });
       return new Response(JSON.stringify({
           error: "This subscription plan is no longer offered. Please choose SmartyGym Premium Monthly instead.",
@@ -80,15 +85,16 @@ serve(async (req) => {
     if (customerId) {
       const activeSubscriptions = await stripe.subscriptions.list({
         customer: customerId,
-        status: 'active',
+        status: 'all',
         limit: 100,
         expand: ['data.items.data.price']
       });
       
-      // Filter to only SmartyGym subscriptions (legacy recurring products).
-      const activeSmartyGymSubs = activeSubscriptions.data.filter((sub: { items: { data: { price?: { id?: string } }[] } }) => {
+      // Filter to only active/past-due SmartyGym subscription products.
+      const activeSmartyGymSubs = activeSubscriptions.data.filter((sub: { status?: string; items: { data: { price?: { id?: string } }[] } }) => {
+        if (!['active', 'trialing', 'past_due', 'unpaid'].includes(sub.status ?? '')) return false;
         const subPriceId = sub.items.data[0]?.price?.id;
-        return subPriceId && LEGACY_SMARTYGYM_SUBSCRIPTION_PRICE_IDS.includes(subPriceId);
+        return subPriceId && ALL_SMARTYGYM_SUBSCRIPTION_PRICE_IDS.includes(subPriceId);
       });
       
       if (activeSmartyGymSubs.length > 0) {
