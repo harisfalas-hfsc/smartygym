@@ -150,7 +150,7 @@ export const DesktopWellnessHero = ({
   return (
     <div className="hidden md:block">
       {/* HERO — fullscreen image (NYC-style running couple) */}
-      <section className="relative w-full h-screen overflow-hidden">
+      <section className="relative w-full h-[90vh] overflow-hidden">
         <div className="absolute inset-0 bg-black" />
         {heroSlides.map((src, i) => (
           <img
@@ -171,10 +171,10 @@ export const DesktopWellnessHero = ({
             }}
           />
         ))}
-        <div className="absolute inset-0 bg-black/55" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent bg-black/45 dark:from-black/25 dark:bg-black/25" />
         <div
-          className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-background from-0% via-background/0 via-[66%] to-transparent to-100%"
-          style={{ height: "100%" }}
+          className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-background from-0% via-background/0 via-[82%] to-transparent to-100%"
+          style={{ height: "22%" }}
           aria-hidden="true"
         />
 
