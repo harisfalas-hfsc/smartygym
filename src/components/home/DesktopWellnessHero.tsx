@@ -1,4 +1,5 @@
 import { ArrowRight, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Facebook, Instagram, Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getBlogArticleImage } from "@/utils/blogImages";
@@ -6,7 +7,18 @@ import toolTimerImage from "@/assets/tools/timer-card-mobile.jpg";
 import tool1RmImage from "@/assets/tools/1rm-card-mobile.jpg";
 import toolMacroImage from "@/assets/tools/macro-card-mobile.jpg";
 import heroCityRunningAsset from "@/assets/hero-city-running.jpg.asset.json";
-const heroImage = heroCityRunningAsset.url;
+import heroBarbellAsset from "@/assets/hero/hero-barbell-lift.avif.asset.json";
+import heroRopesAsset from "@/assets/hero/hero-battle-ropes.avif.asset.json";
+import heroTimerAsset from "@/assets/hero/hero-timer-tablet.avif.asset.json";
+
+const heroSlides = [
+  heroCityRunningAsset.url,
+  heroBarbellAsset.url,
+  heroRopesAsset.url,
+  heroTimerAsset.url,
+  "https://cvccrvyimyzrxcwzmxwk.supabase.co/storage/v1/object/public/avatars/workout-covers/workout-1780027701304-rvna4t.png",
+  "https://cvccrvyimyzrxcwzmxwk.supabase.co/storage/v1/object/public/avatars/workout-covers/workout-1779073192594-qq9ham.jpg",
+];
 import heroWorkoutsImage from "@/assets/hero-workouts-bright.jpg";
 import heroProgramsImage from "@/assets/hero-programs.jpg";
 import heroBlogImage from "@/assets/hero-blog.jpg";
@@ -41,6 +53,14 @@ export const DesktopWellnessHero = ({
   programCategoryToSlug = (c) => (c || "").toLowerCase().replace(/\s+/g, "-"),
 }: Props = {}) => {
   const navigate = useNavigate();
+  const [slide, setSlide] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSlide((s) => (s + 1) % heroSlides.length);
+    }, 2750);
+    return () => clearInterval(id);
+  }, []);
 
   const workoutItems: FeaturedItem[] = (workouts || []).slice(0, 3).map((w: any) => ({
     id: w.id,
@@ -132,18 +152,29 @@ export const DesktopWellnessHero = ({
       {/* HERO — fullscreen image (NYC-style running couple) */}
       <section className="relative w-full h-screen overflow-hidden">
         <div className="absolute inset-0 bg-black" />
-        <img
-          className="absolute inset-0 w-full h-full object-cover"
-          src={heroImage}
-          alt=""
-          aria-hidden="true"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-        />
+        {heroSlides.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            aria-hidden="true"
+            loading={i === 0 ? "eager" : "lazy"}
+            fetchPriority={i === 0 ? "high" : "auto"}
+            decoding="async"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity ease-in-out ${
+              slide === i ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              transitionDuration: "2600ms",
+              animation: "heroKenBurns 20s ease-in-out infinite alternate",
+              transformOrigin: i % 2 === 0 ? "center center" : "center 40%",
+            }}
+          />
+        ))}
+        <div className="absolute inset-0 bg-black/55" />
         <div
-          className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-background via-background/0 to-transparent"
-          style={{ height: "22%" }}
+          className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-background from-0% via-background/0 via-[66%] to-transparent to-100%"
+          style={{ height: "100%" }}
           aria-hidden="true"
         />
 
