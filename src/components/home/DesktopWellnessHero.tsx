@@ -202,7 +202,9 @@ export const DesktopWellnessHero = ({
                 <span className="block whitespace-nowrap text-primary">Anywhere, Anytime.</span>
               </h1>
               <p className="mt-5 lg:mt-6 text-base lg:text-lg leading-relaxed text-white/80">
-                Expert-designed workouts, structured programs, blog insights and smart tools —{" "}
+                Expert-designed workouts, structured programs, blog insights and smart tools.
+              </p>
+              <p className="mt-1 text-base lg:text-lg leading-relaxed text-white/80">
                 <span className="font-bold">100% Human</span>,{" "}
                 <span className="font-bold text-red-400">0% AI</span>.
               </p>
