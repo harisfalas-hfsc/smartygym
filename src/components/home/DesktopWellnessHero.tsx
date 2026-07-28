@@ -196,11 +196,9 @@ export const DesktopWellnessHero = ({
           </div>
 
           <div className="w-full max-w-[1080px] mx-auto px-6">
-            <div className="max-w-xl text-left">
-              <h1 className="text-[38px] lg:text-[60px] font-extrabold leading-[1.05] tracking-tight text-white">
-                Your Gym re-imagined,
-                <br />
-                <span className="text-primary">anywhere, anytime.</span>
+            <div className="text-left">
+              <h1 className="text-[38px] lg:text-[60px] font-extrabold leading-[1.05] tracking-tight text-white whitespace-nowrap">
+                Your Gym Reimagined, <span className="text-primary">Anywhere, Anytime.</span>
               </h1>
               <p className="mt-5 lg:mt-6 text-base lg:text-lg leading-relaxed text-white/80">
                 Expert-designed workouts, structured programs, blog insights and smart tools —{" "}
