@@ -243,7 +243,7 @@ export const DesktopWellnessHero = ({
             <section
               key={s.id}
               id={s.id}
-              className="border-t border-border/40 bg-background"
+              className="bg-background"
             >
               <div
                 className={`max-w-7xl mx-auto px-6 lg:px-8 py-8 lg:py-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start ${
