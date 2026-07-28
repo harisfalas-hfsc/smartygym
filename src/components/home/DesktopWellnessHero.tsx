@@ -195,31 +195,31 @@ export const DesktopWellnessHero = ({
             </div>
           </div>
 
-          <div className="w-full max-w-[1080px] mx-auto px-6 pt-36">
-            <div className="text-left">
+          <div className="w-full max-w-[1080px] mx-auto px-6 pt-[144px]">
+            <div className="text-left w-[576px] max-w-full">
               <h1 className="text-[38px] lg:text-[60px] font-extrabold leading-[1.05] tracking-tight text-white">
                 <span className="block whitespace-nowrap">Your Gym Re-imagined</span>
                 <span className="block whitespace-nowrap text-primary">Anywhere, Anytime.</span>
               </h1>
-              <p className="mt-5 lg:mt-6 text-base lg:text-lg leading-relaxed text-white/80">
+              <p className="mt-2 text-base lg:text-lg leading-relaxed text-white/80">
                 Expert-designed workouts, structured programs, blog insights and smart tools.
               </p>
               <p className="mt-1 text-base lg:text-lg leading-relaxed text-white/80">
                 <span className="font-bold">100% Human</span>,{" "}
                 <span className="font-bold text-red-400">0% AI</span>.
               </p>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
+              <div className="mt-3 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={() => navigate("/smarty-premium")}
-                  className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground hover:opacity-95 transition-all"
+                  className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground hover:opacity-95 transition-all"
                 >
                   Get Premium <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate("/workout")}
-                  className="inline-flex h-12 items-center gap-2 rounded-full border-2 border-primary px-8 text-base font-bold text-primary hover:bg-primary/10 transition-all"
+                  className="inline-flex h-11 items-center gap-2 rounded-full border-2 border-primary px-8 text-base font-bold text-primary hover:bg-primary/10 transition-all"
                 >
                   Browse Workouts <ArrowRight className="w-4 h-4" />
                 </button>
