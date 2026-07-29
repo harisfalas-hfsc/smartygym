@@ -170,9 +170,9 @@ export const DesktopWellnessHero = ({
             }}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent bg-black/25 pointer-events-none" aria-hidden="true" />
+        <div className="absolute inset-0 pointer-events-none dark:bg-black/25 dark:bg-gradient-to-b dark:from-black/25 dark:via-transparent dark:to-transparent" aria-hidden="true" />
         <div
-          className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-background from-0% via-background/0 via-[82%] to-transparent to-100%"
+          className="absolute inset-x-0 bottom-0 z-[1] dark:bg-gradient-to-t dark:from-background dark:from-0% dark:via-background/0 dark:via-[82%] dark:to-transparent dark:to-100%"
           style={{ height: "22%" }}
           aria-hidden="true"
         />
