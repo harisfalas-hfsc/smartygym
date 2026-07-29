@@ -289,18 +289,85 @@ export const Navigation = () => {
     { label: "Contact", path: "/contact", icon: Mail, iconClass: "text-indigo-500", track: undefined, subtitle: "One click away, always." },
   ];
 
-  // Mobile menu moves Smarty Premium to the bottom (below FAQ and Contact).
-  const mobileDiscoveryItems = [
-    ...discoveryItems.filter((item) => item.label !== "Smarty Premium"),
-    ...discoveryItems.filter((item) => item.label === "Smarty Premium"),
+  type NavSection = { heading: string; items: { label: string; path: string; icon: any }[] };
+
+  const exploreItems = [
+    { label: "Smarty Workouts", path: "/workout", icon: Dumbbell },
+    { label: "Smarty Programs", path: "/trainingprogram", icon: ListChecks },
+    { label: "Smarty Ritual", path: "/daily-ritual", icon: Sparkles },
+    { label: "Smarty Tools", path: "/tools", icon: Wrench },
+    { label: "Smarty Blog", path: "/blog", icon: Newspaper },
+    { label: "Exercise Library", path: "/exerciselibrary", icon: BookOpen },
+    { label: "Community", path: "/community", icon: Users },
   ];
 
-  // Desktop menu replaces "About SmartyGym" with "Home" because the About page
-  // is intentionally hidden from desktop (content overlaps with the homepage).
-  const desktopDiscoveryItems = discoveryItems.map((item) =>
-    item.path === "/about"
-      ? { label: "Home", path: "/", icon: Home, iconClass: "text-teal-500", track: undefined }
-      : item,
+  const legalItems = [
+    { label: "Privacy Policy", path: "/privacy", icon: Shield },
+    { label: "Terms of Service", path: "/termsofservice", icon: FileText },
+    { label: "Disclaimer", path: "/disclaimer", icon: AlertTriangle },
+  ];
+
+  // Desktop hides the About page (content overlaps with the homepage) and uses Home instead.
+  const mobileSections: NavSection[] = [
+    { heading: "Explore", items: exploreItems },
+    {
+      heading: "SmartyGym",
+      items: [
+        { label: "About SmartyGym", path: "/about", icon: Info },
+        { label: "Smarty Premium", path: "/smarty-premium", icon: Crown },
+        { label: "FAQ", path: "/faq", icon: HelpCircle },
+        { label: "Contact", path: "/contact", icon: Mail },
+      ],
+    },
+    { heading: "Legal", items: legalItems },
+  ];
+
+  const desktopSections: NavSection[] = [
+    { heading: "Explore", items: exploreItems },
+    {
+      heading: "SmartyGym",
+      items: [
+        { label: "Home", path: "/", icon: Home },
+        { label: "Smarty Premium", path: "/smarty-premium", icon: Crown },
+        { label: "FAQ", path: "/faq", icon: HelpCircle },
+        { label: "Contact", path: "/contact", icon: Mail },
+      ],
+    },
+    { heading: "Legal", items: legalItems },
+  ];
+
+  const renderNavSections = (sections: NavSection[]) => (
+    <nav className="flex-1 overflow-y-auto px-1 pb-6">
+      {sections.map((section) => (
+        <div key={section.heading} className="mt-1">
+          <div className="px-2 pb-1.5 pt-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            {section.heading}
+          </div>
+          <ul className="space-y-0.5">
+            {section.items.map(({ label, path, icon: Icon }) => {
+              const active = location.pathname === path;
+              return (
+                <li key={path}>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate(path)}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm font-semibold transition-colors",
+                      active ? "bg-primary/10 text-primary" : "text-foreground hover:bg-primary/10",
+                    )}
+                  >
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    {label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </nav>
   );
 
   return (
