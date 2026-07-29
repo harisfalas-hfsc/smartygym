@@ -171,7 +171,7 @@ export const DesktopWellnessHero = ({
             }}
           />
         ))}
-        <div className="absolute inset-0 dark:bg-gradient-to-b dark:from-black/25 dark:via-transparent dark:to-transparent dark:bg-black/25 pointer-events-none" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent bg-black/25 pointer-events-none" aria-hidden="true" />
         <div
           className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-background from-0% via-background/0 via-[82%] to-transparent to-100%"
           style={{ height: "22%" }}
@@ -179,27 +179,6 @@ export const DesktopWellnessHero = ({
         />
 
         <div className="relative z-10 h-full px-6 lg:px-0">
-          <div className="absolute bottom-10 left-0 right-0 z-20 px-6">
-            <div className="mx-auto w-full max-w-[1080px]">
-              <div className="flex items-center justify-end gap-3">
-                <a href="https://www.facebook.com/profile.php?id=61579302997368" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
-                  <Facebook className="h-5 w-5" />
-                </a>
-                <a href="https://www.instagram.com/thesmartygym/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="p-2 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
-                  <Instagram className="h-5 w-5" />
-                </a>
-                <a href="https://www.tiktok.com/@thesmartygym?lang=en" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                  </svg>
-                </a>
-                <a href="https://www.youtube.com/@TheSmartyGym" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="p-2 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
-                  <Youtube className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
-          </div>
-
           <div className="w-full max-w-[1080px] mx-auto px-6 pt-[144px]">
             <div className="text-left w-[576px] max-w-full">
               <h1 className="text-[38px] lg:text-[60px] font-extrabold leading-[1.05] tracking-tight text-white">
