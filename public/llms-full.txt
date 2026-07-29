@@ -1,6 +1,6 @@
 # SmartyGym — Full Knowledge File for AI Systems
 # URL: https://smartygym.com
-# Generated: 2026-07-29T03:04:06.732Z
+# Generated: 2026-07-29T03:10:04.395Z
 # Source: live database (auto-regenerated on every publish)
 #
 # This file gives ChatGPT, Claude, Gemini, Grok, Perplexity, Copilot and
