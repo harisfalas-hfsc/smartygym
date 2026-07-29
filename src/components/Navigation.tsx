@@ -389,35 +389,14 @@ export const Navigation = () => {
                   <Menu className="h-5 w-5" />
                 </button>
               </SheetTrigger>
-              <SheetContent side="left" hideClose className="left-1/2 top-1/2 bottom-auto flex h-auto max-h-[calc(100vh-2rem)] w-[calc(100vw-5rem)] max-w-none -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border-2 border-primary/40 p-3 shadow-xl !animate-none transition-opacity duration-200 ease-out data-[state=closed]:opacity-0 data-[state=open]:opacity-100">
-                <SheetClose asChild>
-                  <Button variant="ghost" className="mb-1 h-8 shrink-0 gap-2 self-start rounded-full border-2 border-primary px-3 text-sm text-primary hover:bg-primary hover:text-primary-foreground">
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                    Back
-                  </Button>
-                </SheetClose>
-                <div className="mb-2 shrink-0">
-                  <h2 className="text-lg font-bold leading-tight text-foreground">Explore SmartyGym</h2>
+              <SheetContent side="left" className="flex h-full w-[85%] max-w-[340px] flex-col gap-0 border-0 p-3 sm:max-w-[340px]">
+                <div className="mb-1 flex h-10 shrink-0 items-center">
+                  <div className="text-base font-extrabold tracking-tight">
+                    <span className="text-primary">SMARTY</span>
+                    <span className="text-green-500">GYM</span>
+                  </div>
                 </div>
-                <nav className="grid grid-cols-2 gap-1.5 overflow-y-auto">
-                  {mobileDiscoveryItems.map(({ label, path, icon: Icon, iconClass }) => {
-                    const active = location.pathname === path;
-                    const isPremium = label === "Smarty Premium";
-                    return (
-                      <button
-                        key={path}
-                        type="button"
-                        onClick={() => handleNavigate(path)}
-                        className={`flex flex-col items-center justify-center rounded-2xl border-2 p-1.5 text-center font-semibold transition-all duration-200 ${active ? 'border-primary bg-primary/15 text-primary shadow-sm' : 'border-primary/25 bg-card text-foreground hover:border-primary hover:bg-primary/10'} ${isPremium ? 'col-span-2' : ''}`}
-                      >
-                        <span className={`mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 ${iconClass}`}>
-                          <Icon className="h-4 w-4" />
-                        </span>
-                        <span className="block text-xs leading-tight">{label}</span>
-                      </button>
-                    );
-                  })}
-                </nav>
+                {renderNavSections(mobileSections)}
               </SheetContent>
             </Sheet>
             <HeaderBackButton />
