@@ -1,6 +1,5 @@
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Facebook, Instagram, Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getBlogArticleImage } from "@/utils/blogImages";
 import toolTimerImage from "@/assets/tools/timer-card-mobile.jpg";
