@@ -212,7 +212,7 @@ const Tools = () => {
                       </div>
                       {/* Content section */}
                       <div className="smarty-carousel-content-portrait-tablet flex flex-col justify-center flex-1 px-3 py-3 min-[540px]:p-4 text-center">
-                        <div className="smarty-carousel-title-row-portrait-tablet flex items-center justify-center gap-2 mb-1 min-[540px]:mb-2">
+                        <div className="smarty-carousel-title-row-portrait-tablet flex items-center justify-center gap-2">
                           <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                             <Icon className="w-4 h-4 text-primary" />
                           </div>
@@ -220,9 +220,6 @@ const Tools = () => {
                             {tool.title}
                           </h3>
                         </div>
-                        <p className="smarty-carousel-card-copy text-xs min-[540px]:text-sm text-muted-foreground leading-snug line-clamp-2 h-[2rem] min-h-0 min-[540px]:h-auto">
-                          {tool.description}
-                        </p>
                       </div>
                     </div>
                   </CarouselItem>
