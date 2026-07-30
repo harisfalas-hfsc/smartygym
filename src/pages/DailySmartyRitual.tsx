@@ -161,24 +161,6 @@ const DailySmartyRitual = () => {
 
       <div className="min-h-screen bg-background">
         <div className="container mx-auto max-w-6xl md:max-w-[1500px] px-4 md:px-6 pb-8">
-          {/* Header */}
-          <div className="flex items-center justify-end mb-6">
-            <div className="flex items-center gap-2">
-              {isAuthenticated && ritual && (
-                <>
-                  <Button variant="outline" size="sm" onClick={() => setShowReaderMode(true)}>
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    Reader Mode
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setShowShareDialog(true)}>
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-
           <PageBreadcrumbs 
             items={[
               { label: "Home", href: "/" },
@@ -209,6 +191,19 @@ const DailySmartyRitual = () => {
               Designed by <a href="/coach-profile" className="text-primary hover:underline">Haris Falas</a> to keep you energized, mobile, and performing at your best.
             </p>
           </DesktopPageIntro>
+
+          {isAuthenticated && ritual && (
+            <div className="flex items-center justify-end gap-2 mb-6">
+              <Button variant="outline" size="sm" onClick={() => setShowReaderMode(true)}>
+                <BookOpen className="mr-2 h-4 w-4" />
+                Reader Mode
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowShareDialog(true)}>
+                <Share2 className="mr-2 h-4 w-4" />
+                Share
+              </Button>
+            </div>
+          )}
 
           <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
             <div className="p-4 sm:p-5">
