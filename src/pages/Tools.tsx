@@ -172,53 +172,14 @@ const Tools = () => {
         {/* Info Section */}
         <Card className="mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
           <div className="p-5">
-            <h2 className="text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Smarty Tools</h2>
+            <h2 className="text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Smart Fit Tools</h2>
             <div className="text-muted-foreground w-full mx-auto">
               <p className="text-sm sm:text-base text-center font-bold max-w-3xl mx-auto">
-                <span className="text-primary font-semibold">Smarty Tools</span> are fitness calculators to understand your body and optimize training using validated formulas.
+                <span className="text-primary font-semibold">Smart Fit Tools</span> are fitness calculations to understand your body and optimize training. Use these validated formulas.
               </p>
               <p className="text-sm sm:text-base text-center font-semibold text-foreground mt-2 max-w-3xl mx-auto">
                 Use all <span className="text-primary font-bold">{tools.length} tools</span> — completely free, no signup required.
               </p>
-              {/* Desktop only - detailed calculator descriptions */}
-              <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-x-8 gap-y-6 mt-6 w-full items-start">
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">Workout Timer</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Set up custom work and rest intervals for any training style. Choose from HIIT, Tabata, EMOM, or circuit protocols and let the timer guide every round so you stay focused on form, not the clock.
-                  </p>
-                </div>
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">Rounds Tracker</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    A big-button tap counter that logs every round and optional reps in a single touch. Ideal for AMRAP, EMOM, and circuit sessions where you need to stay moving without losing count.
-                  </p>
-                </div>
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">1RM Calculator</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Estimate your true one-rep maximum using the validated Brzycki formula from any submaximal set. Essential for programming strength blocks, percentage-based work, and tracking long-term progress safely.
-                  </p>
-                </div>
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">BMR Calculator</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Calculate the calories your body burns at complete rest using the Mifflin-St Jeor equation, the gold standard in clinical nutrition. The foundation for any cut, bulk, or maintenance plan you build.
-                  </p>
-                </div>
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">Macro Calculator</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Get a complete nutrition blueprint tailored to your goal, including daily calories, protein, carbs, fats, fiber, water intake, and recommended meal frequency. Everything you need to eat with intention every day.
-                  </p>
-                </div>
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">Calorie Counter</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Search over 300,000 foods from the USDA database and instantly see calories, protein, carbs, fat, and fiber per serving. Log meals on the fly and keep your daily nutrition honest and accurate.
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         </Card>
@@ -251,7 +212,7 @@ const Tools = () => {
                       </div>
                       {/* Content section */}
                       <div className="smarty-carousel-content-portrait-tablet flex flex-col justify-center flex-1 px-3 py-3 min-[540px]:p-4 text-center">
-                        <div className="smarty-carousel-title-row-portrait-tablet flex items-center justify-center gap-2 mb-1 min-[540px]:mb-2">
+                        <div className="smarty-carousel-title-row-portrait-tablet flex items-center justify-center gap-2">
                           <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                             <Icon className="w-4 h-4 text-primary" />
                           </div>
@@ -259,9 +220,6 @@ const Tools = () => {
                             {tool.title}
                           </h3>
                         </div>
-                        <p className="smarty-carousel-card-copy text-xs min-[540px]:text-sm text-muted-foreground leading-snug line-clamp-2 h-[2rem] min-h-0 min-[540px]:h-auto">
-                          {tool.description}
-                        </p>
                       </div>
                     </div>
                   </CarouselItem>
@@ -285,66 +243,33 @@ const Tools = () => {
           </div>
         </div>
 
-        {/* Desktop Grid - Big timer card + 4 smaller cards */}
-        <div className="hidden lg:block space-y-4">
-          {/* Big Workout Timer Card */}
-          {(() => {
-            const timerTool = tools.find(t => t.id === "workout-timer");
-            if (!timerTool) return null;
-            const Icon = timerTool.icon;
+        {/* Desktop Grid - Uniform 6 cards */}
+        <div className="hidden lg:grid lg:grid-cols-3 gap-4">
+          {tools.map((tool) => {
+            const Icon = tool.icon;
             return (
               <div
-                onClick={() => navigate(timerTool.route)}
-                className="group relative h-72 rounded-xl overflow-hidden cursor-pointer transition-all duration-500 ease-out transform-gpu hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/40 hover:z-10"
+                key={tool.id}
+                onClick={() => navigate(tool.route)}
+                className="group relative h-64 rounded-xl overflow-hidden cursor-pointer transition-all duration-500 ease-out transform-gpu hover:scale-[1.03] hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/40 hover:z-10"
               >
                 <img 
-                  src={timerTool.image} 
-                  alt={timerTool.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  src={tool.mobileImage} 
+                  alt={tool.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 group-hover:from-black/95 transition-all duration-300" />
-                <div className="relative h-full flex flex-col justify-end p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-2xl font-bold text-white">{timerTool.title}</h3>
-                    <div className="w-12 h-12 rounded-full bg-background/90 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
-                      <Icon className="w-6 h-6 text-primary" />
+                <div className="relative h-full flex flex-col justify-end p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-base font-semibold text-white truncate mr-2">{tool.title}</h3>
+                    <div className="w-9 h-9 rounded-full bg-background/90 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                      <Icon className="w-5 h-5 text-primary" />
                     </div>
                   </div>
-                  <p className="text-sm text-white/80 max-w-xl">{timerTool.description}</p>
                 </div>
               </div>
             );
-          })()}
-
-          {/* Smaller Cards — single row alongside the big timer above */}
-          <div className="grid grid-cols-5 gap-4">
-            {tools.filter(t => t.id !== "workout-timer").map((tool) => {
-              const Icon = tool.icon;
-              return (
-                <div
-                  key={tool.id}
-                  onClick={() => navigate(tool.route)}
-                  className="group relative h-64 rounded-xl overflow-hidden cursor-pointer transition-all duration-500 ease-out transform-gpu hover:scale-[1.08] hover:-translate-y-3 hover:shadow-2xl hover:shadow-primary/40 hover:z-10"
-                >
-                  <img 
-                    src={tool.mobileImage} 
-                    alt={tool.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 group-hover:from-black/95 transition-all duration-300" />
-                  <div className="relative h-full flex flex-col justify-end p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-base font-semibold text-white truncate mr-2">{tool.title}</h3>
-                      <div className="w-9 h-9 rounded-full bg-background/90 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                    </div>
-                    <p className="text-xs text-white/80 line-clamp-2 min-h-[2.5rem]">{tool.description}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          })}
         </div>
       </div>
       </div>
