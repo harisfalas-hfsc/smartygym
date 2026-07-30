@@ -192,19 +192,6 @@ const DailySmartyRitual = () => {
             </p>
           </DesktopPageIntro>
 
-          {isAuthenticated && ritual && (
-            <div className="flex items-center justify-end gap-2 mb-6">
-              <Button variant="outline" size="sm" onClick={() => setShowReaderMode(true)}>
-                <BookOpen className="mr-2 h-4 w-4" />
-                Reader Mode
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setShowShareDialog(true)}>
-                <Share2 className="mr-2 h-4 w-4" />
-                Share
-              </Button>
-            </div>
-          )}
-
           <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
             <div className="p-4 sm:p-5">
               <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Smarty Ritual</h2>
