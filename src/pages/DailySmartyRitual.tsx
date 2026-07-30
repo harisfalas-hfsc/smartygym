@@ -273,6 +273,18 @@ const DailySmartyRitual = () => {
             <Card className="overflow-hidden">
               {/* Header Section - Elegant Centered Layout */}
               <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-8 relative">
+                {isAuthenticated && ritual && (
+                  <div className="absolute right-6 top-6 flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setShowReaderMode(true)}>
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      Reader Mode
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowShareDialog(true)}>
+                      <Share2 className="mr-2 h-4 w-4" />
+                      Share
+                    </Button>
+                  </div>
+                )}
                 <div className="flex flex-col items-center text-center">
                   <Sparkles aria-label="Smarty Ritual" className="mb-3 h-20 w-20 text-purple-500" />
                   <p className="text-sm text-muted-foreground mb-3">
