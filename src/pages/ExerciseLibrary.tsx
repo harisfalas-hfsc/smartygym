@@ -76,7 +76,16 @@ const ExerciseLibrary = () => {
           />
 
           {/* About Exercise Library */}
-          <Card className="mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+          <DesktopPageIntro icon={Dumbbell} title="Exercise Library">
+            <p>
+              Your comprehensive resource for learning exercises through video demonstrations and detailed instructions.
+              Browse the Exercise Database with hundreds of movements, watch curated videos in the <span className="text-primary font-semibold">SmartyGym</span> Video Gallery,
+              and explore The <span className="text-primary font-semibold">SmartyGym</span> YouTube channel for expert tutorials by Sports Scientist <a href="/coach-profile" className="text-primary hover:underline font-semibold whitespace-nowrap">Haris Falas</a>.
+              Master proper form and technique to train safely and effectively.
+            </p>
+          </DesktopPageIntro>
+
+          <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
             <CardContent className="p-4 sm:p-5">
               <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Exercise Library</h2>
               <div className="space-y-2 text-muted-foreground max-w-3xl mx-auto">
