@@ -180,45 +180,6 @@ const Tools = () => {
               <p className="text-sm sm:text-base text-center font-semibold text-foreground mt-2 max-w-3xl mx-auto">
                 Use all <span className="text-primary font-bold">{tools.length} tools</span> — completely free, no signup required.
               </p>
-              {/* Desktop only - detailed calculator descriptions */}
-              <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-x-8 gap-y-6 mt-6 w-full items-start">
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">Workout Timer</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Set up custom work and rest intervals for any training style. Choose from HIIT, Tabata, EMOM, or circuit protocols and let the timer guide every round so you stay focused on form, not the clock.
-                  </p>
-                </div>
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">Rounds Tracker</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    A big-button tap counter that logs every round and optional reps in a single touch. Ideal for AMRAP, EMOM, and circuit sessions where you need to stay moving without losing count.
-                  </p>
-                </div>
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">1RM Calculator</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Estimate your true one-rep maximum using the validated Brzycki formula from any submaximal set. Essential for programming strength blocks, percentage-based work, and tracking long-term progress safely.
-                  </p>
-                </div>
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">BMR Calculator</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Calculate the calories your body burns at complete rest using the Mifflin-St Jeor equation, the gold standard in clinical nutrition. The foundation for any cut, bulk, or maintenance plan you build.
-                  </p>
-                </div>
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">Macro Calculator</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Get a complete nutrition blueprint tailored to your goal, including daily calories, protein, carbs, fats, fiber, water intake, and recommended meal frequency. Everything you need to eat with intention every day.
-                  </p>
-                </div>
-                <div className="min-w-0 text-center">
-                  <h3 className="font-semibold text-foreground mb-2"><span className="text-primary font-semibold">Calorie Counter</span></h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Search over 300,000 foods from the USDA database and instantly see calories, protein, carbs, fat, and fiber per serving. Log meals on the fly and keep your daily nutrition honest and accurate.
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         </Card>
