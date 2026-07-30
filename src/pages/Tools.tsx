@@ -243,66 +243,33 @@ const Tools = () => {
           </div>
         </div>
 
-        {/* Desktop Grid - Big timer card + 4 smaller cards */}
-        <div className="hidden lg:block space-y-4">
-          {/* Big Workout Timer Card */}
-          {(() => {
-            const timerTool = tools.find(t => t.id === "workout-timer");
-            if (!timerTool) return null;
-            const Icon = timerTool.icon;
+        {/* Desktop Grid - Uniform 6 cards */}
+        <div className="hidden lg:grid lg:grid-cols-3 gap-4">
+          {tools.map((tool) => {
+            const Icon = tool.icon;
             return (
               <div
-                onClick={() => navigate(timerTool.route)}
-                className="group relative h-72 rounded-xl overflow-hidden cursor-pointer transition-all duration-500 ease-out transform-gpu hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/40 hover:z-10"
+                key={tool.id}
+                onClick={() => navigate(tool.route)}
+                className="group relative h-64 rounded-xl overflow-hidden cursor-pointer transition-all duration-500 ease-out transform-gpu hover:scale-[1.03] hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/40 hover:z-10"
               >
                 <img 
-                  src={timerTool.image} 
-                  alt={timerTool.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  src={tool.mobileImage} 
+                  alt={tool.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 group-hover:from-black/95 transition-all duration-300" />
-                <div className="relative h-full flex flex-col justify-end p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-2xl font-bold text-white">{timerTool.title}</h3>
-                    <div className="w-12 h-12 rounded-full bg-background/90 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
-                      <Icon className="w-6 h-6 text-primary" />
+                <div className="relative h-full flex flex-col justify-end p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-base font-semibold text-white truncate mr-2">{tool.title}</h3>
+                    <div className="w-9 h-9 rounded-full bg-background/90 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                      <Icon className="w-5 h-5 text-primary" />
                     </div>
                   </div>
-                  <p className="text-sm text-white/80 max-w-xl">{timerTool.description}</p>
                 </div>
               </div>
             );
-          })()}
-
-          {/* Smaller Cards — single row alongside the big timer above */}
-          <div className="grid grid-cols-5 gap-4">
-            {tools.filter(t => t.id !== "workout-timer").map((tool) => {
-              const Icon = tool.icon;
-              return (
-                <div
-                  key={tool.id}
-                  onClick={() => navigate(tool.route)}
-                  className="group relative h-64 rounded-xl overflow-hidden cursor-pointer transition-all duration-500 ease-out transform-gpu hover:scale-[1.08] hover:-translate-y-3 hover:shadow-2xl hover:shadow-primary/40 hover:z-10"
-                >
-                  <img 
-                    src={tool.mobileImage} 
-                    alt={tool.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 group-hover:from-black/95 transition-all duration-300" />
-                  <div className="relative h-full flex flex-col justify-end p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-base font-semibold text-white truncate mr-2">{tool.title}</h3>
-                      <div className="w-9 h-9 rounded-full bg-background/90 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                    </div>
-                    <p className="text-xs text-white/80 line-clamp-2 min-h-[2.5rem]">{tool.description}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          })}
         </div>
       </div>
       </div>
