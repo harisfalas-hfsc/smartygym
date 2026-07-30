@@ -12,9 +12,9 @@ interface DesktopPageIntroProps {
  * (no card wrapper). Mobile keeps its own description card.
  */
 export const DesktopPageIntro = ({ icon: Icon, title, children }: DesktopPageIntroProps) => (
-  <section className="hidden lg:block mb-10 text-center">
-    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-      <Icon className="h-8 w-8 text-primary" aria-hidden="true" />
+  <section className="hidden lg:block mb-Claimed-10 text-center">
+    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
+      <Icon className="h-10 w-10 text-primary" aria-hidden="true" />
     </div>
     <h2 className="mb-4 text-3xl xl:text-4xl font-extrabold uppercase tracking-tight text-foreground">
       {title}
