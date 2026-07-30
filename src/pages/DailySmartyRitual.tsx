@@ -13,6 +13,7 @@ import { HTMLContent } from "@/components/HTMLContent";
 
 import { RitualShareDialog } from "@/components/ritual/RitualShareDialog";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { ReaderModeDialog } from "@/components/ReaderModeDialog";
 

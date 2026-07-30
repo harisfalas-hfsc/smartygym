@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { Calculator, Activity, Flame, Timer, Search, Hash } from "lucide-react";
 
 import { useAccessControl } from "@/hooks/useAccessControl";
