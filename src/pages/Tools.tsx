@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { Calculator, Activity, Flame, Timer, Search, Hash } from "lucide-react";
 
 import { useAccessControl } from "@/hooks/useAccessControl";
@@ -170,7 +171,16 @@ const Tools = () => {
         />
 
         {/* Info Section */}
-        <Card className="mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+        <DesktopPageIntro icon={Calculator} title="Smarty Tools">
+          <p className="font-bold text-foreground">
+            <span className="text-primary font-semibold">Smarty Tools</span> are fitness calculators to understand your body and optimize training using validated formulas.
+          </p>
+          <p className="font-semibold text-foreground">
+            Use all <span className="text-primary font-bold">{tools.length} tools</span> — completely free, no signup required.
+          </p>
+        </DesktopPageIntro>
+
+        <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
           <div className="p-5">
             <h2 className="text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Smarty Tools</h2>
             <div className="text-muted-foreground w-full mx-auto">

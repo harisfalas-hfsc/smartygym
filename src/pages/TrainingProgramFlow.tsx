@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { InfoRibbon } from "@/components/InfoRibbon";
 import { Heart, Dumbbell, Activity, Flame, User, Move, Scale } from "lucide-react";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
@@ -300,7 +301,16 @@ const TrainingProgramFlow = () => {
           }]} />
 
         {/* Info Section - About Smarty Programs */}
-        <Card className="mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+        <DesktopPageIntro icon={Activity} title="Smarty Programs">
+          <p className="font-bold text-foreground">
+            <span className="text-primary font-semibold">Smarty Programs</span> are long-term, structured plans designed to help you achieve your specific fitness goals. Whether you want to lose weight, build muscle, improve functional strength, enhance cardiovascular endurance, rehabilitate from low back pain, or develop better mobility and stability — we have a science-based program for you. These aren't just random workouts — they're strategic, periodized plans that take you from where you are to where you want to be.
+          </p>
+          <p className="font-semibold text-foreground">
+            Unlock all <span className="text-primary font-bold">{totalProgramCount} programs</span> with a Premium plan or grab one standalone program to start your journey.
+          </p>
+        </DesktopPageIntro>
+
+        <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
           <div className="p-4 sm:p-5">
             <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Smarty Programs</h2>
             <div className="space-y-2 text-muted-foreground max-w-3xl mx-auto">

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { InfoRibbon } from "@/components/InfoRibbon";
 import { Dumbbell, Flame, Zap, Heart, Move, Activity, CalendarCheck, Flower2, RefreshCw, Timer } from "lucide-react";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
@@ -295,7 +296,19 @@ const WorkoutFlow = () => {
           }]} />
 
           {/* Info Section - About Smarty Workouts */}
-          <Card className="mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+          <DesktopPageIntro icon={Dumbbell} title="Smarty Workouts">
+            <p className="font-bold text-foreground">
+              <span className="text-primary font-semibold">Smarty Workouts</span> are single-session training routines designed to fit your lifestyle and goals. Whether you're targeting strength, calorie burning, metabolic conditioning, cardio endurance, mobility & stability, or looking for a challenge — we have you covered. At the gym, at home, or on the go — <span className="text-primary font-semibold">Smarty Workouts</span> deliver results in any setting.
+            </p>
+            <p className="font-semibold text-foreground">
+              Unlock all <span className="text-primary font-bold">{totalWorkoutCount} workouts</span> with a Premium plan or grab one standalone session whenever you need it.
+            </p>
+            <p className="text-sm">
+              (Our coach, <Link to="/coach-profile" className="text-primary font-semibold hover:underline">Haris Falas</Link>, suggests following the <span className="text-primary font-semibold">WOD</span> for science-based periodization, ensuring safety and optimal results)
+            </p>
+          </DesktopPageIntro>
+
+          <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
             <div className="p-4 sm:p-5">
               <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Smarty Workouts</h2>
               <div className="space-y-2 text-muted-foreground max-w-3xl mx-auto">

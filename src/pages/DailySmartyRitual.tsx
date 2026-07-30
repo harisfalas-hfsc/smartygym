@@ -13,6 +13,7 @@ import { HTMLContent } from "@/components/HTMLContent";
 
 import { RitualShareDialog } from "@/components/ritual/RitualShareDialog";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { ReaderModeDialog } from "@/components/ReaderModeDialog";
 
@@ -186,7 +187,30 @@ const DailySmartyRitual = () => {
           />
 
           {/* Description Card - Always visible */}
-          <Card className="mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+          <DesktopPageIntro icon={Sparkles} title="Smarty Ritual">
+            <p className="font-bold text-foreground">
+              Your all-day game plan for movement, recovery, and performance. Each day brings a fresh ritual with three expertly designed phases:
+            </p>
+            <div className="grid grid-cols-3 gap-3 justify-items-center pt-1">
+              <div className="flex items-center gap-2">
+                <Sunrise className="h-5 w-5 text-orange-500" />
+                <span className="text-base font-bold text-foreground"><strong>Morning:</strong> Activation</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Sun className="h-5 w-5 text-yellow-600" />
+                <span className="text-base font-bold text-foreground"><strong>Midday:</strong> Reset</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Moon className="h-5 w-5 text-purple-600" />
+                <span className="text-base font-bold text-foreground"><strong>Evening:</strong> Unwind</span>
+              </div>
+            </div>
+            <p className="font-semibold text-foreground">
+              Designed by <a href="/coach-profile" className="text-primary hover:underline">Haris Falas</a> to keep you energized, mobile, and performing at your best.
+            </p>
+          </DesktopPageIntro>
+
+          <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
             <div className="p-4 sm:p-5">
               <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Smarty Ritual</h2>
               <div className="space-y-2 text-muted-foreground max-w-3xl mx-auto">

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccessControl } from "@/hooks/useAccessControl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { InfoRibbon } from "@/components/InfoRibbon";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 
@@ -530,7 +531,13 @@ const Community = () => {
           />
 
           {/* About Community */}
-          <Card className="mb-6 md:mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+          <DesktopPageIntro icon={Trophy} title="Community">
+            <p className="font-bold text-foreground">
+              Welcome to <span className="text-primary font-semibold">SmartyGym</span> Community! Connect, compete, and interact through leaderboards and shared experiences.
+            </p>
+          </DesktopPageIntro>
+
+          <Card className="lg:hidden mb-6 md:mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
             <CardContent className="p-4 sm:p-5">
               <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Community</h2>
               <div className="space-y-2 text-muted-foreground max-w-3xl mx-auto">

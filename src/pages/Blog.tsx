@@ -4,8 +4,9 @@ import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { InfoRibbon } from "@/components/InfoRibbon";
-import { Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Clock, Calendar, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CompactFilters } from "@/components/CompactFilters";
 import { Link } from "react-router-dom";
@@ -184,7 +185,16 @@ const Blog = () => {
         }]} />
 
           {/* About Blog */}
-          <Card className="mb-6 md:mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+          <DesktopPageIntro icon={BookOpen} title="Smarty Blog">
+            <p className="font-bold text-foreground">
+              Evidence-based articles by <a href="/coach-profile" className="text-primary hover:underline font-semibold">Haris Falas</a> on Fitness, Nutrition, and Wellness to empower your journey.
+            </p>
+            <p className="font-semibold text-foreground">
+              Explore all <span className="text-primary font-bold">{allArticles.length} free articles</span> across Fitness, Nutrition, and Wellness.
+            </p>
+          </DesktopPageIntro>
+
+          <Card className="lg:hidden mb-6 md:mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
             <CardContent className="p-4 sm:p-5">
               <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Smarty Blog</h2>
               <div className="space-y-2 text-muted-foreground max-w-3xl mx-auto">
