@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { isIOSNative } from "@/utils/platform";
+import { platformHeader } from "@/utils/platform";
+import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
+import { PaymentsDisabledNotice } from "@/components/PaymentsDisabledNotice";
 
 interface ProductCardProps {
   product: {
@@ -144,10 +146,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
       <CardFooter className="p-4 pt-0">
         {isDirectSale ? (
-          isIOSNative() ? (
-            <div className="w-full text-center text-xs text-muted-foreground p-2 border rounded">
-              Available at <span className="text-primary font-semibold">smartygym.com</span>
-            </div>
+          !paymentsEnabled ? (
+            <PaymentsDisabledNotice compact />
           ) : (
           <Button 
             className="w-full" 

@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
-import { isIOSNative } from "@/utils/platform";
+import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
+import { PaymentsDisabledNotice } from "@/components/PaymentsDisabledNotice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -190,10 +191,8 @@ export default function SmartyPremium() {
           ))}
         </div>
         <div className="space-y-3 mt-auto">
-          {isIOSNative() ? (
-            <div className="text-center text-xs sm:text-sm text-muted-foreground p-3 border rounded">
-              Purchase at <span className="text-primary font-semibold">smartygym.com</span>
-            </div>
+          {!paymentsEnabled ? (
+            <PaymentsDisabledNotice />
           ) : (
             <Button
               className="w-full py-5 sm:py-6 text-white bg-[#D4AF37] hover:bg-[#C9A431] text-base sm:text-lg font-semibold"
