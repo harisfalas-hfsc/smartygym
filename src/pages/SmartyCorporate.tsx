@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Building2, Check, ChevronRight, Users, Crown, CreditCard, Shield, Headphones, Lightbulb } from "lucide-react";
 import { openExternal } from "@/utils/native";
+import { platformHeader } from "@/utils/platform";
+import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -77,6 +79,13 @@ export default function SmartyCorporate() {
     return () => subscription.unsubscribe();
   }, []);
   const handleGetStarted = (planKey: keyof typeof CORPORATE_PLANS) => {
+    if (!paymentsEnabled) {
+      toast({
+        title: "Purchases are managed on our website",
+        description: "Visit smartygym.com to subscribe.",
+      });
+      return;
+    }
     if (!user) {
       navigate('/auth');
       return;
