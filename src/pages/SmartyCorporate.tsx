@@ -61,6 +61,7 @@ export default function SmartyCorporate() {
   const [orgDialogOpen, setOrgDialogOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof CORPORATE_PLANS | null>(null);
   const [organizationName, setOrganizationName] = useState("");
+  const { paymentsEnabled } = usePaymentsEnabled();
   useEffect(() => {
     supabase.auth.getSession().then(({
       data: {
