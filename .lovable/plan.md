@@ -1,76 +1,32 @@
+## Smarty Gym — Investor Deck (PowerPoint) for Digital Tree
 
-## Answers to your questions first
+A ~14-slide `.pptx`, Dragon's Den style: minimal words, big statements, brand colours (deep navy `0F172A` background, electric blue `29B6D2` accent, white text). Generated with pptxgenjs, visually QA'd slide by slide, delivered to `/mnt/documents`.
 
-- **Do we have failed-renewal messaging today?** Partially. The Stripe webhook already handles `invoice.payment_failed` and sends a plain "Payment Failed" email + dashboard notification. BUT: (1) it is hardcoded in the webhook, not a template in the admin Communications Center, so you can't edit it there; (2) the webhook itself is currently not being delivered by Stripe (established in previous turns), so in practice the message doesn't go out; (3) it fires only once — no distinction between 1st / 2nd / final attempt; (4) no cron fallback if the webhook misses.
-- **How many times does Stripe retry?** Stripe's Smart Retries retry a failed subscription invoice up to **4 times over ~3 weeks** (configurable in Stripe → Billing → Subscriptions and emails → Retry rules). After the final failed attempt, the default action is to mark the subscription `unpaid` / `canceled`.
-- **Can the user renew manually?** Yes — two ways already exist: **Manage Subscription** button in User Dashboard (opens Stripe Customer Portal → update card → Stripe re-attempts the open invoice), and the **/pricing → Subscribe** flow (starts a fresh subscription). Both work today. The expired-user experience on `/pricing` already shows the subscribe CTA.
+Scope: **Smarty Gym only** — zero mention of Smarty Move / Smarty Diet except one single line in the growth slide as future optionality.
 
-## What this plan builds
+### Slide flow
 
-### 1. New template in the admin Communications Center
-Add 3 new rows to `automated_message_templates` so they appear in the admin panel and can be edited without code:
+1. **Title** — Smarty Gym. "Your gym re-imagined. Anywhere, anytime." Haris Falas · smartygym.com
+2. **What is it** — One sentence: a coached training platform where a real Sports Scientist writes every workout, every day.
+3. **The problem** — 3 blocks: no time for the gym · AI/algorithm apps with no continuity · almost no Greek-language coaching apps.
+4. **Why AI apps fail** — Left/right contrast: "An algorithm asks you a questionnaire." vs "A coach remembers yesterday."
+5. **The solution** — 100% Human. 0% AI. Every workout signed, structured, progressive.
+6. **The engine: WOD** — 2 new workouts every day, built to one periodised plan (84-day cycle, all fitness parameters), categorised, never random.
+7. **The coach** — Haris Falas, 25 years: pro athletes, kids, elders, parents, everyday people. The face behind every workout.
+8. **Human interaction** — Direct access to the coach, named author on every workout and program, answers to "why this workout".
+9. **What we build next** — Daily 30s coach video for the WOD, weekly motivation video, weekly blog video, human exercise library (Haris demonstrating, phased).
+10. **What exists today** — Current stage: live platform, workout + program library, exercise library, daily WOD automation, premium subscription live at €9.99/month, blog, tools, community.
+11. **Go-to-market** — Instagram / TikTok / Facebook / YouTube daily WOD clip; weekly motivation; weekly article video; Greek-first positioning.
+12. **Growth plan** — 500 subscribers Y1 → 1,000 Y2 → 5,000 Y3. Revenue shown as a simple derived table at €9.99/month, with retention and CAC left as clearly marked placeholders.
+13. **What we need** — Video production, marketing budget, coach's time, small team (editor, social, support). Presented as roles + cost placeholders, not invented numbers.
+14. **The ask / close** — Partnership with Digital Tree, one line on what the capital buys, and the closing statement.
 
-- `payment_failed_attempt` — 1st/interim failure, friendly reminder + "Update Payment Method" button
-- `payment_failed_final` — after last Stripe retry, subscription about to be canceled
-- (`renewal_thank_you`, `subscription_expired`, `cancellation` already exist and stay)
+### Content integrity
 
-Content of `payment_failed_attempt` (the one you dictated), with emojis + icons:
+Every claim comes from your site and this conversation (€9.99/month, 84-day periodisation, 2 daily WODs, 100% Human 0% AI, 25 years, Greek-language gap). Anything I don't have real data for — production cost, marketing spend, CAC, churn, salaries, current subscriber count — goes in as a visibly marked placeholder like `[MONTHLY VIDEO PRODUCTION — replace]`, and I'll list them for you at the end so you fill in real figures before you present.
 
-> Subject: ⚠️ We couldn't renew your SmartyGym Premium
->
-> Hello dear {{name}}, 👋
->
-> Unfortunately we were unable to process the renewal of your Premium membership 💳❌.
->
-> Don't worry — you can fix it in under a minute:
-> 1. 💰 Make sure your card has funds or update it
-> 2. 🔁 Click the button below to retry the payment manually
-> 3. ✅ Your Premium access continues without interruption
->
-> [Renew Manually →]  (links to Stripe Customer Portal via `customer-portal` function)
->
-> Stripe will also automatically retry your card a few more times over the next days. If nothing works your subscription will pause, but you can reactivate anytime from /pricing.
+### Technical
 
-### 2. Wire the templates into the webhook
-Refactor `handleInvoicePaymentFailed` in `supabase/functions/stripe-webhook/index.ts` to:
-- Read `invoice.attempt_count` from Stripe.
-- If `attempt_count < invoice.next_payment_attempt != null` → send `payment_failed_attempt`.
-- If `next_payment_attempt == null` (Stripe gave up) → send `payment_failed_final` and mark subscription `canceled`.
-- Pull subject/body from `automated_message_templates` (not hardcoded), so edits in the admin panel actually take effect.
-- Send both dashboard message + email through the same template row (parity with other lifecycle messages).
-- Mark these templates as **mandatory** (bypass user opt-out), same as welcome/renewal.
-
-### 3. Cron fallback (in case webhook is still missing)
-New edge function `check-failed-renewals` (runs every 6h via pg_cron):
-- Lists Stripe subscriptions in `past_due` / `unpaid` status.
-- For each, checks the latest invoice's `attempt_count` and `next_payment_attempt`.
-- Fires the same template if we don't already have a `notification_audit_log` entry for that invoice ID (idempotent via invoice id).
-- Registers itself in `cron_job_metadata` so it appears in the admin cron dashboard.
-
-### 4. Manual renewal UX for expired users
-- `/pricing` already shows Subscribe for expired users — verify and leave.
-- User Dashboard: when `status === 'past_due'` or `'unpaid'`, show a red banner "⚠️ Your last payment failed — [Update payment method] [Retry now]". Both buttons call the existing `customer-portal` function; updating the card in the portal triggers Stripe to auto-retry the open invoice.
-- Add a "Renew Manually" deep link in the failure email → routes through `customer-portal` after login.
-
-### 5. Admin panel synchronization
-- Register the 2 new templates in the Communications Center → Automated Messages list (they surface automatically once the row exists with `is_active=true`).
-- Add the new cron `check-failed-renewals` to `cron_job_metadata` so it shows under Admin → Cron Jobs with last-run + next-run.
-- No changes to the Mass Announce / Templates / Test tabs (they read the same table).
-
-### 6. Verification
-- Run `tsgo` for typecheck.
-- Trigger the new function once manually against `hfsc.nicosia@gmail.com` to confirm template render + dashboard row.
-- Confirm the 2 templates show up and are editable in Communications Center.
-
-## Files touched (technical)
-
-- `supabase/migrations/<new>.sql` — insert 2 rows into `automated_message_templates`, insert 1 row into `cron_job_metadata`, schedule pg_cron job.
-- `supabase/functions/stripe-webhook/index.ts` — rewrite `handleInvoicePaymentFailed` to load template + branch on `attempt_count`/`next_payment_attempt`.
-- `supabase/functions/check-failed-renewals/index.ts` — new cron function (Stripe list + idempotent send).
-- `supabase/functions/_shared/renderTemplate.ts` — small helper reused across lifecycle sends (if not already present).
-- `src/pages/UserDashboard.tsx` (or existing subscription card component) — red past_due banner + Retry button.
-- No changes to `/pricing`, `customer-portal`, `check-subscription`, or existing renewal templates.
-
-## Out of scope
-- Changing Stripe's retry schedule (that's in your Stripe dashboard, not in code).
-- Fixing the missing webhook delivery itself — the cron fallback covers that gap, and the webhook fix (if any) is separate.
+- pptxgenjs, 16:9, dark "sandwich" palette (dark title/close, light content slides), Arial Black headers / Arial body, one repeated visual motif (blue rule-free blocks, numbered stat cards).
+- Real project assets embedded as base64 where useful (Haris photo, logo).
+- Schema-validated, converted to images, and every slide inspected for overflow/overlap before delivery.
