@@ -1,70 +1,46 @@
 ## Goal
+Make the iOS payment kill-switch cover both the native iOS app **and** iPhone mobile web browsers, so Apple reviewers see no purchase path when the toggle is off. Keep Android and web behavior unchanged. Clarify the admin UI so the scope of each toggle is obvious.
 
-A new **Payments** section in the admin panel where all Stripe configuration lives, plus a per-platform kill switch (iOS / Android) so you can hide in-app purchasing during App Store and Play Store review, then turn it back on after approval.
+## Current behavior (verified)
+- `Capacitor.isNativePlatform()` returns `true` only inside the native iOS/Android app shell.
+- `usePaymentsEnabled()` therefore treats iPhone Safari/Chrome as **web**, so payments stay visible on mobile web even when the iOS toggle is off.
+- Admin labels say "iOS", which can be read as native-only.
 
-## Note on old memberships
+## Proposed changes
 
-You have no Gold, Platinum or Lifetime products on sale — they can't be purchased anywhere. Two existing members are still grandfathered on old plans, and the webhook keeps recognising their old price IDs purely so they keep their access. The admin Payments screen will show **only the active product** (Premium Monthly €9.99/mo) and the corporate plans. No legacy clutter.
+### 1. Detect iPhone mobile web as iOS for payment purposes
+Update `src/utils/platform.ts`:
+- Add `isIOSDevice()` helper that detects iPhone/iPad/iPod from `navigator.userAgent` (covers native app and mobile web).
+- Update `platformHeader()` to send `"x-smarty-platform": "ios"` whenever `isIOSDevice()` is true.
+- Keep `isIOSNative()` unchanged for any code that truly needs native-shell-only detection.
 
-## How the kill switch behaves
+Update `src/hooks/usePaymentsEnabled.ts`:
+- Update `getPaymentPlatform()` to return `"ios"` when `isIOSDevice()` is true, even if `Capacitor.isNativePlatform()` is false.
+- Android mobile web remains "web" (no change).
 
-When a platform is toggled **OFF**, every purchase CTA on that platform (Premium membership, standalone workouts, standalone programs, shop, corporate) is replaced with a neutral message:
+### 2. Adjust the disabled-purchase message for iPhone web
+Update `src/components/PaymentsDisabledNotice.tsx`:
+- Accept or detect the current platform.
+- When payments are disabled on iOS/iPhone, show a message that does not tell the user to "visit smartygym.com" while they are already on it.
+- Proposed copy: "Purchases are not available on iPhone right now. Please use a desktop or Android device to upgrade."
 
-> "Purchases are managed on our website. Visit smartygym.com to upgrade."
+### 3. Clarify admin panel labels
+Update `src/components/admin/PaymentsManager.tsx`:
+- Rename iOS tab label from "iOS" to "iOS / iPhone".
+- Update the toggle label from "In-app purchasing on iOS" to "Purchasing on iOS / iPhone".
+- Update the guideline text to state explicitly that this affects the native iOS app **and** Safari/Chrome on iPhone.
+- Update the "Purchases visible to" badge label from "Apple" to "Apple / iPhone users".
 
-No price, no Stripe button, no checkout link — nothing a reviewer can flag under Guideline 3.1.1. Toggled **ON**, everything works exactly as today.
+### 4. Server-side enforcement stays the same
+- The existing checkout edge functions already read the `x-smarty-platform` header and reject requests when the matching platform toggle is off.
+- Because `platformHeader()` will now send `"ios"` for iPhone mobile web, server-side enforcement will automatically cover mobile web with no edge-function changes.
 
-Web is never affected — it always sells normally.
+## Out of scope
+- Android mobile web: still treated as "web" and unaffected by the Android toggle.
+- Web (desktop): still always enabled.
+- No database changes; the existing `payments_enabled_ios` and `payments_enabled_android` rows are reused.
 
-## What gets built
-
-### 1. Setting storage
-Two rows in the existing `system_settings` table:
-- `payments_enabled_ios` → true / false
-- `payments_enabled_android` → true / false
-
-Readable by everyone (purchase buttons render before login), writable by admins only.
-
-### 2. Admin panel — new "Payments" section
-Added to the admin nav with a credit-card icon.
-
-**Platform tabs**
-- **iOS** — master toggle + live status badge ("Visible to Apple reviewers: NO / YES") + a short note on Guideline 3.1.1
-- **Android** — same toggle and badge for Google Play
-- **Web** — informational only, always on
-
-**Stripe Configuration panel**
-- Active product: Premium Monthly €9.99/mo, with product ID and price ID
-- Corporate plans (Dynamic / Power / Elite / Enterprise) with their price IDs
-- Webhook endpoint URL and the events it listens to
-- Secret status: `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` shown as configured / missing (values never displayed)
-- Quick links to the existing Stripe revenue and subscription-sync tools
-
-### 3. Frontend enforcement
-A new `usePaymentsEnabled()` hook detects the platform via the existing Capacitor helpers and reads the matching setting. Wired into every purchase entry point:
-- `PurchaseButton.tsx` (standalone workouts/programs) — replaces today's blanket iOS hide with the toggle
-- `SmartyPremium.tsx` (membership checkout)
-- `SmartyCorporate.tsx` / `CorporateAdmin.tsx`
-- Shop buy buttons and any premium upsell CTA that routes to checkout
-
-A shared `<PaymentsDisabledNotice />` keeps the wording identical everywhere.
-
-### 4. Server-side enforcement
-A UI-only toggle can be bypassed, so each checkout function (`create-lifetime-checkout`, `create-individual-purchase-checkout`, `create-corporate-checkout`, `create-checkout`) will read an `x-smarty-platform` header sent by the client, check the matching setting, and return a clean 403 if that platform is disabled. The payment path genuinely closes, not just the button.
-
-## Technical notes
-
-- No changes to Stripe products, prices, or webhook logic. Pricing stays €9.99/mo.
-- Existing premium and grandfathered users are unaffected — the toggle blocks *new purchases only*, never access to owned content.
-- Admins get no bypass, so you can see exactly what a reviewer sees on a real device.
-- Takes effect instantly with no app rebuild, because the value is read from the backend at runtime — you flip it the moment Apple approves.
-- `capacitor.config.ts` and the native projects are untouched.
-
-## Order of work
-
-1. Migration: add the two settings rows plus read/write policies.
-2. Build `usePaymentsEnabled()` and `<PaymentsDisabledNotice />`.
-3. Build the admin Payments section (Stripe config panel + platform tabs).
-4. Wire the hook into all purchase CTAs.
-5. Add the platform header and server-side guard to the checkout functions.
-6. Verify: toggle iOS off, confirm every purchase surface shows the website message and a forced checkout call is rejected.
+## Verification
+- Typecheck passes.
+- Manual check: open smartygym.com in iPhone Safari simulator with `payments_enabled_ios = false`; purchase buttons should be replaced by the disabled notice.
+- Manual check: open the same URL on Android Chrome or desktop; purchase buttons remain visible.
