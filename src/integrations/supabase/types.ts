@@ -3721,6 +3721,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      corporate_subscription_billing_unchanged: {
+        Args: {
+          _current_period_end: string
+          _id: string
+          _max_users: number
+          _plan_type: Database["public"]["Enums"]["corporate_plan_type"]
+          _status: string
+          _stripe_customer_id: string
+          _stripe_subscription_id: string
+        }
+        Returns: boolean
+      }
       ensure_cron_jobs: { Args: never; Returns: Json }
       exec_sql: { Args: { sql: string }; Returns: undefined }
       get_checkin_leaderboard: {
