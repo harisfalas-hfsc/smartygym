@@ -104,7 +104,8 @@ export default function SmartyCorporate() {
           planType: selectedPlan,
           organizationName: organizationName.trim(),
           cancelPath: window.location.pathname + window.location.search
-        }
+        },
+        headers: platformHeader()
       });
       if (error) throw error;
       if (data?.url) {
