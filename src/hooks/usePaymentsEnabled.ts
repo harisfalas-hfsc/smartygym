@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
+import { isIOSDevice } from "@/utils/platform";
 
 export type PaymentPlatform = "ios" | "android" | "web";
 
 export const getPaymentPlatform = (): PaymentPlatform => {
   try {
+    if (isIOSDevice()) return "ios";
     if (!Capacitor.isNativePlatform()) return "web";
     const p = Capacitor.getPlatform();
     if (p === "ios") return "ios";

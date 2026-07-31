@@ -26,11 +26,26 @@ export const isNativeApp = (): boolean => {
 };
 
 /**
+ * Returns true for any iOS device, including:
+ * - Native iOS app (Capacitor)
+ * - Safari / Chrome on iPhone or iPad
+ *
+ * Used for payment kill-switch detection so the iOS toggle also hides
+ * purchase CTAs when Apple reviewers visit smartygym.com from an iPhone.
+ */
+export const isIOSDevice = (): boolean => {
+  if (typeof window === "undefined") return false;
+  const ua = window.navigator.userAgent || "";
+  return /iPhone|iPad|iPod/i.test(ua);
+};
+
+/**
  * Header sent with every checkout request so the edge function can enforce
  * the per-platform purchase kill switch server-side.
  */
 export const platformHeader = (): Record<string, string> => {
   try {
+    if (isIOSDevice()) return { "x-smarty-platform": "ios" };
     if (!Capacitor.isNativePlatform()) return { "x-smarty-platform": "web" };
     return { "x-smarty-platform": Capacitor.getPlatform() };
   } catch {
