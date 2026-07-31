@@ -52,6 +52,7 @@ export default function SmartyPremium() {
   const isPremium = userTier === "premium";
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const { paymentsEnabled } = usePaymentsEnabled();
 
   const monthlyPrice = 9.99;
 
