@@ -53,10 +53,10 @@ const PlatformPanel = ({
     <div className="flex items-start justify-between gap-4 rounded-lg border p-4">
       <div className="space-y-1">
         <Label htmlFor={`toggle-${platform}`} className="text-base font-semibold">
-          In-app purchasing on {title}
+          Purchasing on {title}
         </Label>
         <p className="text-sm text-muted-foreground">
-          When off, every purchase button in the {title} app is replaced with a message
+          When off, every purchase button on {title} is replaced with a message
           pointing to the website. No prices, no checkout links.
         </p>
       </div>
@@ -183,7 +183,7 @@ export const PaymentsManager = () => {
             <Tabs defaultValue="ios" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="ios" className="flex items-center gap-2">
-                  <Apple className="w-4 h-4" /> iOS
+                  <Apple className="w-4 h-4" /> iOS / iPhone
                 </TabsTrigger>
                 <TabsTrigger value="android" className="flex items-center gap-2">
                   <Bot className="w-4 h-4" /> Android
@@ -196,12 +196,12 @@ export const PaymentsManager = () => {
               <TabsContent value="ios" className="mt-4">
                 <PlatformPanel
                   platform="ios"
-                  title="iOS"
-                  storeName="Apple"
+                  title="iOS / iPhone"
+                  storeName="Apple / iPhone users"
                   enabled={settings.ios}
                   saving={saving === "ios"}
                   onToggle={(next) => handleToggle("ios", next)}
-                  guideline="App Store Guideline 3.1.1 requires digital goods sold inside an iOS app to use Apple In-App Purchase. Switch this off during review so no external payment path is visible, then switch it back on once the app is approved."
+                  guideline="Apple App Store Guideline 3.1.1 requires digital goods sold inside an iOS app (or viewed on iPhone Safari/Chrome) to use Apple In-App Purchase. Switch this off during review so no external payment path is visible on the native iOS app or on iPhone browsers, then switch it back on once the app is approved."
                 />
               </TabsContent>
 
