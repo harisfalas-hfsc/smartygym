@@ -24,3 +24,16 @@ export const isNativeApp = (): boolean => {
     return false;
   }
 };
+
+/**
+ * Header sent with every checkout request so the edge function can enforce
+ * the per-platform purchase kill switch server-side.
+ */
+export const platformHeader = (): Record<string, string> => {
+  try {
+    if (!Capacitor.isNativePlatform()) return { "x-smarty-platform": "web" };
+    return { "x-smarty-platform": Capacitor.getPlatform() };
+  } catch {
+    return { "x-smarty-platform": "web" };
+  }
+};

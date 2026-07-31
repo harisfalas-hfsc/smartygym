@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Folder, Users, Mail, FileText, Settings, BarChart3, BookOpen, MessageSquare, Inbox, Megaphone, TrendingUp, Plus, Dumbbell, Calendar, Bell, ShoppingBag, Sparkles, Building2, Video, Smartphone, Clock, WifiOff, Search } from "lucide-react";
+import { Folder, Users, Mail, FileText, Settings, BarChart3, BookOpen, MessageSquare, Inbox, Megaphone, TrendingUp, Plus, Dumbbell, Calendar, Bell, ShoppingBag, Sparkles, Building2, Video, Smartphone, Clock, WifiOff, Search, CreditCard } from "lucide-react";
 import { ContentManager } from "@/components/admin/ContentManager";
 import { CommunicationsManager } from "@/components/admin/CommunicationsManager";
 import { EmailManager } from "@/components/admin/EmailManager";
@@ -28,6 +28,7 @@ import { CorporateDashboard } from "@/components/admin/CorporateDashboard";
 import ExerciseLibraryManager from "@/components/admin/ExerciseLibraryManager";
 import SmartyGymAppVault from "@/pages/admin/SmartyGymAppVault";
 import { CronJobsManager } from "@/components/admin/CronJobsManager";
+import { PaymentsManager } from "@/components/admin/PaymentsManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -69,6 +70,7 @@ export default function AdminBackoffice() {
     { id: "settings", label: "Settings", description: "System configuration", icon: Settings, color: "text-slate-500", bgColor: "bg-slate-500/10" },
     { id: "notification-history", label: "Notifications", description: "Push notification logs", icon: Bell, color: "text-yellow-500", bgColor: "bg-yellow-500/10" },
     { id: "shop", label: "Shop", description: "Products & orders", icon: ShoppingBag, color: "text-rose-500", bgColor: "bg-rose-500/10" },
+    { id: "payments", label: "Payments", description: "Stripe & platform controls", icon: CreditCard, color: "text-green-600", bgColor: "bg-green-600/10" },
     { id: "exercise-library", label: "Exercise Library", description: "Video tutorials", icon: Video, color: "text-teal-500", bgColor: "bg-teal-500/10" },
     { id: "docs", label: "Docs", description: "Documentation", icon: FileText, color: "text-lime-600", bgColor: "bg-lime-500/10" },
     { id: "smartygym-app", label: "SmartyGym App", description: "App vault & settings", icon: Smartphone, color: "text-fuchsia-500", bgColor: "bg-fuchsia-500/10" },
@@ -395,6 +397,9 @@ export default function AdminBackoffice() {
 
             {/* Exercise Library Section */}
             {activeTab === "exercise-library" && <ExerciseLibraryManager />}
+
+            {/* Payments Section */}
+            {activeTab === "payments" && <PaymentsManager />}
 
             {/* Docs Section */}
             {activeTab === "docs" && <AdminDocumentationManager />}

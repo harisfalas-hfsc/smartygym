@@ -6,7 +6,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useAccessControl } from "@/hooks/useAccessControl";
 import { useNavigationHistory } from "@/contexts/NavigationHistoryContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import { isIOSNative } from "@/utils/platform";
+import { platformHeader } from "@/utils/platform";
+import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
+import { PaymentsDisabledNotice } from "@/components/PaymentsDisabledNotice";
 
 interface PurchaseButtonProps {
   contentId: string;
@@ -31,6 +33,7 @@ export const PurchaseButton = ({
   const { history } = useNavigationHistory();
   const navigate = useNavigate();
   const location = useLocation();
+  const { paymentsEnabled, loading: paymentsLoading } = usePaymentsEnabled();
 
   // Check if already purchased
   const alreadyPurchased = hasPurchased(contentId, contentType);
@@ -66,11 +69,6 @@ export const PurchaseButton = ({
   // NEW: Check if user is premium (cannot purchase)
   const isPremium = userTier === "premium";
 
-  // Apple Guideline 3.1.1: hide external payment CTAs in the iOS native app
-  if (isIOSNative()) {
-    return null;
-  }
-
   const handlePurchase = async () => {
     if (!user) {
       toast({
@@ -105,6 +103,7 @@ export const PurchaseButton = ({
           },
           headers: {
             Authorization: `Bearer ${session.access_token}`,
+            ...platformHeader(),
           },
         }
       );
@@ -143,6 +142,12 @@ export const PurchaseButton = ({
         Already Purchased
       </Button>
     );
+  }
+
+  // Platform purchase kill switch (Admin → Payments)
+  if (paymentsLoading) return null;
+  if (!paymentsEnabled) {
+    return <PaymentsDisabledNotice />;
   }
 
   return (
