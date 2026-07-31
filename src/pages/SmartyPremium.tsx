@@ -86,7 +86,8 @@ export default function SmartyPremium() {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-lifetime-checkout', {
-        body: { cancelPath: window.location.pathname + window.location.search }
+        body: { cancelPath: window.location.pathname + window.location.search },
+        headers: platformHeader(),
       });
 
       if (data?.alreadyPremium || data?.hasActiveSubscription) {
