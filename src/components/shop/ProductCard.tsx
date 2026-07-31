@@ -30,6 +30,7 @@ interface ProductCardProps {
 export const ProductCard = ({ product }: ProductCardProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
+  const { paymentsEnabled } = usePaymentsEnabled();
 
   // Check stock availability for direct sale products
   const isOutOfStock = product.product_type === 'direct_sale' && 
