@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
+import { platformHeader } from "@/utils/platform";
 import { PaymentsDisabledNotice } from "@/components/PaymentsDisabledNotice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
