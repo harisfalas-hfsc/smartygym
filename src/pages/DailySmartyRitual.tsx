@@ -169,7 +169,7 @@ const DailySmartyRitual = () => {
           />
 
           {/* Description Card - Always visible */}
-          <DesktopPageIntro icon={Sparkles} title="Smarty Ritual">
+          <DesktopPageIntro icon={Sparkles} title="Smarty Ritual" headingLevel="h2">
             <p className="font-bold text-foreground">
               Your all-day game plan for movement, recovery, and performance. Each day brings a fresh ritual with three expertly designed phases:
             </p>
