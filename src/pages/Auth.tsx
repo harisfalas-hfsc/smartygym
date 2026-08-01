@@ -317,6 +317,8 @@ export default function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // (resend helper defined below)
     
     if (isOffline) {
       toast({
