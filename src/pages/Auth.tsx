@@ -316,7 +316,6 @@ export default function Auth() {
   };
 
   const handleLogin = async (e: React.FormEvent) => {
-    // placeholder-anchor
     e.preventDefault();
     
     if (isOffline) {
