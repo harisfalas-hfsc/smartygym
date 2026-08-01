@@ -28,6 +28,10 @@ const FAQ = () => {
         <meta property="og:description" content="Everything you need to know about SmartyGym - workouts, programs, pricing, and getting started." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://smartygym.com/faq" />
+        <meta property="og:image" content="https://smartygym.com/smartygym-social-share.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:image" content="https://smartygym.com/smartygym-social-share.png" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary" />
