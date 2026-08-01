@@ -86,6 +86,10 @@ export const isAndroidDevice = (): boolean => {
   if (data?.mobile === true && !/Mac|iPhone|iPad|iPod/i.test(data.platform || "")) return true;
   // Desktop-site mode on Android drops "Android" from the UA but keeps touch.
   if (data?.platform === "Android") return true;
+  // Fallback for Android desktop-site mode without client hints:
+  // a "X11; Linux x86_64" UA that reports touch points is a phone/tablet,
+  // never a Linux desktop.
+  if (/X11|Linux/i.test(ua) && !/Windows|Macintosh|CrOS/i.test(ua) && touchPoints() > 1) return true;
   return false;
 };
 
