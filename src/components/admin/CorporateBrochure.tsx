@@ -156,7 +156,7 @@ export const CorporateBrochure = () => {
           <div className="border-2 border-gray-200 rounded-xl p-5">
             <h4 className="font-bold text-lg mb-1">Smarty Dynamic</h4>
             <p className="text-sm text-gray-500 mb-3">Up to 10 team members</p>
-            <p className="text-3xl font-bold mb-4">€399<span className="text-sm text-gray-500">/year</span></p>
+            <p className="text-3xl font-bold mb-4">€699<span className="text-sm text-gray-500">/year</span></p>
             <ul className="text-sm space-y-2">
               <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 10 Premium accounts</li>
               <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Admin dashboard</li>
@@ -169,7 +169,7 @@ export const CorporateBrochure = () => {
             <div className="bg-[#29B6D2] text-white text-xs px-2 py-1 rounded mb-2 inline-block">POPULAR</div>
             <h4 className="font-bold text-lg mb-1 text-[#29B6D2]">Smarty Power</h4>
             <p className="text-sm text-gray-500 mb-3">Up to 20 team members</p>
-            <p className="text-3xl font-bold mb-4">€499<span className="text-sm text-gray-500">/year</span></p>
+            <p className="text-3xl font-bold mb-4">€799<span className="text-sm text-gray-500">/year</span></p>
             <ul className="text-sm space-y-2">
               <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-[#29B6D2]" /> 20 Premium accounts</li>
               <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-[#29B6D2]" /> Admin dashboard</li>
@@ -181,7 +181,7 @@ export const CorporateBrochure = () => {
           <div className="border-2 border-gray-200 rounded-xl p-5">
             <h4 className="font-bold text-lg mb-1">Smarty Elite</h4>
             <p className="text-sm text-gray-500 mb-3">Up to 30 team members</p>
-            <p className="text-3xl font-bold mb-4">€599<span className="text-sm text-gray-500">/year</span></p>
+            <p className="text-3xl font-bold mb-4">€899<span className="text-sm text-gray-500">/year</span></p>
             <ul className="text-sm space-y-2">
               <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 30 Premium accounts</li>
               <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Admin dashboard</li>
@@ -194,7 +194,7 @@ export const CorporateBrochure = () => {
             <div className="bg-white text-gray-900 text-xs px-2 py-1 rounded mb-2 inline-block">ENTERPRISE</div>
             <h4 className="font-bold text-lg mb-1">Smarty Enterprise</h4>
             <p className="text-sm text-gray-400 mb-3">Unlimited team members</p>
-            <p className="text-3xl font-bold mb-4">€699<span className="text-sm text-gray-400">/year</span></p>
+            <p className="text-3xl font-bold mb-4">€999<span className="text-sm text-gray-400">/year</span></p>
             <ul className="text-sm space-y-2">
               <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-[#29B6D2]" /> Unlimited accounts</li>
               <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-[#29B6D2]" /> Admin dashboard</li>

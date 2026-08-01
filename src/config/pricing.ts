@@ -19,10 +19,10 @@ export const STRIPE_PRICE_IDS = {
   premium_monthly: 'price_1Tr93GIxQYg9inGKhIZLvoB2', // Premium Monthly €9.99/mo
 
   // Corporate plans
-  corporate_dynamic:    'price_1Sc28CIxQYg9inGKfoqZgtXZ',
-  corporate_power:      'price_1Sc28EIxQYg9inGKCDUA4ii8',
-  corporate_elite:      'price_1Sc28GIxQYg9inGKS8NkWB11',
-  corporate_enterprise: 'price_1Sc28HIxQYg9inGK3YzEE4YR',
+  corporate_dynamic:    'price_1TzXU6IxQYg9inGKSvUkoVxG',
+  corporate_power:      'price_1TzXUfIxQYg9inGKr4DRiEg7',
+  corporate_elite:      'price_1TzXVDIxQYg9inGKGBr5prVs',
+  corporate_enterprise: 'price_1TzXVUIxQYg9inGKOvbKdfr4',
 } as const;
 
 export type StripePlanKey = keyof typeof STRIPE_PRICE_IDS;
@@ -40,10 +40,10 @@ export const LEGACY_STRIPE_PRICE_IDS = {
 } as const;
 
 export const CORPORATE_PRICES = {
-  dynamic: 399,      // €399/year
-  power: 499,        // €499/year
-  elite: 599,        // €599/year
-  enterprise: 699,   // €699/year
+  dynamic: 699,      // €699/year
+  power: 799,        // €799/year
+  elite: 899,        // €899/year
+  enterprise: 999,   // €999/year
 } as const;
 
 // Stripe Product IDs for SmartyGym products only
