@@ -82,8 +82,9 @@ export default function SmartyCorporate() {
   const handleGetStarted = (planKey: keyof typeof CORPORATE_PLANS) => {
     if (!paymentsEnabled) {
       toast({
-        title: "Purchases are managed on our website",
-        description: "Visit smartygym.com to subscribe.",
+        title: "In-app purchases are not available",
+        description:
+          "Memberships, workouts and training programs are purchased on our website. Visit smartygym.com from any computer, then sign in here with the same account.",
       });
       return;
     }
