@@ -21,6 +21,14 @@ import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { STRIPE_PRICE_IDS } from "@/config/pricing";
 
+// Product icons (same images used on the Stripe products)
+const PLAN_ICONS = {
+  dynamic: "https://cvccrvyimyzrxcwzmxwk.supabase.co/storage/v1/object/public/blog-images/corporate-dynamic-icon.png",
+  power: "https://cvccrvyimyzrxcwzmxwk.supabase.co/storage/v1/object/public/blog-images/corporate-power-icon.png",
+  elite: "https://cvccrvyimyzrxcwzmxwk.supabase.co/storage/v1/object/public/blog-images/corporate-elite-icon.png",
+  enterprise: "https://cvccrvyimyzrxcwzmxwk.supabase.co/storage/v1/object/public/blog-images/corporate-enterprise-icon.png"
+} as const;
+
 // Stripe product and price IDs for corporate plans
 const CORPORATE_PLANS = {
   dynamic: {
