@@ -315,10 +315,48 @@ export default function Auth() {
     }
   };
 
+  const handleResendVerification = async () => {
+    if (!signUpData.email || resending || resendCooldown > 0) return;
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: signUpData.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth${
+            hasRedirect ? `?redirect=${encodeURIComponent(safeRedirect)}` : ""
+          }`,
+        },
+      });
+      if (error) {
+        toast({
+          title: "Could not resend",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Verification email sent",
+          description: `We sent another link to ${signUpData.email}. Please also check your spam folder.`,
+        });
+        setResendCooldown(60);
+        const timer = setInterval(() => {
+          setResendCooldown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // (resend helper defined below)
     
     if (isOffline) {
       toast({
