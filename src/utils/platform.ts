@@ -25,18 +25,41 @@ export const isNativeApp = (): boolean => {
   }
 };
 
+/** Number of touch points reported by the device (0 on real desktops). */
+const touchPoints = (): number => {
+  if (typeof navigator === "undefined") return 0;
+  return Number((navigator as Navigator).maxTouchPoints || 0);
+};
+
+/** Chromium client hints: reliable `mobile` flag, unaffected by desktop-site mode. */
+const uaData = (): { mobile?: boolean; platform?: string } | null => {
+  if (typeof navigator === "undefined") return null;
+  const data = (navigator as unknown as { userAgentData?: { mobile?: boolean; platform?: string } })
+    .userAgentData;
+  return data ?? null;
+};
+
 /**
- * Returns true for any iOS device, including:
+ * Returns true for any Apple mobile device, including:
  * - Native iOS app (Capacitor)
- * - Safari / Chrome on iPhone or iPad
+ * - Safari / Chrome / Firefox / Edge on iPhone, iPad or iPod
+ * - iPad on iPadOS 13+ (reports a Mac user agent)
+ * - iPhone / iPad using "Request Desktop Site" (Mac user agent + touch points)
  *
- * Used for payment kill-switch detection so the iOS toggle also hides
- * purchase CTAs when Apple reviewers visit smartygym.com from an iPhone.
+ * A genuine Mac reports 0 touch points, so it is never matched.
  */
 export const isIOSDevice = (): boolean => {
+  try {
+    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === "ios") return true;
+  } catch {
+    /* ignore */
+  }
   if (typeof window === "undefined") return false;
   const ua = window.navigator.userAgent || "";
-  return /iPhone|iPad|iPod/i.test(ua);
+  if (/iPhone|iPad|iPod/i.test(ua)) return true;
+  // iPadOS 13+ and iOS desktop-site mode masquerade as macOS.
+  if (/Macintosh|Mac OS X/i.test(ua) && touchPoints() > 1) return true;
+  return false;
 };
 
 /**
@@ -54,8 +77,20 @@ export const isAndroidDevice = (): boolean => {
   }
   if (typeof window === "undefined") return false;
   const ua = window.navigator.userAgent || "";
-  return /Android/i.test(ua);
+  if (/Android/i.test(ua)) return true;
+  // Kindle / Fire tablets and other Linux-based mobile browsers.
+  if (/Silk/i.test(ua)) return true;
+  if (/Linux/i.test(ua) && /Mobile/i.test(ua)) return true;
+  // Chromium client hints stay truthful in "Request Desktop Site" mode.
+  const data = uaData();
+  if (data?.mobile === true && !/Mac|iPhone|iPad|iPod/i.test(data.platform || "")) return true;
+  // Desktop-site mode on Android drops "Android" from the UA but keeps touch.
+  if (data?.platform === "Android") return true;
+  return false;
 };
+
+/** True for any phone or tablet (iOS or Android), in any browser or mode. */
+export const isMobileOrTabletDevice = (): boolean => isIOSDevice() || isAndroidDevice();
 
 /**
  * Header sent with every checkout request so the edge function can enforce
