@@ -110,6 +110,8 @@ export default function Auth() {
   }, [navigate]);
 
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Sign Up State
   const [signUpData, setSignUpData] = useState({
@@ -314,6 +316,7 @@ export default function Auth() {
   };
 
   const handleLogin = async (e: React.FormEvent) => {
+    // placeholder-anchor
     e.preventDefault();
     
     if (isOffline) {
