@@ -28,14 +28,14 @@ const SISTER_APPS: SisterApp[] = [
     id: "move",
     name: "SmartyMove",
     tagline: "Check your posture. Correct your movement. Live better.",
-    url: "https://smarty-motion-pro.lovable.app",
+    url: "https://smartymove.com",
     image: logoMove,
   },
   {
     id: "diet",
     name: "SmartyDiet",
     tagline: "Eat smart. Fuel your body. Live longer.",
-    url: "https://smarty-meals-hub.lovable.app",
+    url: "https://smartydiet.com",
     image: logoDiet,
   },
 ];
