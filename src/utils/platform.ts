@@ -40,14 +40,32 @@ export const isIOSDevice = (): boolean => {
 };
 
 /**
+ * Returns true for any Android device, including:
+ * - Native Android app (Capacitor)
+ * - Chrome / Samsung Internet / any browser on an Android phone or tablet
+ *
+ * Used so the Android payment kill-switch also applies to Android mobile web.
+ */
+export const isAndroidDevice = (): boolean => {
+  try {
+    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === "android") return true;
+  } catch {
+    /* ignore */
+  }
+  if (typeof window === "undefined") return false;
+  const ua = window.navigator.userAgent || "";
+  return /Android/i.test(ua);
+};
+
+/**
  * Header sent with every checkout request so the edge function can enforce
  * the per-platform purchase kill switch server-side.
  */
 export const platformHeader = (): Record<string, string> => {
   try {
     if (isIOSDevice()) return { "x-smarty-platform": "ios" };
-    if (!Capacitor.isNativePlatform()) return { "x-smarty-platform": "web" };
-    return { "x-smarty-platform": Capacitor.getPlatform() };
+    if (isAndroidDevice()) return { "x-smarty-platform": "android" };
+    return { "x-smarty-platform": "web" };
   } catch {
     return { "x-smarty-platform": "web" };
   }
