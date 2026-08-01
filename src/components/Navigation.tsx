@@ -285,6 +285,7 @@ export const Navigation = () => {
     { label: "Exercise Library", path: "/exerciselibrary", icon: BookOpen, iconClass: "text-emerald-500", track: undefined },
     { label: "Community", path: "/community", icon: Users, iconClass: "text-cyan-500", track: undefined },
     { label: "Smarty Premium", path: "/smarty-premium", icon: Crown, iconClass: "text-yellow-500", track: undefined },
+    { label: "Smarty Corporate", path: "/corporate", icon: Building2, iconClass: "text-blue-500", track: undefined },
     { label: "FAQ", path: "/faq", icon: HelpCircle, iconClass: "text-purple-500", track: undefined },
     { label: "Contact", path: "/contact", icon: Mail, iconClass: "text-indigo-500", track: undefined, subtitle: "One click away, always." },
   ];
@@ -315,6 +316,7 @@ export const Navigation = () => {
       items: [
         { label: "About SmartyGym", path: "/about", icon: Info },
         { label: "Smarty Premium", path: "/smarty-premium", icon: Crown },
+        { label: "Smarty Corporate", path: "/corporate", icon: Building2 },
         { label: "FAQ", path: "/faq", icon: HelpCircle },
         { label: "Contact", path: "/contact", icon: Mail },
       ],
@@ -329,6 +331,7 @@ export const Navigation = () => {
       items: [
         { label: "Home", path: "/", icon: Home },
         { label: "Smarty Premium", path: "/smarty-premium", icon: Crown },
+        { label: "Smarty Corporate", path: "/corporate", icon: Building2 },
         { label: "FAQ", path: "/faq", icon: HelpCircle },
         { label: "Contact", path: "/contact", icon: Mail },
       ],
