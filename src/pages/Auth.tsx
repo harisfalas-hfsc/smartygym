@@ -110,6 +110,8 @@ export default function Auth() {
   }, [navigate]);
 
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Sign Up State
   const [signUpData, setSignUpData] = useState({
@@ -313,6 +315,46 @@ export default function Auth() {
     }
   };
 
+  const handleResendVerification = async () => {
+    if (!signUpData.email || resending || resendCooldown > 0) return;
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: signUpData.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth${
+            hasRedirect ? `?redirect=${encodeURIComponent(safeRedirect)}` : ""
+          }`,
+        },
+      });
+      if (error) {
+        toast({
+          title: "Could not resend",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Verification email sent",
+          description: `We sent another link to ${signUpData.email}. Please also check your spam folder.`,
+        });
+        setResendCooldown(60);
+        const timer = setInterval(() => {
+          setResendCooldown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -406,6 +448,18 @@ export default function Auth() {
                   Check your inbox (and spam folder) for the verification email and click the link inside.
                 </p>
               </div>
+              <Button
+                className="w-full"
+                onClick={handleResendVerification}
+                disabled={resending || resendCooldown > 0}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                {resendCooldown > 0
+                  ? `Resend in ${resendCooldown}s`
+                  : resending
+                    ? "Sending..."
+                    : "Resend verification email"}
+              </Button>
               <Button
                 variant="outline"
                 className="w-full mt-2"
