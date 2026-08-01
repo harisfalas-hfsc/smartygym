@@ -39,16 +39,16 @@ export const usePaymentsEnabled = () => {
 
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("system_settings")
         .select("setting_value")
         .eq("setting_key", key)
         .maybeSingle();
 
       if (cancelled) return;
-      // Fail safe: if the row is missing or unreadable, treat as ENABLED only on web.
+      // Fail CLOSED on mobile: a missing row or a failed read blocks purchasing.
       const value = data?.setting_value;
-      setEnabled(value === true || value === "true");
+      setEnabled(!error && (value === true || value === "true"));
       setLoading(false);
     })();
 
