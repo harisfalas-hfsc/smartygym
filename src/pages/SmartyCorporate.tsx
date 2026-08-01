@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Building2, Check, ChevronRight, Users, Crown, CreditCard, Shield, Headphones, Lightbulb } from "lucide-react";
+import { Building2, Check, ChevronRight, Users, Crown, CreditCard, Shield, Headphones, Lightbulb, Zap } from "lucide-react";
 import { openExternal } from "@/utils/native";
 import { platformHeader } from "@/utils/platform";
 import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
@@ -20,14 +20,6 @@ import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { STRIPE_PRICE_IDS } from "@/config/pricing";
-
-// Product icons (same images used on the Stripe products)
-const PLAN_ICONS = {
-  dynamic: "https://cvccrvyimyzrxcwzmxwk.supabase.co/storage/v1/object/public/blog-images/corporate-dynamic-icon.png",
-  power: "https://cvccrvyimyzrxcwzmxwk.supabase.co/storage/v1/object/public/blog-images/corporate-power-icon.png",
-  elite: "https://cvccrvyimyzrxcwzmxwk.supabase.co/storage/v1/object/public/blog-images/corporate-elite-icon.png",
-  enterprise: "https://cvccrvyimyzrxcwzmxwk.supabase.co/storage/v1/object/public/blog-images/corporate-enterprise-icon.png"
-} as const;
 
 // Stripe product and price IDs for corporate plans
 const CORPORATE_PLANS = {
@@ -297,7 +289,7 @@ export default function SmartyCorporate() {
             <Card className="relative border-2 border-primary transition-colors flex flex-col">
               <CardHeader className="text-center pb-2">
                 <div className="flex items-center justify-center gap-2 min-h-[56px]">
-                  <img src={PLAN_ICONS.dynamic} alt="Smarty Dynamic corporate plan icon" className="h-8 w-8 object-contain shrink-0" loading="lazy" />
+                  <Users className="h-5 w-5 text-primary shrink-0" />
                   <h2 className="text-lg font-bold whitespace-nowrap">Smarty Dynamic</h2>
                 </div>
                 <div className="min-h-[28px] flex items-center justify-center">
@@ -337,7 +329,7 @@ export default function SmartyCorporate() {
             <Card className="relative border-2 border-primary transition-colors flex flex-col">
               <CardHeader className="text-center pb-2">
                 <div className="flex items-center justify-center gap-2 min-h-[56px]">
-                  <img src={PLAN_ICONS.power} alt="Smarty Power corporate plan icon" className="h-8 w-8 object-contain shrink-0" loading="lazy" />
+                  <Zap className="h-5 w-5 text-primary shrink-0" />
                   <h2 className="text-lg font-bold whitespace-nowrap">Smarty Power</h2>
                 </div>
                 <div className="min-h-[28px] flex items-center justify-center">
@@ -377,7 +369,7 @@ export default function SmartyCorporate() {
             <Card className="relative border-2 border-primary transition-colors flex flex-col">
               <CardHeader className="text-center pb-2">
                 <div className="flex items-center justify-center gap-2 min-h-[56px]">
-                  <img src={PLAN_ICONS.elite} alt="Smarty Elite corporate plan icon" className="h-8 w-8 object-contain shrink-0" loading="lazy" />
+                  <Crown className="h-5 w-5 text-primary shrink-0" />
                   <h2 className="text-lg font-bold whitespace-nowrap">Smarty Elite</h2>
                 </div>
                 <div className="min-h-[28px] flex items-center justify-center">
@@ -417,7 +409,7 @@ export default function SmartyCorporate() {
             <Card className="relative border-2 border-primary shadow-lg flex flex-col bg-gradient-to-br from-primary/5 to-sky-500/5">
               <CardHeader className="text-center pb-2">
                 <div className="flex items-center justify-center gap-2 min-h-[56px]">
-                  <img src={PLAN_ICONS.enterprise} alt="Smarty Enterprise corporate plan icon" className="h-8 w-8 object-contain shrink-0" loading="lazy" />
+                  <Building2 className="h-5 w-5 text-primary shrink-0" />
                   <h2 className="text-lg font-bold text-primary whitespace-nowrap">Smarty Enterprise</h2>
                 </div>
                 <div className="min-h-[28px] flex items-center justify-center">
