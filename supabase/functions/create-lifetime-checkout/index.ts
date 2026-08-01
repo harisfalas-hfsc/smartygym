@@ -113,9 +113,6 @@ serve(async (req) => {
           purchase_type: "premium_monthly",
           user_id: user.id,
         },
-        payment_settings: {
-          save_default_payment_method: "on_subscription",
-        },
       },
       metadata: {
         project: "SMARTYGYM",
