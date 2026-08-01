@@ -26,21 +26,21 @@ const CORPORATE_PLANS = {
   dynamic: {
     name: "Smarty Dynamic",
     maxUsers: 10,
-    price: 399,
+    price: 699,
     priceId: STRIPE_PRICE_IDS.corporate_dynamic,
     productId: "prod_TZATAcAlqgc1P7"
   },
   power: {
     name: "Smarty Power",
     maxUsers: 20,
-    price: 499,
+    price: 799,
     priceId: STRIPE_PRICE_IDS.corporate_power,
     productId: "prod_TZATDsKcDvMtHc"
   },
   elite: {
     name: "Smarty Elite",
     maxUsers: 30,
-    price: 599,
+    price: 899,
     priceId: STRIPE_PRICE_IDS.corporate_elite,
     productId: "prod_TZATGTAsKalmCn"
   },
@@ -172,7 +172,7 @@ export default function SmartyCorporate() {
         <link rel="canonical" href="https://smartygym.com/corporate" />
       </Helmet>
 
-      <SEOEnhancer entities={["Corporate Fitness", "Team Membership", "Business Wellness"]} topics={["corporate fitness plans", "team training", "business wellness programs"]} expertise={["corporate wellness", "team fitness management"]} contentType="Corporate Plans" aiSummary="SmartyGym Corporate: Premium fitness access for teams and organizations. Plans from €399/year (10 users) to €699/year (unlimited). All members get Premium access with admin dashboard for team management." aiKeywords={["corporate fitness", "team membership", "business wellness", "group fitness"]} relatedContent={["Premium Benefits", "Workout Library", "Training Programs"]} targetAudience="businesses and organizations seeking team fitness solutions" pageType="Product" />
+      <SEOEnhancer entities={["Corporate Fitness", "Team Membership", "Business Wellness"]} topics={["corporate fitness plans", "team training", "business wellness programs"]} expertise={["corporate wellness", "team fitness management"]} contentType="Corporate Plans" aiSummary="SmartyGym Corporate: Premium fitness access for teams and organizations. Plans from €699/year (10 users) to €699/year (unlimited). All members get Premium access with admin dashboard for team management." aiKeywords={["corporate fitness", "team membership", "business wellness", "group fitness"]} relatedContent={["Premium Benefits", "Workout Library", "Training Programs"]} targetAudience="businesses and organizations seeking team fitness solutions" pageType="Product" />
 
       <div className="min-h-screen bg-background">
         <main className="container mx-auto max-w-6xl md:max-w-[1500px] px-4 md:px-6 pb-8">
@@ -297,7 +297,7 @@ export default function SmartyCorporate() {
                     Up to 10 Users
                   </Badge>
                 </div>
-                <CardTitle className="text-3xl font-bold mt-3">€399</CardTitle>
+                <CardTitle className="text-3xl font-bold mt-3">€699</CardTitle>
                 <p className="text-sm text-muted-foreground">per year</p>
               </CardHeader>
               <CardContent className="space-y-4 flex-1 flex flex-col">
@@ -337,7 +337,7 @@ export default function SmartyCorporate() {
                     Up to 20 Users
                   </Badge>
                 </div>
-                <CardTitle className="text-3xl font-bold mt-3">€499</CardTitle>
+                <CardTitle className="text-3xl font-bold mt-3">€799</CardTitle>
                 <p className="text-sm text-muted-foreground">per year</p>
               </CardHeader>
               <CardContent className="space-y-4 flex-1 flex flex-col">
@@ -377,7 +377,7 @@ export default function SmartyCorporate() {
                     Up to 30 Users
                   </Badge>
                 </div>
-                <CardTitle className="text-3xl font-bold mt-3">€599</CardTitle>
+                <CardTitle className="text-3xl font-bold mt-3">€899</CardTitle>
                 <p className="text-sm text-muted-foreground">per year</p>
               </CardHeader>
               <CardContent className="space-y-4 flex-1 flex flex-col">

@@ -49,10 +49,10 @@ export function CorporateAnalytics() {
   const chartRef = useRef<HTMLDivElement>(null);
 
   const PLAN_PRICES: { [key: string]: number } = {
-    dynamic: 399,
-    power: 499,
-    elite: 599,
-    enterprise: 699
+    dynamic: 699,
+    power: 799,
+    elite: 899,
+    enterprise: 999
   };
 
   const PLAN_MAX_USERS: { [key: string]: number } = {

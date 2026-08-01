@@ -15,10 +15,10 @@ const logStep = (step: string, details?: any) => {
 
 // Corporate plan configurations
 const CORPORATE_PLANS = {
-  dynamic: { maxUsers: 10, priceId: "price_1Sc28CIxQYg9inGKfoqZgtXZ" },
-  power: { maxUsers: 20, priceId: "price_1Sc28EIxQYg9inGKCDUA4ii8" },
-  elite: { maxUsers: 30, priceId: "price_1Sc28GIxQYg9inGKS8NkWB11" },
-  enterprise: { maxUsers: 9999, priceId: "price_1Sc28HIxQYg9inGK3YzEE4YR" },
+  dynamic: { maxUsers: 10, priceId: "price_1TzXU6IxQYg9inGKSvUkoVxG" },
+  power: { maxUsers: 20, priceId: "price_1TzXUfIxQYg9inGKr4DRiEg7" },
+  elite: { maxUsers: 30, priceId: "price_1TzXVDIxQYg9inGKGBr5prVs" },
+  enterprise: { maxUsers: 9999, priceId: "price_1TzXVUIxQYg9inGKOvbKdfr4" },
 };
 
 serve(async (req) => {
