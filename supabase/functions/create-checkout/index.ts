@@ -138,12 +138,6 @@ serve(async (req) => {
           project: "SMARTYGYM",
           user_id: user.id,
         },
-        // Guarantees the card used at checkout becomes the subscription's
-        // default payment method. Without this, renewal invoices can stall
-        // in draft/open because Stripe has no card to charge.
-        payment_settings: {
-          save_default_payment_method: "on_subscription",
-        },
       },
     });
 
