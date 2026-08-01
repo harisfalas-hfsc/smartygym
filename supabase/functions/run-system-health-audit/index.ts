@@ -5,6 +5,7 @@ import Stripe from "https://esm.sh/stripe@14.21.0";
 import { MESSAGE_TYPES, MESSAGE_TYPE_SOURCES } from "../_shared/notification-types.ts";
 import { CYCLE_START_DATE, PERIODIZATION_84DAY, getDayIn84Cycle, getPeriodizationForDay } from "../_shared/periodization-84day.ts";
 import { getAdminNotificationEmail } from "../_shared/admin-settings.ts";
+import { requireAdminOrServiceRole } from "../_shared/admin-or-service-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -399,6 +400,9 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const authError = await requireAdminOrServiceRole(req, corsHeaders);
+  if (authError) return authError;
 
   const startTime = Date.now();
   const checks: HealthCheck[] = [];

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { stripExerciseMarkup, type ExerciseBasic } from "../_shared/exercise-matching.ts";
+import { requireAdminOrServiceRole } from "../_shared/admin-or-service-auth.ts";
 
 /**
  * Deep clean content: strip markup, remove $2 artifacts, clean leftover fragments
@@ -218,6 +219,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const authError = await requireAdminOrServiceRole(req, corsHeaders);
+  if (authError) return authError;
 
   try {
     const { type, ids, dryRun = false } = await req.json();
