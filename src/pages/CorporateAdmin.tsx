@@ -67,12 +67,10 @@ export default function CorporateAdmin() {
   const [members, setMembers] = useState<CorporateMember[]>([]);
   const [addingMember, setAddingMember] = useState(false);
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   
   // Form state
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [newMemberName, setNewMemberName] = useState("");
-  const [newMemberPassword, setNewMemberPassword] = useState("");
 
   useEffect(() => {
     // Check for success parameter
