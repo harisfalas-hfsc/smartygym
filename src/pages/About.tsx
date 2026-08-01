@@ -134,7 +134,7 @@ const About = () => {
           <div className="md:hidden">
           {/* Hero Section (desktop only) */}
           <ScrollReveal>
-            <div className="mb-12 text-center hidden md:block">
+            <div className="mb-8 text-center">
               <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight uppercase mb-4 text-foreground leading-tight">
                 About <span className="text-primary">SmartyGym</span>
               </h1>
