@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { STRIPE_PRICE_IDS } from "@/config/pricing";
 
 // Stripe product and price IDs for corporate plans
