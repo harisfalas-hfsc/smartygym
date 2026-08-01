@@ -449,6 +449,18 @@ export default function Auth() {
                 </p>
               </div>
               <Button
+                className="w-full"
+                onClick={handleResendVerification}
+                disabled={resending || resendCooldown > 0}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                {resendCooldown > 0
+                  ? `Resend in ${resendCooldown}s`
+                  : resending
+                    ? "Sending..."
+                    : "Resend verification email"}
+              </Button>
+              <Button
                 variant="outline"
                 className="w-full mt-2"
                 onClick={() => setShowVerificationMessage(false)}
