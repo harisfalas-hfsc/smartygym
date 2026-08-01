@@ -6,7 +6,7 @@ const KEYS: Record<string, string> = {
 };
 
 export const PAYMENTS_DISABLED_MESSAGE =
-  "Purchases are managed on our website. Visit smartygym.com to upgrade.";
+  "In-app purchases are not available. Memberships, workouts and training programs are purchased on our website. Visit smartygym.com from any computer to subscribe or buy, then sign in here with the same account and your access appears automatically.";
 
 /**
  * Server-side enforcement of the per-platform purchase kill switch.
@@ -27,13 +27,15 @@ export async function blockIfPlatformPaymentsDisabled(
     { auth: { persistSession: false } }
   );
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("system_settings")
     .select("setting_value")
     .eq("setting_key", key)
     .maybeSingle();
 
-  const enabled = data?.setting_value === true || data?.setting_value === "true";
+  // Fail closed: on read error or missing row, mobile purchasing stays blocked.
+  const enabled =
+    !error && (data?.setting_value === true || data?.setting_value === "true");
   if (enabled) return null;
 
   return new Response(

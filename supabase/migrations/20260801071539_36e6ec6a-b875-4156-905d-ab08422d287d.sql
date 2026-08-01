@@ -1,0 +1,1 @@
+UPDATE public.system_settings SET setting_value = 'true'::jsonb WHERE setting_key IN ('payments_enabled_ios','payments_enabled_android');
