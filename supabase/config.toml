@@ -291,3 +291,6 @@ verify_jwt = true
 
 [functions.restructure-training-programs]
 verify_jwt = true
+
+[functions.process-email-queue]
+verify_jwt = true
