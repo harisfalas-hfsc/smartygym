@@ -51,6 +51,10 @@ const About = () => {
         <meta property="og:description" content="Discover how SmartyGym makes quality fitness accessible to everyone with science-based workouts and expert coaching." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://smartygym.com/about" />
+        <meta property="og:image" content="https://smartygym.com/smartygym-social-share.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:image" content="https://smartygym.com/smartygym-social-share.png" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
