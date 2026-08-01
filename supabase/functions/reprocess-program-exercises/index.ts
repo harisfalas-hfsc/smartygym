@@ -15,6 +15,7 @@ import {
   type ExerciseBasic,
 } from "../_shared/exercise-matching.ts";
 import { normalizeWorkoutHtml } from "../_shared/html-normalizer.ts";
+import { requireAdminOrServiceRole } from "../_shared/admin-or-service-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,6 +26,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const authError = await requireAdminOrServiceRole(req, corsHeaders);
+  if (authError) return authError;
 
   const LOG_PREFIX = "[REPROCESS-PROGRAM]";
   console.log(`${LOG_PREFIX} 🔄 Starting training program exercise reprocessing (force-match)...`);
