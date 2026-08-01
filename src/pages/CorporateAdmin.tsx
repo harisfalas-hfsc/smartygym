@@ -25,9 +25,6 @@ import {
   Trash2,
   Calendar,
   RefreshCw,
-  Copy,
-  Eye,
-  EyeOff,
   UserCheck,
   UserPlus,
 } from "lucide-react";

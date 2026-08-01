@@ -69,7 +69,7 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const { email, fullName, password } = await req.json();
+    const { email, fullName } = await req.json();
     
     if (!email || !email.includes('@')) {
       throw new Error("Valid email is required");
@@ -79,8 +79,13 @@ serve(async (req) => {
       throw new Error("Full name is required");
     }
 
-    // Generate random password if not provided
-    const memberPassword = password || Math.random().toString(36).slice(-12) + 'Aa1!';
+    // Never accept or email a plaintext password. Create the account with a
+    // strong throwaway secret and send a one-time password-setup link instead.
+    const randomBytes = new Uint8Array(32);
+    crypto.getRandomValues(randomBytes);
+    const memberPassword = Array.from(randomBytes)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("") + "Aa1!";
 
     logStep("Creating member account", { email, fullName });
 
@@ -200,6 +205,19 @@ serve(async (req) => {
         const resend = new Resend(resendKey);
         
         const memberEmail = email.trim().toLowerCase();
+
+        // Generate a one-time password-setup (recovery) link
+        let setupLink = "https://smartygym.com/reset-password";
+        const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+          type: "recovery",
+          email: memberEmail,
+          options: { redirectTo: "https://smartygym.com/reset-password" },
+        });
+        if (linkError) {
+          logStep("ERROR generating setup link", { error: linkError.message });
+        } else if (linkData?.properties?.action_link) {
+          setupLink = linkData.properties.action_link;
+        }
         await resend.emails.send({
           from: "SmartyGym <notifications@smartygym.com>",
           to: [memberEmail],
@@ -228,13 +246,12 @@ serve(async (req) => {
                   <li>Community features</li>
                 </ul>
                 <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 20px 0;">
-                  <strong>Your Login Credentials:</strong><br>
-                  Email: ${memberEmail}<br>
-                  Password: ${memberPassword}
+                  <strong>Your account email:</strong><br>
+                  ${memberEmail}
                 </div>
-                <p style="color: #666; font-size: 14px;">We recommend changing your password after your first login.</p>
+                <p style="color: #666; font-size: 14px;">For your security we never send passwords by email. Use the secure link below to set your own password. It can only be used once and expires shortly.</p>
                 <div style="text-align: center; margin: 30px 0;">
-                  <a href="https://smartygym.com/auth" style="display: inline-block; background: #29B6D2; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold;">Login to SmartyGym →</a>
+                  <a href="${setupLink}" style="display: inline-block; background: #29B6D2; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold;">Set Your Password →</a>
                 </div>
                 <p>Let's make every workout count!</p>
                 <p><em>The SmartyGym Team</em></p>
