@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { STRIPE_PRICE_IDS } from "@/config/pricing";
 
 // Stripe product and price IDs for corporate plans
@@ -182,8 +183,27 @@ export default function SmartyCorporate() {
           label: "Smarty Corporate"
         }]} />
 
-          {/* Header */}
-          <div className="text-center mb-8">
+          {/* Desktop intro (icon + headline + description, no card) */}
+          <DesktopPageIntro icon={Building2} title="Smarty Corporate">
+            <p className="font-bold text-foreground">
+              <span className="text-primary font-semibold">Smarty Corporate</span> is designed for teams, businesses, and organizations that want to provide premium fitness access to their members.
+              With one master account, an administrator can create and manage multiple user accounts, each receiving full Premium-level access
+              to all <span className="text-primary font-semibold">SmartyGym</span> features including workouts, training programs, daily rituals, and fitness tools.
+            </p>
+            <p className="font-semibold text-foreground">
+              All team members enjoy the same benefits as individual Premium subscribers for the duration of the subscription.
+              The administrator has access to a dedicated dashboard to manage team members, monitor usage, and control access.
+            </p>
+            <div className="pt-1">
+              <Link to="/corporate-wellness" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+                Why Invest in Corporate Wellness
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </DesktopPageIntro>
+
+          {/* Header (mobile) */}
+          <div className="lg:hidden text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-2">
               <Building2 className="h-8 w-8 text-primary" />
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight uppercase">Smarty Corporate</h1>
@@ -193,8 +213,8 @@ export default function SmartyCorporate() {
             </p>
           </div>
 
-          {/* About Card */}
-          <Card className="mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+          {/* About Card (mobile) */}
+          <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
             <CardHeader className="text-center">
               <CardTitle className="flex items-center justify-center gap-2">
                 <Building2 className="h-5 w-5 text-primary" />
