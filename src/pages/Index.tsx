@@ -413,8 +413,8 @@ const Index = () => {
   // Premium Monthly checkout lives on /smarty-premium.
   return <>
       <Helmet>
-        <title>SmartyGym, Online Gym — Expert Workouts and Training Programs by Haris Falas</title>
-        <meta name="description" content="SmartyGym, online gym: expert workouts, training programs, blog insights and smart tools by Sports Scientist Haris Falas. HIIT, TABATA, strength, cardio. Train anywhere." />
+        <title>SmartyGym — Expert Workouts by Haris Falas</title>
+        <meta name="description" content="Online gym with expert workouts, training programs and smart tools by Sports Scientist Haris Falas. HIIT, Tabata, strength, cardio. Train anywhere." />
         <meta name="keywords" content="smartygym, smarty gym, online gym, online fitness, personal trainer, HFSC, HFSC Performance, Haris Falas, Sports Scientist, AMRAP workouts, TABATA training, HIIT workouts, strength training, cardio workouts, functional training, home workouts, bodyweight workouts, online training programs, workout programs online, fitness calculators, smartygym.com" />
 
         <meta name="semantic-keywords" content="online-fitness, home-workouts, virtual-training, digital-gym, remote-coaching, bodyweight-training, functional-fitness, strength-conditioning" />
