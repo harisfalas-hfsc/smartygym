@@ -254,36 +254,12 @@ const STATIC_ROUTES: Array<
 
   // Subscription / plan pages
   {
-    path: "/joinpremium",
-    title: "Join SmartyGym Premium | Full Access Membership",
+    path: "/smarty-premium",
+    title: "SmartyGym Premium | Full Access Membership",
     description:
       "Join SmartyGym Premium for full access to 500+ workouts, multi-week programs, the daily WOD and every Smarty tool.",
     changefreq: "weekly",
     priority: "0.9",
-  },
-  {
-    path: "/join-premium",
-    title: "Join Premium | SmartyGym Membership",
-    description:
-      "Become a SmartyGym Premium member and unlock the full library of workouts, training programs and tools by Haris Falas.",
-    changefreq: "weekly",
-    priority: "0.9",
-  },
-  {
-    path: "/smarty-plans",
-    title: "SmartyGym Plans and Pricing | Free, Premium, Corporate",
-    description:
-      "Compare SmartyGym plans: free, Premium and Corporate. Human-designed workouts and programs at every level.",
-    changefreq: "weekly",
-    priority: "0.9",
-  },
-  {
-    path: "/premiumbenefits",
-    title: "Premium Benefits | What You Unlock with SmartyGym Premium",
-    description:
-      "Everything you unlock with SmartyGym Premium: full workout library, multi-week programs, daily WOD and unlimited tool access.",
-    changefreq: "monthly",
-    priority: "0.7",
   },
 
   // Corporate
