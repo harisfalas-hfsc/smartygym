@@ -196,7 +196,7 @@ const Blog = () => {
 
           <Card className="lg:hidden mb-6 md:mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
             <CardContent className="p-4 sm:p-5">
-              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Smarty Blog</h2>
+              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">Smarty Blog</h1>
               <div className="space-y-2 text-muted-foreground max-w-3xl mx-auto">
                 <p className="text-sm sm:text-base text-center font-bold">
                   Evidence-based articles by <a href="/coach-profile" className="text-primary hover:underline font-semibold">Haris Falas</a> on Fitness, Nutrition, and Wellness to empower your journey.
