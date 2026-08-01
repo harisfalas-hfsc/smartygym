@@ -47,7 +47,7 @@ const CORPORATE_PLANS = {
   enterprise: {
     name: "Smarty Enterprise",
     maxUsers: 9999,
-    price: 699,
+    price: 999,
     priceId: STRIPE_PRICE_IDS.corporate_enterprise,
     productId: "prod_TZATUtaS2jhgtK"
   }
@@ -172,7 +172,7 @@ export default function SmartyCorporate() {
         <link rel="canonical" href="https://smartygym.com/corporate" />
       </Helmet>
 
-      <SEOEnhancer entities={["Corporate Fitness", "Team Membership", "Business Wellness"]} topics={["corporate fitness plans", "team training", "business wellness programs"]} expertise={["corporate wellness", "team fitness management"]} contentType="Corporate Plans" aiSummary="SmartyGym Corporate: Premium fitness access for teams and organizations. Plans from €699/year (10 users) to €699/year (unlimited). All members get Premium access with admin dashboard for team management." aiKeywords={["corporate fitness", "team membership", "business wellness", "group fitness"]} relatedContent={["Premium Benefits", "Workout Library", "Training Programs"]} targetAudience="businesses and organizations seeking team fitness solutions" pageType="Product" />
+      <SEOEnhancer entities={["Corporate Fitness", "Team Membership", "Business Wellness"]} topics={["corporate fitness plans", "team training", "business wellness programs"]} expertise={["corporate wellness", "team fitness management"]} contentType="Corporate Plans" aiSummary="SmartyGym Corporate: Premium fitness access for teams and organizations. Plans from €699/year (10 users) to €999/year (unlimited). All members get Premium access with admin dashboard for team management." aiKeywords={["corporate fitness", "team membership", "business wellness", "group fitness"]} relatedContent={["Premium Benefits", "Workout Library", "Training Programs"]} targetAudience="businesses and organizations seeking team fitness solutions" pageType="Product" />
 
       <div className="min-h-screen bg-background">
         <main className="container mx-auto max-w-6xl md:max-w-[1500px] px-4 md:px-6 pb-8">
@@ -420,7 +420,7 @@ export default function SmartyCorporate() {
                     Unlimited Users
                   </Badge>
                 </div>
-                <CardTitle className="text-3xl font-bold mt-3">€699</CardTitle>
+                <CardTitle className="text-3xl font-bold mt-3">€999</CardTitle>
                 <p className="text-sm text-muted-foreground">per year</p>
               </CardHeader>
               <CardContent className="space-y-4 flex-1 flex flex-col">

@@ -194,7 +194,7 @@ export const CorporateBrochure = () => {
             <div className="bg-white text-gray-900 text-xs px-2 py-1 rounded mb-2 inline-block">ENTERPRISE</div>
             <h4 className="font-bold text-lg mb-1">Smarty Enterprise</h4>
             <p className="text-sm text-gray-400 mb-3">Unlimited team members</p>
-            <p className="text-3xl font-bold mb-4">€699<span className="text-sm text-gray-400">/year</span></p>
+            <p className="text-3xl font-bold mb-4">€999<span className="text-sm text-gray-400">/year</span></p>
             <ul className="text-sm space-y-2">
               <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-[#29B6D2]" /> Unlimited accounts</li>
               <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-[#29B6D2]" /> Admin dashboard</li>

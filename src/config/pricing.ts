@@ -40,10 +40,10 @@ export const LEGACY_STRIPE_PRICE_IDS = {
 } as const;
 
 export const CORPORATE_PRICES = {
-  dynamic: 399,      // €399/year
-  power: 499,        // €499/year
-  elite: 599,        // €599/year
-  enterprise: 699,   // €699/year
+  dynamic: 699,      // €699/year
+  power: 799,        // €799/year
+  elite: 899,        // €899/year
+  enterprise: 999,   // €999/year
 } as const;
 
 // Stripe Product IDs for SmartyGym products only
