@@ -250,26 +250,10 @@ export default function CorporateAdmin() {
     }
   };
 
-  const generateRandomPassword = () => {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
-    let password = '';
-    for (let i = 0; i < 12; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setNewMemberPassword(password);
-  };
-
-  const copyPassword = () => {
-    navigator.clipboard.writeText(newMemberPassword);
-    toast({ title: "Password Copied", description: "Password copied to clipboard." });
-  };
-
   const resetForm = () => {
     setNewMemberEmail("");
     setNewMemberName("");
-    setNewMemberPassword("");
     setActiveSlotIndex(null);
-    setShowPassword(false);
   };
 
   const getPlanDisplayName = (planType: string) => {
