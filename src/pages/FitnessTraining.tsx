@@ -75,25 +75,29 @@ const FitnessTraining = () => {
   return (
     <>
       <Helmet>
-        <title>Human-Designed Fitness Training Platform | SmartyGym</title>
+        <title>Human-Designed Fitness Training | SmartyGym</title>
         <meta
           name="description"
-          content="SmartyGym is a complete human-designed fitness training platform — workouts, training programs, exercise library, tools, rituals, check-ins and community, all coach-crafted by Sports Scientist Haris Falas."
+          content="A complete human-designed fitness platform: workouts, programs, exercise library and tools, coach-crafted by Sports Scientist Haris Falas."
         />
         <meta
           name="keywords"
           content="fitness training, workouts, training programs, exercise library, workout tools, strength training, hypertrophy, conditioning, mobility, warm-ups, cooldowns, home workouts, gym workouts, dumbbell workouts, bodyweight workouts, push pull legs, upper lower split, full body training, progressive overload, workout templates, training splits, beginner programs, intermediate programs, advanced programs, human-designed, coach-crafted, SmartyGym"
         />
         <link rel="canonical" href={URL} />
-        <meta property="og:title" content="Human-Designed Fitness Training Platform | SmartyGym" />
+        <meta property="og:title" content="Human-Designed Fitness Training | SmartyGym" />
         <meta
           property="og:description"
           content="A complete gym in your pocket — human-designed workouts, programs, exercise library, tools and rituals by real coaches."
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={URL} />
+        <meta property="og:image" content="https://smartygym.com/smartygym-social-share.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:image" content="https://smartygym.com/smartygym-social-share.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Human-Designed Fitness Training Platform | SmartyGym" />
+        <meta name="twitter:title" content="Human-Designed Fitness Training | SmartyGym" />
         <meta
           name="twitter:description"
           content="A complete gym in your pocket — human-designed workouts, programs, exercise library, tools and rituals by real coaches."

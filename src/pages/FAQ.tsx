@@ -20,7 +20,7 @@ const FAQ = () => {
     <>
       <Helmet>
         <title>FAQ | SmartyGym Online Fitness</title>
-        <meta name="description" content="Get answers to common questions about SmartyGym - online workouts, training programs, pricing, equipment needs, and how to get started with your fitness journey." />
+        <meta name="description" content="Answers to common SmartyGym questions: online workouts, training programs, pricing, equipment needs and how to get started." />
         <meta name="keywords" content="smartygym faq, online fitness questions, home workout help, training program questions, fitness coaching faq, online gym help" />
         
         {/* Open Graph */}
@@ -28,6 +28,10 @@ const FAQ = () => {
         <meta property="og:description" content="Everything you need to know about SmartyGym - workouts, programs, pricing, and getting started." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://smartygym.com/faq" />
+        <meta property="og:image" content="https://smartygym.com/smartygym-social-share.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:image" content="https://smartygym.com/smartygym-social-share.png" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary" />

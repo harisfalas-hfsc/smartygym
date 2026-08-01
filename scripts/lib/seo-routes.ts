@@ -112,44 +112,12 @@ const STATIC_ROUTES: Array<
     priority: "1.0",
   },
   {
-    path: "/home",
-    title: "SmartyGym Home | Online Fitness Platform",
-    description:
-      "Your SmartyGym home: daily workout, training programs, exercise library, and tools designed by Sports Scientist Haris Falas.",
-    changefreq: "daily",
-    priority: "0.9",
-  },
-  {
-    path: "/start",
-    title: "Get Started with SmartyGym",
-    description:
-      "Start your SmartyGym journey: pick a plan, choose your training focus, and get human-designed workouts by Haris Falas.",
-    changefreq: "monthly",
-    priority: "0.7",
-  },
-  {
     path: "/about",
     title: "About SmartyGym | Built by Sports Scientist Haris Falas",
     description:
       "Why SmartyGym exists: 100% human-designed training by Haris Falas (BSc Sports Science, CSCS) for busy adults who refuse generic AI workouts.",
     changefreq: "monthly",
     priority: "0.7",
-  },
-  {
-    path: "/about-smartygym",
-    title: "About SmartyGym | Mission, Method and Coach",
-    description:
-      "Discover SmartyGym: a human-coached online fitness platform built around evidence-based training and healthy aging.",
-    changefreq: "monthly",
-    priority: "0.7",
-  },
-  {
-    path: "/take-a-tour",
-    title: "Take a Tour of SmartyGym | Workouts, Programs and Tools",
-    description:
-      "A guided tour of SmartyGym: daily workout, multi-week programs, exercise library and tools — all human-designed by Haris Falas.",
-    changefreq: "monthly",
-    priority: "0.6",
   },
   {
     path: "/contact",
@@ -286,36 +254,12 @@ const STATIC_ROUTES: Array<
 
   // Subscription / plan pages
   {
-    path: "/joinpremium",
-    title: "Join SmartyGym Premium | Full Access Membership",
+    path: "/smarty-premium",
+    title: "SmartyGym Premium | Full Access Membership",
     description:
       "Join SmartyGym Premium for full access to 500+ workouts, multi-week programs, the daily WOD and every Smarty tool.",
     changefreq: "weekly",
     priority: "0.9",
-  },
-  {
-    path: "/join-premium",
-    title: "Join Premium | SmartyGym Membership",
-    description:
-      "Become a SmartyGym Premium member and unlock the full library of workouts, training programs and tools by Haris Falas.",
-    changefreq: "weekly",
-    priority: "0.9",
-  },
-  {
-    path: "/smarty-plans",
-    title: "SmartyGym Plans and Pricing | Free, Premium, Corporate",
-    description:
-      "Compare SmartyGym plans: free, Premium and Corporate. Human-designed workouts and programs at every level.",
-    changefreq: "weekly",
-    priority: "0.9",
-  },
-  {
-    path: "/premiumbenefits",
-    title: "Premium Benefits | What You Unlock with SmartyGym Premium",
-    description:
-      "Everything you unlock with SmartyGym Premium: full workout library, multi-week programs, daily WOD and unlimited tool access.",
-    changefreq: "monthly",
-    priority: "0.7",
   },
 
   // Corporate

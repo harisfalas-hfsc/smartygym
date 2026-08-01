@@ -413,8 +413,8 @@ const Index = () => {
   // Premium Monthly checkout lives on /smarty-premium.
   return <>
       <Helmet>
-        <title>SmartyGym, Online Gym — Expert Workouts and Training Programs by Haris Falas</title>
-        <meta name="description" content="SmartyGym, online gym: expert workouts, training programs, blog insights and smart tools by Sports Scientist Haris Falas. HIIT, TABATA, strength, cardio. Train anywhere." />
+        <title>SmartyGym — Expert Workouts by Haris Falas</title>
+        <meta name="description" content="Online gym with expert workouts, training programs and smart tools by Sports Scientist Haris Falas. HIIT, Tabata, strength, cardio. Train anywhere." />
         <meta name="keywords" content="smartygym, smarty gym, online gym, online fitness, personal trainer, HFSC, HFSC Performance, Haris Falas, Sports Scientist, AMRAP workouts, TABATA training, HIIT workouts, strength training, cardio workouts, functional training, home workouts, bodyweight workouts, online training programs, workout programs online, fitness calculators, smartygym.com" />
 
         <meta name="semantic-keywords" content="online-fitness, home-workouts, virtual-training, digital-gym, remote-coaching, bodyweight-training, functional-fitness, strength-conditioning" />
@@ -643,7 +643,7 @@ const Index = () => {
                     <CarouselItem key={card.id} className="pl-3 basis-[75%] sm:basis-[60%]">
                       <div onClick={() => navigate(card.route)} className="border-2 border-green-500/60 rounded-xl overflow-hidden hover:border-green-500 hover:scale-[1.02] hover:shadow-xl transition-all duration-300 cursor-pointer bg-card flex flex-col">
                         <div className="relative aspect-[16/8] w-full overflow-hidden flex-shrink-0">
-                          <img src={card.image} alt={card.title} loading={index === 0 ? "eager" : "lazy"} decoding="async" className="absolute inset-0 w-full h-full object-cover object-[center_top]" />
+                          <img src={card.image} alt={card.title} width={1280} height={640} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} decoding="async" className="absolute inset-0 w-full h-full object-cover object-[center_top]" />
                         </div>
                         <div className="flex flex-col justify-center flex-1 p-2 text-center">
                           <div className="flex items-center justify-center gap-1.5 mb-0.5">
