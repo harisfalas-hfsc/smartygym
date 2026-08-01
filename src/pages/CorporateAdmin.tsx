@@ -176,7 +176,6 @@ export default function CorporateAdmin() {
         body: {
           email: newMemberEmail,
           fullName: newMemberName,
-          password: newMemberPassword || undefined,
         },
       });
 
@@ -188,7 +187,7 @@ export default function CorporateAdmin() {
 
       toast({
         title: "Member Added Successfully!",
-        description: `${newMemberName} has been added to your team and will receive login credentials via email.`,
+        description: `${newMemberName} has been added to your team and will receive a secure email to set their own password.`,
       });
 
       // Refresh data
@@ -529,52 +528,6 @@ export default function CorporateAdmin() {
                             onChange={(e) => setNewMemberEmail(e.target.value)}
                             className="h-8 text-sm"
                           />
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <Label htmlFor={`password-${index}`} className="text-xs">Password</Label>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={generateRandomPassword}
-                              className="h-5 text-xs px-2"
-                            >
-                              Generate
-                            </Button>
-                          </div>
-                          <div className="relative">
-                            <Input
-                              id={`password-${index}`}
-                              type={showPassword ? "text" : "password"}
-                              placeholder="Auto-generated if empty"
-                              value={newMemberPassword}
-                              onChange={(e) => setNewMemberPassword(e.target.value)}
-                              className="h-8 text-sm pr-16"
-                            />
-                            <div className="absolute right-1 top-1/2 -translate-y-1/2 flex gap-0.5">
-                              {newMemberPassword && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6"
-                                  onClick={copyPassword}
-                                >
-                                  <Copy className="h-3 w-3" />
-                                </Button>
-                              )}
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => setShowPassword(!showPassword)}
-                              >
-                                {showPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                              </Button>
-                            </div>
-                          </div>
                         </div>
                         <div className="flex gap-2 pt-1">
                           <Button
