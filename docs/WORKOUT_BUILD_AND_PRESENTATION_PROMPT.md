@@ -1,18 +1,26 @@
-# Copy-Paste Lovable Prompt — Workout Creation Rules + Workout Page, Reader Mode & Player
+# ONE COMPLETE COPY-PASTE DOCUMENT — WORKOUT CREATION, PUBLISHED PAGE, EXERCISE VIEW, TOOLS, READER MODE & PLAYER
 
-Paste everything below the line into the new project (SmartyWorkout / SmartyWOD).
-It contains TWO parts:
-- **Part A** — how a workout is created (rules per category, structure, prescriptions, quality gate).
-- **Part B** — how a workout is presented (page layout, icons, eye button, tools bar, reader mode, player).
+Copy this entire document into Lovable in one message. This is the only workout document required.
+It defines both the workout-generation engine and every part of the finished workout experience:
 
-There is **no periodization / no daily cycle** in this project: the user asks for a category and
-gets that category, every time, as many times as they want.
+1. Library-only exercise selection and category-specific coaching rules.
+2. Workout structure, prescriptions, validation and generated fields.
+3. The complete published workout page and its visual hierarchy.
+4. The eye button and exercise-detail dialog with GIF, description and instructions.
+5. The workout tools, Reader Mode and full workout Player.
+6. Player parsing, carousel, timer, Tabata, manual exercises and section transitions.
+7. Completion, rating, notes, favourites, sharing, scheduling and calendar export.
+
+There is **no periodization, daily cycle or category rotation**. If a user asks for Strength repeatedly,
+create Strength repeatedly. The requested category, equipment, difficulty, duration and format control each workout.
 
 ---
 
 # PROMPT START
 
-Build the workout engine and the workout page exactly to this specification.
+Build the workout engine and the complete published workout experience exactly to this specification.
+Do not implement only the generator. Do not stop after rendering workout text. The published page, exercise
+eye buttons, detail dialog, tools, Reader Mode and Player are all mandatory parts of the same deliverable.
 
 ## PART A — HOW A WORKOUT IS CREATED
 
@@ -218,6 +226,11 @@ with the exact warnings; never save a broken workout silently.
 
 Build a `WorkoutDisplay` component rendered inside an access gate. Vertical order on the page:
 
+The workout record must supply at least: `id`, `serial`, `name`, `description`, `category`, `focus`,
+`difficulty`, `format`, `duration`, `equipment`, `image_url`, `activation`, `warm_up`, `main_workout`,
+`finisher`, `cool_down`, `instructions`, `tips`, `created_by`, `created_at`, and access status. Store the
+structured sections separately but join them for display with exactly one empty paragraph between sections.
+
 ### B1. Header block
 1. `<h1>` workout name (`text-4xl font-bold`).
 2. **🔍 Description card** — bordered card `border-2 border-primary/30`, header strip `bg-primary/5`,
@@ -272,6 +285,16 @@ The workout HTML is rendered through an exercise-aware HTML renderer:
   equipment, difficulty, description and the numbered step-by-step instructions.
 - If a token has no valid ID, the plain name is rendered with no eye.
 
+**Exercise Detail modal behavior**
+- Query the exercise by token ID, never by a fuzzy client-side name search.
+- Show the looping GIF first. If it is missing, show the start and end frames; if all media is missing,
+  show a stable "Demo not available" state without breaking the layout.
+- Below the media show primary target, secondary muscles, equipment and difficulty.
+- Show the complete library description, followed by an ordered list built from the library `instructions[]`.
+- The dialog is scrollable on a phone, has an accessible title and close button, and returns the user to the
+  same scroll position in the workout when closed.
+- The eye button must remain inline beside the exercise name and must not alter the prescription text.
+
 ### B6. Reader Mode
 Dialog, `max-w-4xl w-[95vw] h-[90vh]`, opened from the Reader button on the content card.
 - Control bar: label "Reader Mode", font-size `−` / `size px` / `+` (range 14–28), divider, sun/moon theme toggle.
@@ -313,6 +336,32 @@ section changes: "Section complete → *previous section* → Next: *next sectio
 - Keyboard: ← / → navigate, Space toggles play/pause on timed steps, Esc closes.
 - Everything resets (index 0, phase work, timer cleared) when the player is closed or restarted.
 
+**Player media and instruction data**
+- On open, collect unique exercise IDs and fetch `id`, `name`, `gif_url`, `frame_start_url`,
+  `frame_end_url`, `description` and `instructions` in one batched library query.
+- Every exercise slide shows: section, optional protocol/block label, exercise name, exact prescription,
+  looping GIF (or frame fallback), and a collapsible **Instructions** area containing the numbered library steps.
+- Never ask the model to generate exercise technique instructions; these always come from the human-built
+  exercise-library record selected by the token ID.
+- Keep a stable media viewport so different GIF proportions do not resize the dialog.
+- Request a screen Wake Lock while the timer is running; release it on pause, close, finish or page hide.
+- Give an audio cue and vibration cue, when supported and permitted, at work/rest transitions and before
+  automatic advancement. The player remains fully usable when either permission is unavailable.
+
+**Tabata behavior**
+- A Tabata block is 8 rounds of 20 seconds work and 10 seconds rest.
+- Track and show `Round N of 8`, the current `WORK` or `REST` phase and the countdown.
+- Do not treat one 20/10 pair as a complete Tabata block. Complete all eight rounds before moving to the
+  next exercise or section unless the authored workout explicitly assigns alternating exercises by round.
+- Pause freezes the exact round, phase and second. Reset returns to Round 1, Work, 20 seconds.
+
+**Other protocol behavior**
+- EMOM shows the authored minute label and advances at the end of the minute; repeated rounds preserve the
+  authored sequence.
+- Timed Circuit/AMRAP/For Time exercises use the authored work duration when a per-exercise duration exists.
+- Rep/set, distance and calorie prescriptions are manual: the player never guesses a duration and waits for Next.
+- Rest written in a rep/set prescription is displayed but must not be mistaken for the exercise work timer.
+
 ### B8. Below the content
 - **Workout interactions** row: favourite ❤, mark complete ✅, star rating, comment, schedule workout,
   add to calendar (.ics) — gated for non-entitled users.
@@ -324,5 +373,39 @@ section changes: "Section complete → *previous section* → Next: *next sectio
 Title `{name} | Online Workout | {Brand}`, meta description built from duration + format + description
 (≤158 chars), Open Graph + Twitter tags with the workout image, canonical URL, and JSON-LD
 `ExercisePlan` + `HowTo` (one step per section) + `BreadcrumbList`.
+
+### B10. Required component and data flow
+Implement this as working product behavior, not static mockups:
+
+1. `WorkoutDisplay` joins and normalizes the workout sections and renders the published page.
+2. `ExerciseHTMLContent` sanitizes HTML, parses only `{{exercise:ID:Name}}` tokens and injects inline eye buttons.
+3. `ExerciseDetailDialog` loads media, metadata, description and numbered instructions by exact ID.
+4. `WorkoutToolsBar` opens the Workout Timer, Rounds Counter, 1RM Calculator and Exercise Library dialogs.
+5. `ReaderModeDialog` receives the same normalized, linked workout content.
+6. `parseWorkoutSteps` walks the HTML in document order and produces one playable step per valid token.
+7. `WorkoutPlayerDialog` receives those steps, batch-loads exercise media/instructions and runs the carousel/timers.
+8. `WorkoutInteractions` persists completion, rating, note, favourite and scheduled date against the user/workout.
+9. Sharing and `.ics` export use the real workout title, canonical URL and scheduled date.
+
+Do not duplicate generated exercise names in a separate array. The tokenized workout HTML is the source of truth
+for display and step order; the exercise library is the source of truth for media, descriptions and instructions.
+
+### B11. Acceptance checklist — do not declare complete until all pass
+- A generated workout cannot contain an invented or unlinked exercise.
+- Challenge, Mobility & Stability, Pilates, Recovery and Micro-Workout bans are enforced before and after generation.
+- The published page shows name, description, creator credit, all metadata, image, tools, Player bar, Workout,
+  Instructions and Tips in the specified order.
+- Every valid exercise token renders its name plus an inline eye button.
+- The eye opens the correct library exercise with working media, description and numbered instructions.
+- Reader Mode opens the same workout, defaults dark and supports 14–28px text.
+- Start your workout opens a swipeable ordered carousel with every linked exercise exactly once.
+- Section-break slides appear between sections and wait for Continue.
+- Timed steps count down and advance; rep/set steps wait for the user.
+- Tabata completes 8 full 20/10 rounds and shows round/phase state.
+- GIF fallback, pause, reset, previous, next, finish, Wake Lock and audio/vibration degradation all work.
+- Completion, rating, note, favourite, schedule, calendar export and sharing persist or execute correctly.
+- Verify on a 390px phone and desktop; no text, controls, GIFs or dialogs overflow or overlap.
+- Add focused tests for token parsing, section detection, prescription extraction, timer parsing, Tabata rounds,
+  section-break insertion, missing-media fallback and invalid/unlinked-token exclusion.
 
 # PROMPT END
