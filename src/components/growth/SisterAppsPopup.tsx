@@ -3,13 +3,15 @@ import { ExternalLink, Sparkles, ChevronLeft } from "lucide-react";
 import logoMove from "@/assets/smartymove-logo.png";
 import logoDiet from "@/assets/smartydiet-logo.png";
 import logoGym from "@/assets/smarty-gym-logo.png";
+import logoWorkout from "@/assets/smartyworkout-logo.png";
+import logoLogbook from "@/assets/smartylogbook-logo.png";
 import { useOverlayZIndex } from "@/lib/overlayActivity";
 
 // Change this constant when porting the component to the other two projects.
-const CURRENT_APP: "gym" | "move" | "diet" = "gym";
+const CURRENT_APP: "gym" | "move" | "diet" | "workout" | "logbook" = "gym";
 
 type SisterApp = {
-  id: "gym" | "move" | "diet";
+  id: "gym" | "move" | "diet" | "workout" | "logbook";
   name: string;
   tagline: string;
   url: string;
@@ -37,6 +39,20 @@ const SISTER_APPS: SisterApp[] = [
     tagline: "Eat smart. Fuel your body. Live longer.",
     url: "https://smartydiet.com",
     image: logoDiet,
+  },
+  {
+    id: "workout",
+    name: "SmartyWorkout",
+    tagline: "Your daily workout, built around you.",
+    url: "https://smartyworkout.com",
+    image: logoWorkout,
+  },
+  {
+    id: "logbook",
+    name: "SmartyLogbook",
+    tagline: "Track every session. See your progress.",
+    url: "https://smartylogbook.com",
+    image: logoLogbook,
   },
 ];
 
