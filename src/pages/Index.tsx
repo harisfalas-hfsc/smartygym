@@ -67,6 +67,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { generateOrganizationWithRatingSchema } from "@/utils/seoHelpers";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 type VisibleProgramMetadata = Database["public"]["Functions"]["get_visible_program_metadata"]["Returns"][number];
 type BlogArticleCard = Pick<Database["public"]["Tables"]["blog_articles"]["Row"], "id" | "slug" | "title" | "image_url" | "read_time" | "category" | "published_at" | "created_at"> & {
@@ -83,6 +84,7 @@ const homepageFAQs = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const { freeAccessMode } = useFreeAccessMode();
   const location = useLocation();
   const {
     toast

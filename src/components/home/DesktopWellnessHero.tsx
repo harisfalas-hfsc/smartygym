@@ -1,6 +1,7 @@
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { getBlogArticleImage } from "@/utils/blogImages";
 import toolTimerImage from "@/assets/tools/timer-card-mobile.jpg";
 import tool1RmImage from "@/assets/tools/1rm-card-mobile.jpg";
@@ -52,6 +53,7 @@ export const DesktopWellnessHero = ({
   programCategoryToSlug = (c) => (c || "").toLowerCase().replace(/\s+/g, "-"),
 }: Props = {}) => {
   const navigate = useNavigate();
+  const { freeAccessMode } = useFreeAccessMode();
   const [slide, setSlide] = useState(0);
 
   useEffect(() => {

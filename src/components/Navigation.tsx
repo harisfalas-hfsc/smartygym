@@ -43,6 +43,7 @@ interface CorporateSubscriptionInfo {
 }
 
 export const Navigation = () => {
+  const { freeAccessMode } = useFreeAccessMode();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
