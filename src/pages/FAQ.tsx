@@ -12,8 +12,10 @@ import {
 import { HelpCircle, MessageCircle } from "lucide-react";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 const FAQ = () => {
+  const { freeAccessMode } = useFreeAccessMode();
   const navigate = useNavigate();
 
   return (
@@ -313,7 +315,7 @@ const FAQ = () => {
                       
                       Every ritual is personally designed by <a href="/coach-profile" className="text-primary hover:underline font-medium">Haris Falas</a> and 
                       delivered fresh each morning at 7:00 AM. You can even add the ritual phases to your calendar with one click. 
-                      Smarty Ritual is exclusively available for <a href="/smarty-premium" className="text-primary hover:underline font-medium">Premium members</a>.
+                      {freeAccessMode ? "Smarty Ritual is available to all signed-in members." : <>Smarty Ritual is exclusively available for <a href="/smarty-premium" className="text-primary hover:underline font-medium">Premium members</a>.</>}
                     </AccordionContent>
                   </AccordionItem>
 
@@ -337,12 +339,12 @@ const FAQ = () => {
                     </AccordionContent>
                   </AccordionItem>
 
-                  <AccordionItem value="item-8">
+                  {!freeAccessMode && <AccordionItem value="item-8">
                     <AccordionTrigger className="text-left">Is there a free trial?</AccordionTrigger>
                     <AccordionContent className="py-2 leading-relaxed">
                       We don't offer a free trial, but you can explore a selection of <strong>free workouts</strong>, <strong>free training programs</strong>, and our <strong>fitness tools</strong> at no cost before deciding to upgrade. SmartyGym <strong>Premium Membership</strong> is <strong>€9.99/month</strong> and unlocks every workout, program, ritual and tool, with all future updates included. <strong>Cancel anytime</strong> from your account. You can also buy individual workouts and programs as standalone purchases. Check out our <a href="/smarty-premium" className="text-primary hover:underline font-medium">Smarty Plans</a> to see what's included.
                     </AccordionContent>
-                  </AccordionItem>
+                  </AccordionItem>}
 
                   <AccordionItem value="item-8a">
                     <AccordionTrigger className="text-left">What is a standalone purchase?</AccordionTrigger>
@@ -369,7 +371,7 @@ const FAQ = () => {
                       Getting started is simple:<br/>
                       1. <strong>Browse</strong> our free workouts and tools to get a feel for the platform.<br/>
                       2. <a href="/auth?mode=signup" className="text-primary hover:underline font-medium"><strong>Sign up</strong></a> for a free account to save your progress and track your training.<br/>
-                      3. <a href="/smarty-premium" className="text-primary hover:underline font-medium"><strong>Become a Premium Member</strong></a> for €9.99/month and unlock everything — every workout, every training program, the Smarty Ritual, Smarty Tools, check-ins and all future content. Cancel anytime.<br/>
+                      {!freeAccessMode && <>3. <a href="/smarty-premium" className="text-primary hover:underline font-medium"><strong>Become a Premium Member</strong></a> for €9.99/month and unlock everything — every workout, every training program, the Smarty Ritual, Smarty Tools, check-ins and all future content. Cancel anytime.<br/></>}
                       4. <strong>Start training</strong> — pick a workout or program and get moving!<br/><br/>
                       
                       If you need guidance, <a href="/contact" className="text-primary hover:underline font-medium">contact us</a> directly.

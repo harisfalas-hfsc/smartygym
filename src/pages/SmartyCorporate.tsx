@@ -11,6 +11,7 @@ import { Building2, Check, ChevronRight, Users, Crown, CreditCard, Shield, Headp
 import { openExternal } from "@/utils/native";
 import { platformHeader } from "@/utils/platform";
 import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -63,6 +64,14 @@ export default function SmartyCorporate() {
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof CORPORATE_PLANS | null>(null);
   const [organizationName, setOrganizationName] = useState("");
   const { paymentsEnabled } = usePaymentsEnabled();
+  const { freeAccessMode, loading: freeAccessLoading } = useFreeAccessMode();
+
+  // Global Free Access Mode: corporate pricing page is unavailable.
+  useEffect(() => {
+    if (!freeAccessLoading && freeAccessMode) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [freeAccessLoading, freeAccessMode, navigate]);
   useEffect(() => {
     supabase.auth.getSession().then(({
       data: {
@@ -158,6 +167,8 @@ export default function SmartyCorporate() {
     isLink: true,
     href: "/corporate-wellness"
   }];
+  if (freeAccessLoading || freeAccessMode) return null;
+
   return <>
       <Helmet>
         <title>Smarty Corporate | Team & Business Plans | SmartyGym</title>

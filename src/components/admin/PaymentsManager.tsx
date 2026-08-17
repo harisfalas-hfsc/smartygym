@@ -5,7 +5,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Apple, Bot, CreditCard, Globe, KeyRound, Webhook } from "lucide-react";
+import { Apple, Bot, CreditCard, Globe, KeyRound, Lock, Webhook } from "lucide-react";
+import { FREE_ACCESS_SETTING_KEY, setFreeAccessModeCache, useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { STRIPE_PRICE_IDS, SUBSCRIPTION_PRICES, CORPORATE_PRICES } from "@/config/pricing";
@@ -127,6 +128,36 @@ export const PaymentsManager = () => {
       .catch(() => setSecretStatus(null));
   }, []);
 
+  const { freeAccessMode } = useFreeAccessMode();
+  const [freeAccess, setFreeAccess] = useState(freeAccessMode);
+  const [savingFreeAccess, setSavingFreeAccess] = useState(false);
+
+  useEffect(() => {
+    setFreeAccess(freeAccessMode);
+  }, [freeAccessMode]);
+
+  const handleFreeAccessToggle = async (next: boolean) => {
+    setSavingFreeAccess(true);
+    const { error } = await supabase
+      .from("system_settings")
+      .update({ setting_value: next as unknown as never })
+      .eq("setting_key", FREE_ACCESS_SETTING_KEY);
+
+    if (error) {
+      toast({ title: "Failed to save", description: error.message, variant: "destructive" });
+    } else {
+      setFreeAccess(next);
+      setFreeAccessModeCache(next);
+      toast({
+        title: next ? "Free Access Mode ON" : "Free Access Mode OFF",
+        description: next
+          ? "All content is free for signed-in members. Every price, purchase button and premium page is hidden everywhere."
+          : "Normal paid mode restored. Existing subscriptions were never touched.",
+      });
+    }
+    setSavingFreeAccess(false);
+  };
+
   const handleToggle = async (platform: NativePlatform, next: boolean) => {
     setSaving(platform);
     const { error } = await supabase
@@ -166,6 +197,46 @@ export const PaymentsManager = () => {
 
   return (
     <div className="space-y-6">
+      <Card className={freeAccess ? "border-amber-500" : undefined}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="w-5 h-5" />
+            Global Free Access Mode
+          </CardTitle>
+          <CardDescription>
+            Master switch. When ON, every signed-in member gets full premium access and
+            the whole app becomes free-only: no prices, no purchase buttons, no premium or
+            corporate pages, no "buy on the website" notices. Nothing in Stripe changes and
+            existing subscriptions keep billing — flip it back any time.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-start justify-between gap-4 rounded-lg border p-4">
+            <div className="space-y-1">
+              <Label htmlFor="toggle-free-access" className="text-base font-semibold">
+                Make the entire app free
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Use this for App Store / Play Store review when a reviewer must not see any
+                purchase path at all.
+              </p>
+            </div>
+            <Switch
+              id="toggle-free-access"
+              checked={freeAccess}
+              disabled={savingFreeAccess}
+              onCheckedChange={handleFreeAccessToggle}
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">Current state:</span>
+            <Badge variant={freeAccess ? "destructive" : "secondary"}>
+              {freeAccess ? "EVERYTHING FREE" : "NORMAL PAID MODE"}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

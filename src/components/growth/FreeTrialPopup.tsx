@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Crown, X } from "lucide-react";
 import popupImg from "@/assets/popup-free-trial-bright.jpg";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 const REPEAT_DELAY_MS = 60 * 60 * 1000;
 const DEFAULT_INITIAL_DELAY_MS = 10_000;
@@ -96,6 +97,8 @@ export function FreeTrialPopup() {
     return () => clearTimeout(timer);
   }, [dismissed]);
 
+  const { freeAccessMode } = useFreeAccessMode();
+
   const handleDismiss = () => {
     setShow(false);
     setDismissed(true);
@@ -103,6 +106,8 @@ export function FreeTrialPopup() {
       sessionStorage.setItem(DISMISS_KEY, String(Date.now() + REPEAT_DELAY_MS));
     } catch {}
   };
+
+  if (freeAccessMode) return null;
 
   if (!isLoading && user && (userTier === "premium" || hasSubscriptionHistory === true)) {
     return null;

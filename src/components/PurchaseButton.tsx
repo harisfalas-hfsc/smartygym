@@ -8,6 +8,7 @@ import { useNavigationHistory } from "@/contexts/NavigationHistoryContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { platformHeader } from "@/utils/platform";
 import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { PaymentsDisabledNotice } from "@/components/PaymentsDisabledNotice";
 
 interface PurchaseButtonProps {
@@ -34,6 +35,7 @@ export const PurchaseButton = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { paymentsEnabled, loading: paymentsLoading } = usePaymentsEnabled();
+  const { freeAccessMode, loading: freeAccessLoading } = useFreeAccessMode();
 
   // Check if already purchased
   const alreadyPurchased = hasPurchased(contentId, contentType);
@@ -126,6 +128,10 @@ export const PurchaseButton = ({
       setIsProcessing(false);
     }
   };
+
+  // Global Free Access Mode: no purchase UI at all.
+  if (freeAccessLoading) return null;
+  if (freeAccessMode) return null;
 
   // 🚨 CRITICAL: Premium users cannot purchase standalone content
   if (isPremium) {

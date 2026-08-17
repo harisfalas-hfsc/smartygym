@@ -19,13 +19,32 @@ export async function blockIfPlatformPaymentsDisabled(
 ): Promise<Response | null> {
   const platform = (req.headers.get("x-smarty-platform") || "web").toLowerCase();
   const key = KEYS[platform];
-  if (!key) return null; // web always allowed
-
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     { auth: { persistSession: false } }
   );
+
+  // Global Free Access Mode: no checkout is allowed on ANY platform.
+  const { data: freeRow } = await supabase
+    .from("system_settings")
+    .select("setting_value")
+    .eq("setting_key", "free_access_mode")
+    .maybeSingle();
+  const freeAccessMode =
+    freeRow?.setting_value === true || freeRow?.setting_value === "true";
+  if (freeAccessMode) {
+    return new Response(
+      JSON.stringify({
+        error:
+          "All SmartyGym content is currently free for signed-in members. No purchase is required.",
+        freeAccessMode: true,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+    );
+  }
+
+  if (!key) return null; // web always allowed
 
   const { data, error } = await supabase
     .from("system_settings")

@@ -1,6 +1,7 @@
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { getBlogArticleImage } from "@/utils/blogImages";
 import toolTimerImage from "@/assets/tools/timer-card-mobile.jpg";
 import tool1RmImage from "@/assets/tools/1rm-card-mobile.jpg";
@@ -52,6 +53,7 @@ export const DesktopWellnessHero = ({
   programCategoryToSlug = (c) => (c || "").toLowerCase().replace(/\s+/g, "-"),
 }: Props = {}) => {
   const navigate = useNavigate();
+  const { freeAccessMode } = useFreeAccessMode();
   const [slide, setSlide] = useState(0);
 
   useEffect(() => {
@@ -192,13 +194,15 @@ export const DesktopWellnessHero = ({
                 <span className="font-bold text-red-400">0% AI</span>.
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => navigate("/smarty-premium")}
-                  className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground hover:opacity-95 transition-all"
-                >
-                  Get Premium <ArrowRight className="w-4 h-4" />
-                </button>
+                {!freeAccessMode && (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/smarty-premium")}
+                    className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground hover:opacity-95 transition-all"
+                  >
+                    Get Premium <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => navigate("/workout")}

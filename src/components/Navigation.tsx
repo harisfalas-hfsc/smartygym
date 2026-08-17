@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ interface CorporateSubscriptionInfo {
 }
 
 export const Navigation = () => {
+  const { freeAccessMode } = useFreeAccessMode();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -275,6 +277,13 @@ export const Navigation = () => {
     setTimeout(() => window.scrollTo(0, 0), 0);
   };
 
+  const premiumNavItems = freeAccessMode
+    ? []
+    : [
+        { label: "Smarty Premium", path: "/smarty-premium", icon: Crown, iconClass: "text-yellow-500", track: undefined },
+        { label: "Smarty Corporate", path: "/corporate", icon: Building2, iconClass: "text-blue-500", track: undefined },
+      ];
+
   const discoveryItems = [
     { label: "About SmartyGym", path: "/about", icon: Info, iconClass: "text-teal-500", track: undefined },
     { label: "Smarty Workouts", path: "/workout", icon: Dumbbell, iconClass: "text-primary", track: undefined },
@@ -284,8 +293,7 @@ export const Navigation = () => {
     { label: "Smarty Blog", path: "/blog", icon: Newspaper, iconClass: "text-red-500", track: undefined },
     { label: "Exercise Library", path: "/exerciselibrary", icon: BookOpen, iconClass: "text-emerald-500", track: undefined },
     { label: "Community", path: "/community", icon: Users, iconClass: "text-cyan-500", track: undefined },
-    { label: "Smarty Premium", path: "/smarty-premium", icon: Crown, iconClass: "text-yellow-500", track: undefined },
-    { label: "Smarty Corporate", path: "/corporate", icon: Building2, iconClass: "text-blue-500", track: undefined },
+    ...premiumNavItems,
     { label: "FAQ", path: "/faq", icon: HelpCircle, iconClass: "text-purple-500", track: undefined },
     { label: "Contact", path: "/contact", icon: Mail, iconClass: "text-indigo-500", track: undefined, subtitle: "One click away, always." },
   ];
@@ -315,8 +323,12 @@ export const Navigation = () => {
       heading: "SmartyGym",
       items: [
         { label: "About SmartyGym", path: "/about", icon: Info },
-        { label: "Smarty Premium", path: "/smarty-premium", icon: Crown },
-        { label: "Smarty Corporate", path: "/corporate", icon: Building2 },
+        ...(freeAccessMode
+          ? []
+          : [
+              { label: "Smarty Premium", path: "/smarty-premium", icon: Crown },
+              { label: "Smarty Corporate", path: "/corporate", icon: Building2 },
+            ]),
         { label: "FAQ", path: "/faq", icon: HelpCircle },
         { label: "Contact", path: "/contact", icon: Mail },
       ],
@@ -330,8 +342,12 @@ export const Navigation = () => {
       heading: "SmartyGym",
       items: [
         { label: "Home", path: "/", icon: Home },
-        { label: "Smarty Premium", path: "/smarty-premium", icon: Crown },
-        { label: "Smarty Corporate", path: "/corporate", icon: Building2 },
+        ...(freeAccessMode
+          ? []
+          : [
+              { label: "Smarty Premium", path: "/smarty-premium", icon: Crown },
+              { label: "Smarty Corporate", path: "/corporate", icon: Building2 },
+            ]),
         { label: "FAQ", path: "/faq", icon: HelpCircle },
         { label: "Contact", path: "/contact", icon: Mail },
       ],

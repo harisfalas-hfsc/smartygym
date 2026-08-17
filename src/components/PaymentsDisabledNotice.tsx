@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 interface PaymentsDisabledNoticeProps {
   className?: string;
@@ -10,6 +11,11 @@ interface PaymentsDisabledNoticeProps {
  * for the current platform (Admin → Payments).
  */
 export const PaymentsDisabledNotice = ({ className, compact }: PaymentsDisabledNoticeProps) => {
+  const { freeAccessMode, loading } = useFreeAccessMode();
+
+  // Global Free Access Mode: never point anywhere external to buy.
+  if (loading || freeAccessMode) return null;
+
   return (
     <div
       className={cn(
