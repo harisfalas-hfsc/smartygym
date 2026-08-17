@@ -167,6 +167,8 @@ export default function SmartyCorporate() {
     isLink: true,
     href: "/corporate-wellness"
   }];
+  if (freeAccessLoading || freeAccessMode) return null;
+
   return <>
       <Helmet>
         <title>Smarty Corporate | Team & Business Plans | SmartyGym</title>
