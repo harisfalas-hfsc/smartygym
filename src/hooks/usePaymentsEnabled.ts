@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isAndroidDevice, isIOSDevice } from "@/utils/platform";
+import { fetchFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 export type PaymentPlatform = "ios" | "android" | "web";
 
@@ -27,18 +28,28 @@ const SETTING_KEYS: Record<PaymentPlatform, string | null> = {
 export const usePaymentsEnabled = () => {
   const platform = getPaymentPlatform();
   const [enabled, setEnabled] = useState(true);
-  const [loading, setLoading] = useState(platform !== "web");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const key = SETTING_KEYS[platform];
-    if (!key) {
-      setEnabled(true);
-      setLoading(false);
-      return;
-    }
-
     let cancelled = false;
     (async () => {
+      // Global Free Access Mode is the master switch: it forces every
+      // platform (web included) into "no purchases" state.
+      const freeMode = await fetchFreeAccessMode();
+      if (cancelled) return;
+      if (freeMode) {
+        setEnabled(false);
+        setLoading(false);
+        return;
+      }
+
+      if (!key) {
+        setEnabled(true);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("system_settings")
         .select("setting_value")

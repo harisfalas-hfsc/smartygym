@@ -251,6 +251,14 @@ export const PaymentsManager = () => {
           {loading ? (
             <Skeleton className="h-40 w-full" />
           ) : (
+            <>
+            {freeAccess && (
+              <div className="mb-4 rounded-lg border border-amber-500 bg-amber-500/10 p-3 text-sm">
+                <strong>Free Access Mode is ON.</strong> It overrides everything below —
+                purchases are forced OFF on iOS, Android and web, no matter what these
+                switches say. Turn it off to restore the per-platform controls.
+              </div>
+            )}
             <Tabs defaultValue="ios" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="ios" className="flex items-center gap-2">
@@ -269,8 +277,8 @@ export const PaymentsManager = () => {
                   platform="ios"
                   title="iOS / iPhone"
                   storeName="Apple / iPhone users"
-                  enabled={settings.ios}
-                  saving={saving === "ios"}
+                  enabled={freeAccess ? false : settings.ios}
+                  saving={saving === "ios" || freeAccess}
                   onToggle={(next) => handleToggle("ios", next)}
                   guideline="Apple App Store Guideline 3.1.1 requires digital goods sold inside an iOS app (or viewed on iPhone Safari/Chrome) to use Apple In-App Purchase. Switch this off during review so no external payment path is visible on the native iOS app or on iPhone browsers, then switch it back on once the app is approved."
                 />
@@ -281,8 +289,8 @@ export const PaymentsManager = () => {
                   platform="android"
                   title="Android"
                   storeName="Google Play"
-                  enabled={settings.android}
-                  saving={saving === "android"}
+                  enabled={freeAccess ? false : settings.android}
+                  saving={saving === "android" || freeAccess}
                   onToggle={(next) => handleToggle("android", next)}
                   guideline="Google Play's Payments policy requires in-app digital purchases to use Play Billing. Switch this off during review, then back on after approval."
                 />
@@ -290,16 +298,21 @@ export const PaymentsManager = () => {
 
               <TabsContent value="web" className="mt-4">
                 <div className="rounded-lg border p-4 space-y-2">
-                  <p className="font-semibold">Web purchasing is always on</p>
+                  <p className="font-semibold">
+                    {freeAccess ? "Web purchasing is OFF (Free Access Mode)" : "Web purchasing is always on"}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     smartygym.com sells normally at all times through Stripe. This is
                     intentional and cannot be switched off — it is where users are sent
                     when a mobile platform is disabled.
                   </p>
-                  <Badge variant="secondary">Enabled</Badge>
+                  <Badge variant={freeAccess ? "destructive" : "secondary"}>
+                    {freeAccess ? "Disabled by Free Access Mode" : "Enabled"}
+                  </Badge>
                 </div>
               </TabsContent>
             </Tabs>
+            </>
           )}
         </CardContent>
       </Card>
