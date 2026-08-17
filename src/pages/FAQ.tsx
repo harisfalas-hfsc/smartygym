@@ -15,6 +15,7 @@ import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 const FAQ = () => {
+  const { freeAccessMode } = useFreeAccessMode();
   const navigate = useNavigate();
 
   return (
