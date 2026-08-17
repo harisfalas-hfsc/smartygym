@@ -13,6 +13,7 @@ import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 export const WorkoutOfTheDay = () => {
   const navigate = useNavigate();
+  const { freeAccessMode } = useFreeAccessMode();
   const [wodCarouselApi, setWodCarouselApi] = useState<CarouselApi>();
   const [currentWodSlide, setCurrentWodSlide] = useState(0);
 
@@ -111,6 +112,7 @@ export const WorkoutOfTheDay = () => {
             <span className="text-muted-foreground whitespace-nowrap">{wod.duration || "45-60 min"}</span>
           </div>
         </div>
+        {!freeAccessMode && (
         <div className="flex flex-wrap items-center gap-1">
           <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 text-xs py-0">
             <Crown className="w-2.5 h-2.5 mr-0.5" />
@@ -121,6 +123,7 @@ export const WorkoutOfTheDay = () => {
             €{wod.price?.toFixed(2)}
           </Badge>
         </div>
+        )}
       </div>
     );
   };
@@ -158,6 +161,7 @@ export const WorkoutOfTheDay = () => {
             {wod.duration || "30-45 min"}
           </div>
         </div>
+        {!freeAccessMode && (
         <div className="flex flex-wrap items-center gap-1">
           <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 text-xs py-0">
             <Crown className="w-2.5 h-2.5 mr-0.5" />
@@ -168,6 +172,7 @@ export const WorkoutOfTheDay = () => {
             €{wod.price?.toFixed(2)}
           </Badge>
         </div>
+        )}
       </div>
     );
   };
