@@ -9,6 +9,7 @@ import { useTodayWods } from "@/hooks/useTodayWods";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { SwipeToExplore } from "@/components/ui/SwipeToExplore";
 import { cn } from "@/lib/utils";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 export const WorkoutOfTheDay = () => {
   const navigate = useNavigate();
