@@ -21,6 +21,7 @@ import { CalendarCheck, CalendarIcon, Clock, Dumbbell, Star, Crown, ShoppingBag,
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { cn } from "@/lib/utils";
 import { fetchVisibleWorkoutMetadata } from "@/hooks/useTodayWods";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 const WOD_CATEGORIES = [
   "STRENGTH",
@@ -36,6 +37,7 @@ const DIFFICULTY_OPTIONS = ["Beginner", "Intermediate", "Advanced"];
 
 const WODArchive = () => {
   const navigate = useNavigate();
+  const { freeAccessMode } = useFreeAccessMode();
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(undefined);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [equipmentFilter, setEquipmentFilter] = useState<string>("all");
