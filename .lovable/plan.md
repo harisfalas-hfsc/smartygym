@@ -20,6 +20,12 @@ Yes, this is doable and it is safe to reverse. The key idea: **nothing is delete
 New card inside the existing **Admin → Payments** section (same place as the iOS/Android toggles):
 a single master toggle "Free Access Mode — all content free for signed-in users", with a confirmation dialog and a plain-language note about what it hides.
 
+## Your questions answered
+
+- **Is the Smarty Premium page hidden?** Yes. While the mode is ON, `/smarty-premium` and the corporate pricing page are removed from all menus and, if someone types the URL, they redirect to the dashboard. Every other reference is hidden too — "Join Premium" CTAs, gold upgrade buttons, premium badges and locks, the "purchases are made on smartygym.com" notice, and pricing copy in FAQ/marketing pages visible inside the app.
+- **Does pressing the button back restore everything?** Yes, exactly as before. The toggle is only an overlay; when it is OFF every path runs the same code as today, reading the same Stripe/subscription data, which is never modified while the mode is ON.
+- **Immediate, or do I do it myself?** I build and ship the toggle **OFF**, so nothing changes for your live customers on release. Flipping it is your action from Admin → Payments, and it takes effect immediately for everyone — no redeploy and no publish needed, since the setting is read live from the database on page load.
+
 ## Technical section
 
 1. **Setting**: new `system_settings` row `free_access_mode` (boolean). Public read (anon + authenticated), admin-only write, same pattern as `payments_enabled_ios`.
