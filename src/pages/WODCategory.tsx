@@ -15,10 +15,12 @@ import WODPeriodizationCalendar from "@/components/WODPeriodizationCalendar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { useTodayWods } from "@/hooks/useTodayWods";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 const WODCategory = () => {
   const navigate = useNavigate();
   const { userTier, hasPurchased } = useAccessControl();
+  const { freeAccessMode } = useFreeAccessMode();
   const [wodCarouselApi, setWodCarouselApi] = useState<CarouselApi>();
   const [wodCurrentSlide, setWodCurrentSlide] = useState(0);
 
@@ -127,7 +129,7 @@ const WODCategory = () => {
 
           {/* Access Badge - Bottom */}
           <div className="absolute bottom-3 right-3">
-            {wod.is_premium ? <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 shadow-lg">
+            {freeAccessMode ? null : wod.is_premium ? <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 shadow-lg">
                 <Crown className="w-3 h-3 mr-1" />
                 Premium
               </Badge> : wod.is_standalone_purchase && wod.price ? <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 shadow-lg">
@@ -187,10 +189,10 @@ const WODCategory = () => {
             </div>
             {/* Row 2: Premium + BUY badges only */}
             <div className="flex flex-wrap items-center gap-1.5">
-              <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 text-xs py-0.5">
+              {!freeAccessMode && <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 text-xs py-0.5">
                 <Crown className="w-3 h-3 mr-1" />
                 Premium
-              </Badge>
+              </Badge>}
               {wod.is_standalone_purchase && wod.price && userTier !== "premium" && !hasPurchased(wod.id, "workout") && <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>

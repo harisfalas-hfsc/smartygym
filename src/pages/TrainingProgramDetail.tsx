@@ -39,6 +39,7 @@ import { useAllPrograms } from "@/hooks/useProgramData";
 import { useProgramInteractions } from "@/hooks/useProgramInteractions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccessControl } from "@/hooks/useAccessControl";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { stripHtmlTags } from "@/lib/text";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
 
@@ -64,6 +65,7 @@ const TrainingProgramDetail = () => {
   const navigate = useNavigate();
   const { type } = useParams();
   const { userTier, hasPurchased } = useAccessControl();
+  const { freeAccessMode } = useFreeAccessMode();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [equipmentFilter, setEquipmentFilter] = useState<EquipmentFilter>("all");
@@ -552,12 +554,12 @@ const TrainingProgramDetail = () => {
 
                   {/* Premium/Free Badge - Bottom Right */}
                   <div className="absolute bottom-2 right-2 z-10">
-                    {program.is_premium ? (
+                    {program.is_premium ? (freeAccessMode ? null : (
                       <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-lg">
                         <Crown className="h-3 w-3 shrink-0" />
                         Premium
                       </span>
-                    ) : (
+                    )) : (
                       <span className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-lg">
                         <Check className="h-3 w-3 shrink-0" />
                         FREE

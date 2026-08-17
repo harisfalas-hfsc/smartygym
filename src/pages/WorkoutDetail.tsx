@@ -29,6 +29,7 @@ import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { ContentLoadingSkeleton } from "@/components/ContentLoadingSkeleton";
 import { useAllWorkouts } from "@/hooks/useWorkoutData";
 import { useAccessControl } from "@/hooks/useAccessControl";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { useWorkoutInteractions } from "@/hooks/useWorkoutInteractions";
 import { supabase } from "@/integrations/supabase/client";
 import { stripHtmlTags } from "@/lib/text";
@@ -60,6 +61,7 @@ const WorkoutDetail = () => {
   const navigate = useNavigate();
   const { type } = useParams();
   const { userTier, hasPurchased } = useAccessControl();
+  const { freeAccessMode } = useFreeAccessMode();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [equipmentFilter, setEquipmentFilter] = useState<EquipmentFilter>("all");
@@ -616,12 +618,12 @@ const WorkoutDetail = () => {
 
                   {/* Premium/Free Badge - Bottom Right */}
                   <div className="absolute bottom-2 right-2 z-10">
-                    {workout.is_premium ? (
+                    {workout.is_premium ? (freeAccessMode ? null : (
                       <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-lg">
                         <Crown className="h-3 w-3 shrink-0" />
                         Premium
                       </span>
-                    ) : (
+                    )) : (
                       <span className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-lg">
                         <Check className="h-3 w-3 shrink-0" />
                         FREE

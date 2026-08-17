@@ -21,6 +21,7 @@ import { CalendarCheck, CalendarIcon, Clock, Dumbbell, Star, Crown, ShoppingBag,
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { cn } from "@/lib/utils";
 import { fetchVisibleWorkoutMetadata } from "@/hooks/useTodayWods";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 const WOD_CATEGORIES = [
   "STRENGTH",
@@ -36,6 +37,7 @@ const DIFFICULTY_OPTIONS = ["Beginner", "Intermediate", "Advanced"];
 
 const WODArchive = () => {
   const navigate = useNavigate();
+  const { freeAccessMode } = useFreeAccessMode();
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(undefined);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [equipmentFilter, setEquipmentFilter] = useState<string>("all");
@@ -348,7 +350,7 @@ const WODArchive = () => {
                     <h3 className="text-white font-bold text-sm line-clamp-2">{wod.name}</h3>
                   </div>
                   {/* Premium Badge */}
-                  {wod.is_premium && (
+                  {wod.is_premium && !freeAccessMode && (
                     <div className="absolute top-2 right-2">
                       <Badge className="bg-gradient-to-r from-primary to-yellow-500 text-primary-foreground">
                         <Crown className="w-3 h-3 mr-1" />

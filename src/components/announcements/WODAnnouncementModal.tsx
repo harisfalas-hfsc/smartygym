@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarCheck, Clock, Dumbbell, Home, Crown, ShoppingBag, X, TrendingUp, Layers, Target } from "lucide-react";
 import { useTodayWods } from "@/hooks/useTodayWods";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 interface WODAnnouncementModalProps {
   open: boolean;
@@ -14,6 +15,7 @@ interface WODAnnouncementModalProps {
 
 export const WODAnnouncementModal = ({ open, onClose }: WODAnnouncementModalProps) => {
   const navigate = useNavigate();
+  const { freeAccessMode } = useFreeAccessMode();
   const [countdown, setCountdown] = useState(15);
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
@@ -122,6 +124,7 @@ export const WODAnnouncementModal = ({ open, onClose }: WODAnnouncementModalProp
         </div>
 
         {/* Badges */}
+        {!freeAccessMode && (
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 text-xs">
             <Crown className="w-3 h-3 mr-1" />
@@ -132,6 +135,7 @@ export const WODAnnouncementModal = ({ open, onClose }: WODAnnouncementModalProp
             €{wod.price?.toFixed(2)}
           </Badge>
         </div>
+        )}
       </div>
     );
   };
