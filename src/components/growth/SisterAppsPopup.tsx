@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Sparkles, ChevronLeft } from "lucide-react";
 import logoMove from "@/assets/smartymove-logo.png";
 import logoDiet from "@/assets/smartydiet-logo.png";
-import logoGym from "@/assets/smarty-gym-logo.png";
 import logoWorkout from "@/assets/smartyworkout-logo.png";
-import logoLogbook from "@/assets/smartylogbook-logo.png";
 import { useOverlayZIndex } from "@/lib/overlayActivity";
 
 // Change this constant when porting the component to the other two projects.
@@ -20,25 +18,11 @@ type SisterApp = {
 
 const SISTER_APPS: SisterApp[] = [
   {
-    id: "gym",
-    name: "SmartyGym",
-    tagline: "Train smart. Get stronger. Feel younger.",
-    url: "https://smartygym.com",
-    image: logoGym,
-  },
-  {
     id: "move",
     name: "SmartyMove",
     tagline: "Check your posture. Correct your movement. Live better.",
     url: "https://smartymove.com",
     image: logoMove,
-  },
-  {
-    id: "diet",
-    name: "SmartyDiet",
-    tagline: "Eat smart. Fuel your body. Live longer.",
-    url: "https://smartydiet.com",
-    image: logoDiet,
   },
   {
     id: "workout",
@@ -48,11 +32,11 @@ const SISTER_APPS: SisterApp[] = [
     image: logoWorkout,
   },
   {
-    id: "logbook",
-    name: "SmartyLogbook",
-    tagline: "Track every session. See your progress.",
-    url: "https://smartylogbook.com",
-    image: logoLogbook,
+    id: "diet",
+    name: "SmartyDiet",
+    tagline: "Eat smart. Fuel your body. Live longer.",
+    url: "https://smartydiet.com",
+    image: logoDiet,
   },
 ];
 
@@ -62,6 +46,7 @@ export const SisterAppsPopup = () => {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const zIndex = useOverlayZIndex(open);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -71,6 +56,18 @@ export const SisterAppsPopup = () => {
     return () => window.clearTimeout(t);
   }, []);
 
+  // Close when tapping/clicking anywhere outside the panel
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: PointerEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", handler, true);
+    return () => document.removeEventListener("pointerdown", handler, true);
+  }, [open]);
+
   const others = SISTER_APPS.filter((a) => a.id !== CURRENT_APP);
 
   if (!mounted) return null;
@@ -78,9 +75,10 @@ export const SisterAppsPopup = () => {
   return (
     <>
       <div
+        ref={panelRef}
         aria-hidden={!open}
         style={{ zIndex }}
-        className={`fixed top-1/2 -translate-y-1/2 left-0 flex items-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "translate-x-0" : "-translate-x-[calc(100%+10px)]"}`}
+        className={`fixed top-1/2 -translate-y-1/2 left-0 flex items-center gap-2 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "translate-x-0" : "-translate-x-[calc(100%+70px)]"}`}
       >
         <aside className="w-[260px] pl-4 pr-2 py-4 bg-white rounded-r-2xl shadow-[4px_0_24px_rgba(15,23,42,0.12)]">
           <div className="mb-4">
@@ -123,9 +121,9 @@ export const SisterAppsPopup = () => {
           type="button"
           onClick={() => setOpen(false)}
           aria-label="Hide panel"
-          className="h-12 w-6 rounded-r-full bg-white text-slate-900 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-[4px_0_12px_rgba(15,23,42,0.08)]"
+          className="h-16 w-12 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-[0_4px_16px_rgba(15,23,42,0.18)]"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-8 h-8" />
         </button>
       </div>
 
