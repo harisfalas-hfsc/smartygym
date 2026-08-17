@@ -28,7 +28,7 @@ const SETTING_KEYS: Record<PaymentPlatform, string | null> = {
 export const usePaymentsEnabled = () => {
   const platform = getPaymentPlatform();
   const [enabled, setEnabled] = useState(true);
-  const [loading, setLoading] = useState(platform !== "web");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const key = SETTING_KEYS[platform];
