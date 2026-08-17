@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { CategoryCountBadge } from "@/components/ui/category-count-badge";
 import { SwipeToExplore } from "@/components/ui/SwipeToExplore";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 type VisibleProgramMetadata = Database["public"]["Functions"]["get_visible_program_metadata"]["Returns"][number];
 
@@ -28,6 +29,7 @@ const TrainingProgramFlow = () => {
   
   const { userTier } = useAccessControl();
   const isPremium = userTier === "premium";
+  const { freeAccessMode } = useFreeAccessMode();
   const isMobile = useIsMobile();
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -305,9 +307,11 @@ const TrainingProgramFlow = () => {
           <p className="font-bold text-foreground">
             <span className="text-primary font-semibold">Smarty Programs</span> are long-term, structured plans designed to help you achieve your specific fitness goals. Whether you want to lose weight, build muscle, improve functional strength, enhance cardiovascular endurance, rehabilitate from low back pain, or develop better mobility and stability — we have a science-based program for you. These aren't just random workouts — they're strategic, periodized plans that take you from where you are to where you want to be.
           </p>
-          <p className="font-semibold text-foreground">
-            Unlock all <span className="text-primary font-bold">{totalProgramCount} programs</span> with a Premium plan or grab one standalone program to start your journey.
-          </p>
+          {!freeAccessMode && (
+            <p className="font-semibold text-foreground">
+              Unlock all <span className="text-primary font-bold">{totalProgramCount} programs</span> with a Premium plan or grab one standalone program to start your journey.
+            </p>
+          )}
         </DesktopPageIntro>
 
         <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
@@ -316,7 +320,7 @@ const TrainingProgramFlow = () => {
             <div className="space-y-2 text-muted-foreground max-w-3xl mx-auto">
             {isMobile ? (
                 <p className="text-sm text-center">
-                  <span className="text-primary font-semibold">Smarty Programs</span> are structured plans for your fitness goals. Unlock all <span className="text-primary font-bold">{totalProgramCount}</span> with Premium or grab one standalone.
+                  <span className="text-primary font-semibold">Smarty Programs</span> are structured plans for your fitness goals.{!freeAccessMode && <> Unlock all <span className="text-primary font-bold">{totalProgramCount}</span> with Premium or grab one standalone.</>}
                 </p>
               ) : (
                 <>
@@ -324,9 +328,11 @@ const TrainingProgramFlow = () => {
                     <span className="text-primary font-semibold">Smarty Programs</span> are long-term, structured plans designed to help you achieve your specific fitness goals. Whether you want to lose weight, build muscle, improve functional strength, enhance cardiovascular endurance, rehabilitate from low back pain, or develop better mobility and stability — we have a science-based program for you. These aren't just random workouts — they're strategic, periodized plans that take you from where you are to where you want to be.
                   </p>
                   
-                  <p className="text-sm sm:text-base font-semibold text-foreground text-center mt-6">
-                    Unlock all <span className="text-primary font-bold">{totalProgramCount} programs</span> with a Premium plan or grab one standalone program to start your journey.
-                  </p>
+                  {!freeAccessMode && (
+                    <p className="text-sm sm:text-base font-semibold text-foreground text-center mt-6">
+                      Unlock all <span className="text-primary font-bold">{totalProgramCount} programs</span> with a Premium plan or grab one standalone program to start your journey.
+                    </p>
+                  )}
                 </>
               )}
             </div>
