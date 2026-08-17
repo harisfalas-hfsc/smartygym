@@ -1,15 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, Sparkles, ChevronLeft } from "lucide-react";
+import { ExternalLink, Sparkles, X } from "lucide-react";
 import logoMove from "@/assets/smartymove-logo.png";
 import logoDiet from "@/assets/smartydiet-logo.png";
 import logoWorkout from "@/assets/smartyworkout-logo.png";
-import { useOverlayZIndex } from "@/lib/overlayActivity";
 
-// Change this constant when porting the component to the other two projects.
-const CURRENT_APP: "gym" | "move" | "diet" | "workout" | "logbook" = "gym";
+const CURRENT_APP: "workout" | "gym" | "move" | "diet" | "logbook" = "gym";
 
 type SisterApp = {
-  id: "gym" | "move" | "diet" | "workout" | "logbook";
+  id: "workout" | "gym" | "move" | "diet" | "logbook";
   name: string;
   tagline: string;
   url: string;
@@ -17,6 +15,13 @@ type SisterApp = {
 };
 
 const SISTER_APPS: SisterApp[] = [
+  {
+    id: "diet",
+    name: "SmartyDiet",
+    tagline: "Eat smart. Fuel your body. Live longer.",
+    url: "https://smartydiet.com",
+    image: logoDiet,
+  },
   {
     id: "move",
     name: "SmartyMove",
@@ -31,22 +36,15 @@ const SISTER_APPS: SisterApp[] = [
     url: "https://smartyworkout.com",
     image: logoWorkout,
   },
-  {
-    id: "diet",
-    name: "SmartyDiet",
-    tagline: "Eat smart. Fuel your body. Live longer.",
-    url: "https://smartydiet.com",
-    image: logoDiet,
-  },
 ];
+
 
 const DELAY_MS = 30000;
 
 export const SisterAppsPopup = () => {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const zIndex = useOverlayZIndex(open);
-  const panelRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -56,16 +54,16 @@ export const SisterAppsPopup = () => {
     return () => window.clearTimeout(t);
   }, []);
 
-  // Close when tapping/clicking anywhere outside the panel
   useEffect(() => {
     if (!open) return;
-    const handler = (e: PointerEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (panelRef.current && !panelRef.current.contains(target)) {
         setOpen(false);
       }
     };
-    document.addEventListener("pointerdown", handler, true);
-    return () => document.removeEventListener("pointerdown", handler, true);
+    window.addEventListener("mousedown", handleClick);
+    return () => window.removeEventListener("mousedown", handleClick);
   }, [open]);
 
   const others = SISTER_APPS.filter((a) => a.id !== CURRENT_APP);
@@ -74,11 +72,18 @@ export const SisterAppsPopup = () => {
 
   return (
     <>
+      {open && (
+        <div
+          aria-hidden="false"
+          className="fixed inset-0 z-[58] bg-black/20"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
       <div
         ref={panelRef}
         aria-hidden={!open}
-        style={{ zIndex }}
-        className={`fixed top-1/2 -translate-y-1/2 left-0 flex items-center gap-2 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "translate-x-0" : "-translate-x-[calc(100%+70px)]"}`}
+        className={`fixed top-1/2 -translate-y-1/2 left-0 z-[60] flex items-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "translate-x-0" : "-translate-x-[calc(100%+10px)]"}`}
       >
         <aside className="w-[260px] pl-4 pr-2 py-4 bg-white rounded-r-2xl shadow-[4px_0_24px_rgba(15,23,42,0.12)]">
           <div className="mb-4">
@@ -121,9 +126,9 @@ export const SisterAppsPopup = () => {
           type="button"
           onClick={() => setOpen(false)}
           aria-label="Hide panel"
-          className="h-16 w-12 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-[0_4px_16px_rgba(15,23,42,0.18)]"
+          className="ml-2 h-14 w-14 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-slate-50 hover:text-primary transition-colors shadow-[4px_0_12px_rgba(15,23,42,0.08)] border border-slate-100"
         >
-          <ChevronLeft className="w-8 h-8" />
+          <X className="w-7 h-7" />
         </button>
       </div>
 
@@ -131,16 +136,14 @@ export const SisterAppsPopup = () => {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Show sister apps"
-        style={{ zIndex: Math.max(1, zIndex - 1) }}
-        className={`fixed top-1/2 -translate-y-1/2 left-0 w-2 h-24 rounded-r-full bg-primary shadow-[0_0_28px_hsl(var(--primary)/0.65)] hover:w-3 hover:bg-primary transition-all duration-300 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        className={`fixed top-1/2 -translate-y-1/2 left-0 z-[59] w-2 h-24 rounded-r-full bg-primary shadow-[0_0_28px_hsl(var(--primary)/0.65)] hover:w-3 hover:bg-primary transition-all duration-300 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       />
       {!open && (
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Show sister apps"
-          style={{ zIndex: Math.max(1, zIndex - 2) }}
-          className="fixed top-1/2 -translate-y-1/2 left-0 w-6 h-20 opacity-0"
+          className="fixed top-1/2 -translate-y-1/2 left-0 z-[58] w-6 h-20 opacity-0"
         />
       )}
     </>
