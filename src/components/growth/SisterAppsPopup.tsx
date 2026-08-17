@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Sparkles, ChevronLeft } from "lucide-react";
 import logoMove from "@/assets/smartymove-logo.png";
 import logoDiet from "@/assets/smartydiet-logo.png";
-import logoGym from "@/assets/smarty-gym-logo.png";
 import logoWorkout from "@/assets/smartyworkout-logo.png";
-import logoLogbook from "@/assets/smartylogbook-logo.png";
 import { useOverlayZIndex } from "@/lib/overlayActivity";
 
 // Change this constant when porting the component to the other two projects.
