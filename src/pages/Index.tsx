@@ -1152,11 +1152,13 @@ const Index = () => {
                     We are not here to replace your gym. We are here to back you up when life gets in the way. Whether you're traveling, on holiday, can't make it to the gym, or your gym is closed, SmartyGym is your backup plan. Or, if you go to your gym but want to follow a professional, science-based workout or training program designed by{' '}
                     <Link to="/coach-profile" className="text-primary hover:underline font-medium">Haris Falas</Link>, we provide that expert guidance.
                   </p>
-                  <Link to="/smarty-premium" className="inline-flex items-center gap-2 text-base font-semibold text-green-500 hover:text-green-600 hover:underline mt-2">
-                    <Crown className="w-5 h-5" />
-                    Join Premium
-                    <ChevronRight className="w-5 h-5" />
-                  </Link>
+                  {!freeAccessMode && (
+                    <Link to="/smarty-premium" className="inline-flex items-center gap-2 text-base font-semibold text-green-500 hover:text-green-600 hover:underline mt-2">
+                      <Crown className="w-5 h-5" />
+                      Join Premium
+                      <ChevronRight className="w-5 h-5" />
+                    </Link>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
                     <article className="flex items-start gap-3 p-4 bg-background/50 rounded-lg border border-primary/20 h-full min-h-[88px]">
@@ -1594,7 +1596,7 @@ const Index = () => {
                   <Calendar className="h-5 w-5" />
                   Explore Programs
                 </Button>
-                {!isPremium && <Button size="lg" onClick={() => navigate("/smarty-premium")} className="gap-2 rounded-full px-8 uppercase tracking-wider font-bold border-2 border-[#B8892B] bg-gradient-to-b from-[#F5D67A] via-[#D4A94A] to-[#B8892B] text-black hover:brightness-110 shadow-[0_4px_14px_rgba(184,137,43,0.45)]">
+                {!isPremium && !freeAccessMode && <Button size="lg" onClick={() => navigate("/smarty-premium")} className="gap-2 rounded-full px-8 uppercase tracking-wider font-bold border-2 border-[#B8892B] bg-gradient-to-b from-[#F5D67A] via-[#D4A94A] to-[#B8892B] text-black hover:brightness-110 shadow-[0_4px_14px_rgba(184,137,43,0.45)]">
                     <UserCheck className="h-5 w-5" />
                     Join Premium
                   </Button>}
