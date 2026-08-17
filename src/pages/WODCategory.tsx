@@ -193,7 +193,7 @@ const WODCategory = () => {
                 <Crown className="w-3 h-3 mr-1" />
                 Premium
               </Badge>}
-              {wod.is_standalone_purchase && wod.price && userTier !== "premium" && !hasPurchased(wod.id, "workout") && <TooltipProvider>
+              {!freeAccessMode && wod.is_standalone_purchase && wod.price && userTier !== "premium" && !hasPurchased(wod.id, "workout") && <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 cursor-help text-xs py-0.5">

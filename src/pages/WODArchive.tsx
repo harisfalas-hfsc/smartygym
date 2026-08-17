@@ -395,7 +395,7 @@ const WODArchive = () => {
                   
                   {/* Price & Action */}
                   <div className="flex items-center justify-between gap-2">
-                    {wod.price && wod.is_standalone_purchase && (
+                    {!freeAccessMode && wod.price && wod.is_standalone_purchase && (
                       <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
                         <ShoppingBag className="w-3 h-3 mr-1" />
                         €{wod.price.toFixed(2)}
