@@ -65,6 +65,7 @@ const TrainingProgramDetail = () => {
   const navigate = useNavigate();
   const { type } = useParams();
   const { userTier, hasPurchased } = useAccessControl();
+  const { freeAccessMode } = useFreeAccessMode();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [equipmentFilter, setEquipmentFilter] = useState<EquipmentFilter>("all");
