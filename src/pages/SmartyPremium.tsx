@@ -66,8 +66,6 @@ export default function SmartyPremium() {
 
   const monthlyPrice = 9.99;
 
-  if (freeAccessLoading || freeAccessMode) return null;
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -221,6 +219,8 @@ export default function SmartyPremium() {
       </CardContent>
     </Card>
   );
+
+  if (freeAccessLoading || freeAccessMode) return null;
 
   return (
     <>
