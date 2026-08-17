@@ -40,6 +40,15 @@ a single master toggle "Free Access Mode — all content free for signed-in user
 - No migration touches existing rows; no data is written when the flag flips.
 - Verification after flipping back: sign in as a free account and confirm premium content is locked and the purchase button returns; sign in as a paying account and confirm access is intact; confirm `create-checkout` returns a session URL again.
 
-## Caveat worth knowing
+## The Apple "external purchase" point — YES, it is fixed in this plan
 
-Apple also rejects apps that merely *point* to external purchasing. While the flag is on, the "purchase on smartygym.com" notice text and any pricing copy in FAQ/marketing pages visible inside the app should also be hidden — I will include that in the same flag.
+Apple rejects apps that even *mention or link to* buying somewhere else. That is exactly what your rejection screenshot shows: the "In-app purchases are not available… visit smartygym.com" notice.
+
+So this is not a warning for you to handle — it is part of the work:
+
+- The "In-app purchases are not available / purchased on our website / visit smartygym.com" notice is hidden while the mode is ON.
+- Every price string (€9.99/month, corporate €699–€999, "Billed monthly", "Cancel anytime") is hidden while the mode is ON.
+- Any FAQ, marketing or dashboard copy that mentions buying, subscribing, upgrading or smartygym.com purchases is hidden while the mode is ON.
+- No external purchase link of any kind remains reachable inside the app.
+
+All of it comes back automatically, unchanged, the moment you switch the mode OFF.
