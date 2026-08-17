@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { fetchFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 export type UserTier = "guest" | "subscriber" | "premium";
 
@@ -209,7 +210,9 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
       const isPersonalPremium = dbData?.status === 'active' &&
                          ['lifetime', 'premium', 'legacy_premium'].includes(dbData?.plan_type ?? '');
       const isCorporatePremium = !!corpAdmin || isCorporateMemberActive;
-      const isPremium = isPersonalPremium || isCorporatePremium || isAdmin;
+      // Global Free Access Mode (Admin → Payments): every signed-in user is premium.
+      const freeAccessMode = await fetchFreeAccessMode();
+      const isPremium = isPersonalPremium || isCorporatePremium || isAdmin || freeAccessMode;
 
       setState({
         user,
