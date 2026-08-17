@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { platformHeader } from "@/utils/platform";
 import { PaymentsDisabledNotice } from "@/components/PaymentsDisabledNotice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +55,14 @@ export default function SmartyPremium() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const { paymentsEnabled } = usePaymentsEnabled();
+  const { freeAccessMode, loading: freeAccessLoading } = useFreeAccessMode();
+
+  // Global Free Access Mode: the whole premium page is unavailable.
+  useEffect(() => {
+    if (!freeAccessLoading && freeAccessMode) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [freeAccessLoading, freeAccessMode, navigate]);
 
   const monthlyPrice = 9.99;
 
