@@ -15,6 +15,7 @@ interface WODAnnouncementModalProps {
 
 export const WODAnnouncementModal = ({ open, onClose }: WODAnnouncementModalProps) => {
   const navigate = useNavigate();
+  const { freeAccessMode } = useFreeAccessMode();
   const [countdown, setCountdown] = useState(15);
   const [dontShowAgain, setDontShowAgain] = useState(false);
 

@@ -348,7 +348,7 @@ const WODArchive = () => {
                     <h3 className="text-white font-bold text-sm line-clamp-2">{wod.name}</h3>
                   </div>
                   {/* Premium Badge */}
-                  {wod.is_premium && (
+                  {wod.is_premium && !freeAccessMode && (
                     <div className="absolute top-2 right-2">
                       <Badge className="bg-gradient-to-r from-primary to-yellow-500 text-primary-foreground">
                         <Crown className="w-3 h-3 mr-1" />
