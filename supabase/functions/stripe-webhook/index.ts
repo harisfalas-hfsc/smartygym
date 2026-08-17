@@ -119,6 +119,42 @@ serve(async (req) => {
       logStep("WARN: Failed to record idempotency row, continuing", { error: idemError });
     }
 
+    // Fast-ack pattern: Stripe disables endpoints that time out. Acknowledge
+    // immediately and do the (slow) provisioning + email work in the background.
+    const process = async () => {
+      try {
+        await handleEvent(event, supabase, stripe);
+      } catch (e) {
+        logStep("ERROR in background processing", { id: event.id, type: event.type, error: (e as Error).message });
+      }
+    };
+
+    try {
+      // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
+      EdgeRuntime.waitUntil(process());
+    } catch {
+      await process();
+    }
+
+    return new Response(JSON.stringify({ received: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+
+  } catch (err) {
+    const error = err as Error;
+    logStep("ERROR in webhook handler", { error: error.message });
+    // Return 200 so Stripe does not retry-storm and disable the endpoint;
+    // failures are logged and reconciled by the sync/self-healing crons.
+    return new Response(JSON.stringify({ received: true, error: error.message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+  }
+});
+
+async function handleEvent(event: Stripe.Event, supabase: any, stripe: Stripe) {
+  {
     // Handle different event types
     switch (event.type) {
       case "checkout.session.completed": {
@@ -169,21 +205,8 @@ serve(async (req) => {
       default:
         logStep("Unhandled event type", { type: event.type });
     }
-
-    return new Response(JSON.stringify({ received: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-
-  } catch (err) {
-    const error = err as Error;
-    logStep("ERROR in webhook handler", { error: error.message });
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
   }
-});
+}
 
 // Helper function to check if user is a first-time customer
 async function isFirstTimeCustomer(userId: string, supabase: any): Promise<boolean> {
