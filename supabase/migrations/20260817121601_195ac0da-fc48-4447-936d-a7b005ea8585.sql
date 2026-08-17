@@ -1,0 +1,1 @@
+UPDATE public.system_settings SET setting_value='false'::jsonb WHERE setting_key='sister_announcement_enabled';
