@@ -536,7 +536,7 @@ const TrainingProgramFlow = () => {
         )}
 
         {/* Bottom Premium Banner */}
-        {!isPremium && (
+        {!isPremium && !freeAccessMode && (
           <ScrollReveal delay={600}>
             <div className="bg-card border border-border rounded-xl p-6 mt-8 text-center shadow-soft">
               <h3 className="text-xl font-semibold mb-2">Start your transformation</h3>
