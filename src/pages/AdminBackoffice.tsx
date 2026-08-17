@@ -29,6 +29,7 @@ import ExerciseLibraryManager from "@/components/admin/ExerciseLibraryManager";
 import SmartyGymAppVault from "@/pages/admin/SmartyGymAppVault";
 import { CronJobsManager } from "@/components/admin/CronJobsManager";
 import { PaymentsManager } from "@/components/admin/PaymentsManager";
+import { AnnouncementManagerAdmin } from "@/components/admin/AnnouncementManagerAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -71,6 +72,7 @@ export default function AdminBackoffice() {
     { id: "notification-history", label: "Notifications", description: "Push notification logs", icon: Bell, color: "text-yellow-500", bgColor: "bg-yellow-500/10" },
     { id: "shop", label: "Shop", description: "Products & orders", icon: ShoppingBag, color: "text-rose-500", bgColor: "bg-rose-500/10" },
     { id: "payments", label: "Payments", description: "Stripe & platform controls", icon: CreditCard, color: "text-green-600", bgColor: "bg-green-600/10" },
+    { id: "announcement", label: "Announcement", description: "Sister apps popup on/off", icon: Megaphone, color: "text-pink-600", bgColor: "bg-pink-600/10" },
     { id: "exercise-library", label: "Exercise Library", description: "Video tutorials", icon: Video, color: "text-teal-500", bgColor: "bg-teal-500/10" },
     { id: "docs", label: "Docs", description: "Documentation", icon: FileText, color: "text-lime-600", bgColor: "bg-lime-500/10" },
     { id: "smartygym-app", label: "SmartyGym App", description: "App vault & settings", icon: Smartphone, color: "text-fuchsia-500", bgColor: "bg-fuchsia-500/10" },
@@ -400,6 +402,9 @@ export default function AdminBackoffice() {
 
             {/* Payments Section */}
             {activeTab === "payments" && <PaymentsManager />}
+
+            {/* Announcement Section */}
+            {activeTab === "announcement" && <AnnouncementManagerAdmin />}
 
             {/* Docs Section */}
             {activeTab === "docs" && <AdminDocumentationManager />}

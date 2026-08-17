@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Sparkles, X } from "lucide-react";
+import { useSisterAnnouncement } from "@/hooks/useSisterAnnouncement";
 import logoMove from "@/assets/smartymove-logo.png";
 import logoDiet from "@/assets/smartydiet-logo.png";
 import logoWorkout from "@/assets/smartyworkout-logo.png";
@@ -45,14 +46,16 @@ export const SisterAppsPopup = () => {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const { enabled, loading } = useSisterAnnouncement();
 
   useEffect(() => {
+    if (loading || !enabled) return;
     const t = window.setTimeout(() => {
       setMounted(true);
       setOpen(true);
     }, DELAY_MS);
     return () => window.clearTimeout(t);
-  }, []);
+  }, [enabled, loading]);
 
   useEffect(() => {
     if (!open) return;
@@ -68,7 +71,7 @@ export const SisterAppsPopup = () => {
 
   const others = SISTER_APPS.filter((a) => a.id !== CURRENT_APP);
 
-  if (!mounted) return null;
+  if (!enabled || !mounted) return null;
 
   return (
     <>
