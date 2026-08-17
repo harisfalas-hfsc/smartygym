@@ -715,7 +715,7 @@ const WorkoutDetail = () => {
                   )}
                   
                   {/* Buy Badge - Only if standalone purchasable and user can use it */}
-                  {workout.is_standalone_purchase && workout.price && userTier !== "premium" && !hasPurchased(workout.id, "workout") && (
+                  {!freeAccessMode && workout.is_standalone_purchase && workout.price && userTier !== "premium" && !hasPurchased(workout.id, "workout") && (
                     <div className="flex items-center">
                       <Tooltip>
                         <TooltipTrigger asChild>

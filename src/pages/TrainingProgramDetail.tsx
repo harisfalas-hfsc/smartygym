@@ -638,7 +638,7 @@ const TrainingProgramDetail = () => {
                   )}
                   
                   {/* Buy Badge - Only if standalone purchasable and user can use it */}
-                  {program.is_standalone_purchase && program.price && userTier !== "premium" && !hasPurchased(program.id, "program") && (
+                  {!freeAccessMode && program.is_standalone_purchase && program.price && userTier !== "premium" && !hasPurchased(program.id, "program") && (
                     <div className="flex items-center">
                       <Tooltip>
                         <TooltipTrigger asChild>
