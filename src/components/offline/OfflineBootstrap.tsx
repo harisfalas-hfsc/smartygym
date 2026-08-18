@@ -10,16 +10,47 @@ import {
   initOfflineSessionTracking,
 } from "@/lib/offline";
 import { getCyprusTodayStr } from "@/lib/cyprusDate";
+import { fetchFreeAccessMode, subscribeFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
 
 /**
  * Downloads the signed-in member's entire world in the background so every
  * page works with zero internet — without the member visiting any page first.
  */
+/** Fields that hold the paid body of a workout / program. */
+const BODY_FIELDS = [
+  "warm_up",
+  "activation",
+  "main_workout",
+  "finisher",
+  "cool_down",
+  "instructions",
+  "tips",
+  "notes",
+  "overview",
+  "program_structure",
+  "weekly_schedule",
+  "progression_plan",
+  "nutrition_tips",
+  "expected_results",
+  "target_audience",
+];
+
+/** Listing-safe copy: keeps title/image/description, drops the paid content. */
+const stripBody = <T extends Record<string, unknown>>(row: T): T => {
+  const copy: Record<string, unknown> = { ...row };
+  for (const field of BODY_FIELDS) {
+    if (field in copy) copy[field] = null;
+  }
+  copy.offline_locked = true;
+  return copy as T;
+};
+
 export const OfflineBootstrap = () => {
   const queryClient = useQueryClient();
   const running = useRef(false);
   const lastRunAt = useRef(0);
+  const premiumAtLastSync = useRef<boolean | null>(null);
 
   useEffect(() => {
     initOfflineSessionTracking();
@@ -36,6 +67,36 @@ export const OfflineBootstrap = () => {
 
       try {
         await flushMutationQueue(userId);
+
+        // ---- entitlement first: it decides WHAT may be stored offline --------
+        const [{ data: roleRows }, { data: subRow }, { data: purchaseRows }, freeAccessMode] =
+          await Promise.all([
+            table("user_roles").select("role").eq("user_id", userId),
+            table("user_subscriptions")
+              .select("plan_type, status")
+              .eq("user_id", userId)
+              .maybeSingle(),
+            table("user_purchases")
+              .select("content_id, content_type")
+              .eq("user_id", userId)
+              .eq("content_deleted", false),
+            fetchFreeAccessMode(true),
+          ]);
+
+        const isAdmin = (roleRows ?? []).some((r: any) => r.role === "admin");
+        const isPersonalPremium =
+          subRow?.status === "active" &&
+          ["lifetime", "premium", "legacy_premium"].includes(subRow?.plan_type ?? "");
+        const isPremium = isAdmin || isPersonalPremium || freeAccessMode;
+        const purchased = new Set(
+          (purchaseRows ?? []).map((p: any) => `${p.content_type}:${p.content_id}`),
+        );
+
+        const entitledTo = (row: any, kind: "workout" | "program") => {
+          if (isPremium) return true;
+          if (row?.is_free === true || row?.is_premium === false) return true;
+          return purchased.has(`${kind}:${row?.id}`);
+        };
 
         const tasks: Promise<unknown>[] = [];
 
@@ -79,13 +140,17 @@ export const OfflineBootstrap = () => {
 
             for (const w of workouts) {
               const slug = workoutSlugs.get(w.id) || slugifyContentName(w.name || w.id);
-              const row = { ...w, canonical_slug: slug };
+              const full = { ...w, canonical_slug: slug };
+              // Not entitled? store a listing-safe copy only, which also
+              // OVERWRITES any body cached while Free Access Mode was on.
+              const row = entitledTo(w, "workout") ? full : stripBody(full);
               await save(`detail:workout:${w.id}`, row);
               await save(`detail:workout:${slug}`, row);
             }
             for (const p of programs) {
               const slug = programSlugs.get(p.id) || slugifyContentName(p.name || p.id);
-              const row = { ...p, canonical_slug: slug };
+              const full = { ...p, canonical_slug: slug };
+              const row = entitledTo(p, "program") ? full : stripBody(full);
               await save(`detail:program:${p.id}`, row);
               await save(`detail:program:${slug}`, row);
               await save(`detail:training-program:${p.id}`, row);
@@ -234,6 +299,18 @@ export const OfflineBootstrap = () => {
         );
 
         await Promise.allSettled(tasks);
+
+        // Entitlement dropped since the last sync (e.g. Free Access Mode was
+        // switched off, or a subscription lapsed)? Throw away the in-memory
+        // detail caches so the UI re-reads the now-locked local copies.
+        const previousPremium = premiumAtLastSync.current;
+        premiumAtLastSync.current = isPremium;
+        if (previousPremium === true && !isPremium) {
+          queryClient.removeQueries({ queryKey: ["workout"] });
+          queryClient.removeQueries({ queryKey: ["training-program"] });
+          queryClient.removeQueries({ queryKey: ["program"] });
+        }
+
         await trimCache();
       } catch (error) {
         console.warn("[offline] bootstrap failed", error);
@@ -267,14 +344,32 @@ export const OfflineBootstrap = () => {
       }
     });
 
-    const onOnline = () => {
-      if (activeUserId) void run(activeUserId);
+    const resync = (force = false) => {
+      if (!activeUserId) return;
+      if (force) lastRunAt.current = 0;
+      void run(activeUserId);
     };
+
+    const onOnline = () => resync(true);
+    const onFocus = () => {
+      if (document.visibilityState === "visible") resync();
+    };
+    // Admin flipped the Free Access switch → re-sync entitlements right away.
+    const unsubscribeFreeAccess = subscribeFreeAccessMode(() => resync(true));
+    // Catch the switch flipping on other devices too.
+    const poll = window.setInterval(() => {
+      if (navigator.onLine) void fetchFreeAccessMode(true);
+    }, 5 * 60 * 1000);
+
     window.addEventListener("online", onOnline);
+    document.addEventListener("visibilitychange", onFocus);
 
     return () => {
       sub.subscription.unsubscribe();
+      unsubscribeFreeAccess();
+      window.clearInterval(poll);
       window.removeEventListener("online", onOnline);
+      document.removeEventListener("visibilitychange", onFocus);
     };
   }, [queryClient]);
 
