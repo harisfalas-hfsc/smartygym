@@ -41,6 +41,10 @@ for (const target of targets) {
   if (!entries.includes("assets")) {
     throw new Error(`${target.name} native bundle is missing its local assets directory.`);
   }
+
+  if (!indexHtml.includes('window.location.hostname === "localhost"')) {
+    throw new Error(`${target.name} native bundle is missing the guard for website-only redirects.`);
+  }
 }
 
 console.log("Native bundle verified: Android and iOS will boot from packaged web assets.");
