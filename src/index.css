@@ -43,9 +43,18 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  html,
-  body {
+  html {
     overscroll-behavior-y: contain;
+    overflow-x: clip;
+    overflow-y: auto;
+    touch-action: pan-y;
+  }
+
+  body {
+    min-height: 100%;
+    overflow-x: clip;
+    overflow-y: visible;
+    touch-action: pan-y;
   }
 
   :root {
@@ -1124,11 +1133,10 @@ li.tiptap-list-item p {
 
 /* Global smooth scrolling */
 html,
-body,
 #root {
   scroll-behavior: smooth;
   max-width: 100vw;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Global textarea behavior - prevent horizontal scrolling */
