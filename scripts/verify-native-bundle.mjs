@@ -30,7 +30,8 @@ for (const target of targets) {
     throw new Error(`${target.name} must use webDir "dist" for offline cold starts.`);
   }
 
-  const absoluteRemoteEntry = /<(?:script|link)[^>]+(?:src|href)=["']https?:\/\//i.test(indexHtml);
+  const absoluteRemoteEntry = /<script[^>]+type=["']module["'][^>]+src=["']https?:\/\//i.test(indexHtml)
+    || /<link[^>]+rel=["']stylesheet["'][^>]+href=["']https?:\/\//i.test(indexHtml);
   if (absoluteRemoteEntry) {
     throw new Error(`${target.name} index.html references a remote entry file and cannot cold-start offline.`);
   }
