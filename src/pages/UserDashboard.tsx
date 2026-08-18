@@ -455,16 +455,19 @@ export default function UserDashboard() {
   };
   const fetchCalculatorHistory = async (userId: string) => {
     try {
-      const load = async (key: string, table: "onerm_history" | "bmr_history" | "calorie_history") =>
-        offlineFirst(key, async () => {
+      const load = async <T extends CalculatorRecord>(
+        key: string,
+        table: "onerm_history" | "bmr_history" | "calorie_history",
+      ): Promise<T[]> =>
+        offlineFirst<T[]>(key, async () => {
           const result = await supabase.from(table).select("*").eq("user_id", userId).order("created_at", { ascending: false });
           if (result.error) throw result.error;
-          return result.data ?? [];
+          return (result.data ?? []) as unknown as T[];
         }, userId);
       const [onerm, bmr, calories] = await Promise.all([
-        load("logbook:onerm", "onerm_history"),
-        load("logbook:bmr", "bmr_history"),
-        load("logbook:calories", "calorie_history"),
+        load<OneRMRecord>("logbook:onerm", "onerm_history"),
+        load<BMRRecord>("logbook:bmr", "bmr_history"),
+        load<CalorieRecord>("logbook:calories", "calorie_history"),
       ]);
       setOneRMHistory(onerm.slice(0, 5));
       setBMRHistory(bmr.slice(0, 5));
