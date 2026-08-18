@@ -65,6 +65,11 @@ export const fetchFreeAccessMode = async (force = false): Promise<boolean> => {
 
 export const setFreeAccessModeCache = (value: boolean) => {
   cached = value;
+  try {
+    localStorage.setItem(FREE_ACCESS_LOCAL_KEY, String(value));
+  } catch {
+    /* storage unavailable */
+  }
   listeners.forEach((l) => l(value));
 };
 
