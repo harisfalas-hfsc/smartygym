@@ -12,9 +12,9 @@
     "generate:sitemap": "bunx tsx scripts/generate-sitemap.ts",
     "predev": "bunx tsx scripts/generate-sitemap.ts",
     "prebuild": "bunx tsx scripts/generate-sitemap.ts",
-    "postbuild": "(bunx tsx scripts/ping-search-engines.ts || true) && npx cap copy && node scripts/verify-native-bundle.mjs",
+    "postbuild": "(bunx tsx scripts/ping-search-engines.ts || true) && npx cap sync && node scripts/verify-native-bundle.mjs",
     "ping:search-engines": "bunx tsx scripts/ping-search-engines.ts",
-    "native:sync": "npm run build && npx cap sync && node scripts/verify-native-bundle.mjs",
+    "native:sync": "npm run build && node scripts/verify-native-bundle.mjs",
     "native:android": "npm run native:sync && npx cap open android",
     "native:ios": "npm run native:sync && npx cap open ios"
   },
