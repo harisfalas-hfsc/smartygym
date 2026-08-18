@@ -2,6 +2,7 @@
 // notes). Replayed automatically once the connection returns.
 import { readOffline, saveOffline } from "./db";
 import { supabase } from "@/integrations/supabase/client";
+import { getNetworkStatus } from "./connectivity";
 
 const QUEUE_KEY = "pending-mutations";
 
@@ -27,7 +28,7 @@ export async function pendingMutationCount(userId: string) {
 }
 
 export async function flushMutationQueue(userId: string): Promise<number> {
-  if (typeof navigator !== "undefined" && !navigator.onLine) return 0;
+  if (!(await getNetworkStatus())) return 0;
   const entries = (await readOffline<QueueEntry[]>(QUEUE_KEY, userId))?.data ?? [];
   if (!entries.length) return 0;
 

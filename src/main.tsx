@@ -4,7 +4,7 @@ import "./index.css";
 import { configureStatusBar } from "./utils/native";
 import { registerAppServiceWorker } from "./utils/registerServiceWorker";
 import { Capacitor } from "@capacitor/core";
-import { initOfflineSessionTracking, restoreCachedSessionOffline } from "./lib/offline";
+import { getNetworkStatus, initOfflineSessionTracking, initializeConnectivity, restoreCachedSessionOffline } from "./lib/offline";
 
 // Configure native status bar on app launch
 configureStatusBar();
@@ -50,8 +50,9 @@ if (!Capacitor.isNativePlatform()) {
 }
 
 const boot = async () => {
+  await initializeConnectivity();
   initOfflineSessionTracking();
-  if (typeof navigator !== "undefined" && !navigator.onLine) {
+  if (!(await getNetworkStatus())) {
     await restoreCachedSessionOffline();
   }
 

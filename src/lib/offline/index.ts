@@ -3,6 +3,7 @@ export * from "./offlineFirst";
 export * from "./credentials";
 export * from "./mutationQueue";
 export * from "./session";
+export * from "./connectivity";
 
 import { offlineFirst } from "./offlineFirst";
 import { getCurrentUserId } from "./session";
