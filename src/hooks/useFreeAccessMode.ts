@@ -63,6 +63,14 @@ export const fetchFreeAccessMode = async (force = false): Promise<boolean> => {
   return inflight;
 };
 
+/** Subscribe to Free Access Mode changes (returns an unsubscribe function). */
+export const subscribeFreeAccessMode = (listener: (v: boolean) => void) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+};
+
 export const setFreeAccessModeCache = (value: boolean) => {
   cached = value;
   try {
