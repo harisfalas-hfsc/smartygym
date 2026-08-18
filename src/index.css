@@ -43,6 +43,11 @@ All colors MUST be HSL.
 */
 
 @layer base {
+  html,
+  body {
+    overscroll-behavior-y: contain;
+  }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 15%;

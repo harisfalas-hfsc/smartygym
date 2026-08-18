@@ -6,6 +6,7 @@ import type { Session } from "@supabase/supabase-js";
 const DEVICE_SCOPE = "device";
 const CRED_KEY = "offline-credentials";
 const SESSION_KEY = "offline-session";
+const ACTIVE_USER_KEY = "smartygym_offline_user_id";
 const ITERATIONS = 210_000;
 
 interface StoredCredential {
@@ -53,38 +54,74 @@ export async function storeOfflineCredentials(email: string, password: string, u
       verifier,
       savedAt: Date.now(),
     };
-    await saveOffline(CRED_KEY, record, DEVICE_SCOPE);
+    await saveOffline(`${CRED_KEY}:${record.email}`, record, DEVICE_SCOPE);
+    localStorage.setItem(ACTIVE_USER_KEY, userId);
   } catch (e) {
     console.warn("[offline] could not store device credentials", e);
   }
 }
 
 export async function getStoredCredentialEmail(): Promise<string | null> {
-  const rec = await readOffline<StoredCredential>(CRED_KEY, DEVICE_SCOPE);
+  const activeUserId = localStorage.getItem(ACTIVE_USER_KEY);
+  if (!activeUserId) return null;
+  const session = await readOffline<StoredSession>(`${SESSION_KEY}:${activeUserId}`, DEVICE_SCOPE);
+  const email = session?.data.session.user.email?.trim().toLowerCase();
+  if (!email) return null;
+  const rec = await readOffline<StoredCredential>(`${CRED_KEY}:${email}`, DEVICE_SCOPE);
   return rec?.data.email ?? null;
 }
 
 export async function verifyOfflineCredentials(email: string, password: string): Promise<boolean> {
-  const rec = await readOffline<StoredCredential>(CRED_KEY, DEVICE_SCOPE);
+  const normalizedEmail = email.trim().toLowerCase();
+  let rec = await readOffline<StoredCredential>(`${CRED_KEY}:${normalizedEmail}`, DEVICE_SCOPE);
+  // One-time compatibility migration from the original single-account key.
+  if (!rec) {
+    const legacy = await readOffline<StoredCredential>(CRED_KEY, DEVICE_SCOPE);
+    if (legacy?.data.email === normalizedEmail) {
+      rec = legacy;
+      await saveOffline(`${CRED_KEY}:${normalizedEmail}`, legacy.data, DEVICE_SCOPE);
+      await removeOffline(CRED_KEY, DEVICE_SCOPE);
+    }
+  }
   if (!rec) return false;
   const { salt, iterations, verifier, email: storedEmail } = rec.data;
-  if (storedEmail !== email.trim().toLowerCase()) return false;
+  if (storedEmail !== normalizedEmail) return false;
   const candidate = await derive(password, fromBase64(salt), iterations);
-  return candidate === verifier;
+  const matches = candidate === verifier;
+  if (matches) localStorage.setItem(ACTIVE_USER_KEY, rec.data.userId);
+  return matches;
 }
 
 export async function clearStoredCredentials() {
-  await removeOffline(CRED_KEY, DEVICE_SCOPE);
-  await removeOffline(SESSION_KEY, DEVICE_SCOPE);
+  const activeUserId = localStorage.getItem(ACTIVE_USER_KEY);
+  if (!activeUserId) return;
+  const session = await readOffline<StoredSession>(`${SESSION_KEY}:${activeUserId}`, DEVICE_SCOPE);
+  const email = session?.data.session.user.email?.trim().toLowerCase();
+  if (email) await removeOffline(`${CRED_KEY}:${email}`, DEVICE_SCOPE);
+  await removeOffline(`${SESSION_KEY}:${activeUserId}`, DEVICE_SCOPE);
+  localStorage.removeItem(ACTIVE_USER_KEY);
 }
 
 export async function cacheSessionForOffline(session: Session) {
   const record: StoredSession = { session, savedAt: Date.now() };
-  await saveOffline(SESSION_KEY, record, DEVICE_SCOPE);
+  await saveOffline(`${SESSION_KEY}:${session.user.id}`, record, DEVICE_SCOPE);
+  localStorage.setItem(ACTIVE_USER_KEY, session.user.id);
 }
 
 export async function getCachedOfflineSession(): Promise<Session | null> {
-  const rec = await readOffline<StoredSession>(SESSION_KEY, DEVICE_SCOPE);
+  const activeUserId = localStorage.getItem(ACTIVE_USER_KEY);
+  if (!activeUserId) return null;
+  let rec = await readOffline<StoredSession>(`${SESSION_KEY}:${activeUserId}`, DEVICE_SCOPE);
+  // One-time compatibility migration for devices that synced before sessions
+  // became account-scoped.
+  if (!rec) {
+    const legacy = await readOffline<StoredSession>(SESSION_KEY, DEVICE_SCOPE);
+    if (legacy?.data.session.user.id === activeUserId) {
+      rec = legacy;
+      await saveOffline(`${SESSION_KEY}:${activeUserId}`, legacy.data, DEVICE_SCOPE);
+      await removeOffline(SESSION_KEY, DEVICE_SCOPE);
+    }
+  }
   return rec?.data.session ?? null;
 }
 

@@ -4,6 +4,7 @@ import "./index.css";
 import { configureStatusBar } from "./utils/native";
 import { registerAppServiceWorker } from "./utils/registerServiceWorker";
 import { Capacitor } from "@capacitor/core";
+import { initOfflineSessionTracking, restoreCachedSessionOffline } from "./lib/offline";
 
 // Configure native status bar on app launch
 configureStatusBar();
@@ -41,22 +42,22 @@ const clearLovableDeploymentPinCookie = () => {
 // older deployment until cookies are cleared. Remove it on every app start.
 clearLovableDeploymentPinCookie();
 
-// In a true Capacitor native shell we don't want a web SW — the native
-// container handles caching. Everywhere else (browser + WebView APK wrappers
-// like AppMySite) we register the guarded service worker for fast repeat
-// loads + offline support. The guard inside registerAppServiceWorker handles
-// dev, iframe, and Lovable preview hosts.
-if (Capacitor.isNativePlatform()) {
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.getRegistrations().then((regs) => {
-      regs.forEach((r) => r.unregister());
-    });
-  }
-  if ("caches" in window) {
-    caches.keys().then((names) => names.forEach((n) => caches.delete(n)));
-  }
-} else {
+// Capacitor loads the bundled `dist` shell and therefore needs no service
+// worker. Never delete Cache Storage here: Android/iOS WebView wrappers may
+// rely on it to boot the published PWA while offline.
+if (!Capacitor.isNativePlatform()) {
   registerAppServiceWorker();
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+const boot = async () => {
+  initOfflineSessionTracking();
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await restoreCachedSessionOffline();
+  }
+
+  const root = document.getElementById("root");
+  if (!root) return;
+  createRoot(root).render(<App />);
+};
+
+void boot();
