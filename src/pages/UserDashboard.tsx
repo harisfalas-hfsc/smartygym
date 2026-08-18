@@ -14,6 +14,7 @@ import { UserMessagesPanel } from "@/components/UserMessagesPanel";
 import { MyOrders } from "@/components/MyOrders";
 import { useQuery } from "@tanstack/react-query";
 import { useAccessControl } from "@/hooks/useAccessControl";
+import { offlineFirst, restoreCachedSessionOffline } from "@/lib/offline";
 import { openExternal } from "@/utils/native";
 
 import { useAdminRole } from "@/hooks/useAdminRole";
@@ -355,15 +356,16 @@ export default function UserDashboard() {
           session
         }
       } = await supabase.auth.getSession();
-      if (!session?.user) {
+       const resolvedSession = session || (!navigator.onLine ? await restoreCachedSessionOffline() : null);
+       if (!resolvedSession?.user) {
         setLoading(false);
         navigate('/auth');
         return;
       }
-      setUser(session.user);
+       setUser(resolvedSession.user);
 
       // Fetch all data in parallel with individual error handling
-      await Promise.allSettled([fetchAllData(session.user.id), checkSubscription(session.user.id), fetchCorporateSubscription(session.user.id)]);
+       await Promise.allSettled([fetchAllData(resolvedSession.user.id), checkSubscription(resolvedSession.user.id), fetchCorporateSubscription(resolvedSession.user.id)]);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error initializing dashboard:", error);
@@ -383,14 +385,12 @@ export default function UserDashboard() {
   };
   const fetchWorkoutInteractions = async (userId: string) => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from("workout_interactions").select("*").eq("user_id", userId).order("updated_at", {
-        ascending: false
-      });
-      if (error) throw error;
-      if (data) setWorkoutInteractions(data);
+      const data = await offlineFirst("favorites:workout-interactions", async () => {
+        const result = await supabase.from("workout_interactions").select("*").eq("user_id", userId).order("updated_at", { ascending: false });
+        if (result.error) throw result.error;
+        return result.data ?? [];
+      }, userId);
+      setWorkoutInteractions(data);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error fetching workout interactions:", error);
@@ -399,14 +399,12 @@ export default function UserDashboard() {
   };
   const fetchProgramInteractions = async (userId: string) => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from("program_interactions").select("*").eq("user_id", userId).order("updated_at", {
-        ascending: false
-      });
-      if (error) throw error;
-      if (data) setProgramInteractions(data);
+      const data = await offlineFirst("favorites:program-interactions", async () => {
+        const result = await supabase.from("program_interactions").select("*").eq("user_id", userId).order("updated_at", { ascending: false });
+        if (result.error) throw result.error;
+        return result.data ?? [];
+      }, userId);
+      setProgramInteractions(data);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error fetching program interactions:", error);
@@ -457,23 +455,20 @@ export default function UserDashboard() {
   };
   const fetchCalculatorHistory = async (userId: string) => {
     try {
-      // Fetch all calculator histories in parallel
-      const [onermResult, bmrResult, calorieResult] = await Promise.allSettled([supabase.from("onerm_history").select("*").eq("user_id", userId).order("created_at", {
-        ascending: false
-      }).limit(5), supabase.from("bmr_history").select("*").eq("user_id", userId).order("created_at", {
-        ascending: false
-      }).limit(5), supabase.from("calorie_history").select("*").eq("user_id", userId).order("created_at", {
-        ascending: false
-      }).limit(5)]);
-      if (onermResult.status === 'fulfilled' && onermResult.value.data) {
-        setOneRMHistory(onermResult.value.data);
-      }
-      if (bmrResult.status === 'fulfilled' && bmrResult.value.data) {
-        setBMRHistory(bmrResult.value.data);
-      }
-      if (calorieResult.status === 'fulfilled' && calorieResult.value.data) {
-        setCalorieHistory(calorieResult.value.data);
-      }
+      const load = async (key: string, table: "onerm_history" | "bmr_history" | "calorie_history") =>
+        offlineFirst(key, async () => {
+          const result = await supabase.from(table).select("*").eq("user_id", userId).order("created_at", { ascending: false });
+          if (result.error) throw result.error;
+          return result.data ?? [];
+        }, userId);
+      const [onerm, bmr, calories] = await Promise.all([
+        load("logbook:onerm", "onerm_history"),
+        load("logbook:bmr", "bmr_history"),
+        load("logbook:calories", "calorie_history"),
+      ]);
+      setOneRMHistory(onerm.slice(0, 5));
+      setBMRHistory(bmr.slice(0, 5));
+      setCalorieHistory(calories.slice(0, 5));
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error fetching calculator history:", error);
@@ -482,16 +477,12 @@ export default function UserDashboard() {
   };
   const fetchMeasurementHistory = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from("user_activity_log")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("content_type", "measurement")
-        .order("created_at", { ascending: false })
-        .limit(5);
-      
-      if (error) throw error;
-      if (data) setMeasurementHistory(data);
+      const activity = await offlineFirst("logbook:activity", async () => {
+        const result = await supabase.from("user_activity_log").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+        if (result.error) throw result.error;
+        return result.data ?? [];
+      }, userId);
+      setMeasurementHistory(activity.filter((row) => row.content_type === "measurement").slice(0, 5));
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error fetching measurements:", error);

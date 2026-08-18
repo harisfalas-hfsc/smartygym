@@ -258,7 +258,7 @@ export const OfflineBootstrap = () => {
         // ---- logbook / progress / stats ---------------------------------------
         tasks.push(
           (async () => {
-            const [checkins, progress, calories, bmr, onerm, goals, measurements, badges, scheduled] =
+            const [checkins, progress, calories, bmr, onerm, goals, measurements, badges, scheduled, activity] =
               await Promise.all([
                 table("smarty_checkins").select("*").eq("user_id", userId),
                 table("progress_logs").select("*").eq("user_id", userId),
@@ -269,6 +269,7 @@ export const OfflineBootstrap = () => {
                 table("user_measurement_goals").select("*").eq("user_id", userId),
                 table("user_badges").select("*").eq("user_id", userId),
                 table("scheduled_workouts").select("*").eq("user_id", userId),
+                table("user_activity_log").select("*").eq("user_id", userId),
               ]);
             await Promise.all([
               save("logbook:checkins", checkins.data ?? []),
@@ -280,6 +281,7 @@ export const OfflineBootstrap = () => {
               save("progress:measurement-goals", measurements.data ?? []),
               save("badges", badges.data ?? []),
               save("saved:scheduled-workouts", scheduled.data ?? []),
+              save("logbook:activity", activity.data ?? []),
             ]);
           })(),
         );
