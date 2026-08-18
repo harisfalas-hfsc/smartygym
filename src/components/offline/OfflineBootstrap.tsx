@@ -69,7 +69,14 @@ export const OfflineBootstrap = () => {
         await flushMutationQueue(userId);
 
         // ---- entitlement first: it decides WHAT may be stored offline --------
-        const [{ data: roleRows }, { data: subRow }, { data: purchaseRows }, freeAccessMode] =
+        const [
+          { data: roleRows },
+          { data: subRow },
+          { data: purchaseRows },
+          { data: corpAdmin },
+          { data: corpMember },
+          freeAccessMode,
+        ] =
           await Promise.all([
             table("user_roles").select("role").eq("user_id", userId),
             table("user_subscriptions")
@@ -80,6 +87,16 @@ export const OfflineBootstrap = () => {
               .select("content_id, content_type")
               .eq("user_id", userId)
               .eq("content_deleted", false),
+            table("corporate_subscriptions")
+              .select("id")
+              .eq("admin_user_id", userId)
+              .eq("status", "active")
+              .maybeSingle(),
+            table("corporate_members")
+              .select("corporate_subscription_id, corporate_subscriptions!inner(status)")
+              .eq("user_id", userId)
+              .eq("corporate_subscriptions.status", "active")
+              .maybeSingle(),
             fetchFreeAccessMode(true),
           ]);
 
@@ -87,7 +104,8 @@ export const OfflineBootstrap = () => {
         const isPersonalPremium =
           subRow?.status === "active" &&
           ["lifetime", "premium", "legacy_premium"].includes(subRow?.plan_type ?? "");
-        const isPremium = isAdmin || isPersonalPremium || freeAccessMode;
+        const isCorporatePremium = Boolean(corpAdmin || corpMember);
+        const isPremium = isAdmin || isPersonalPremium || isCorporatePremium || freeAccessMode;
         const purchased = new Set(
           (purchaseRows ?? []).map((p: any) => `${p.content_type}:${p.content_id}`),
         );
@@ -133,10 +151,14 @@ export const OfflineBootstrap = () => {
             const workoutSlugs = buildUniqueContentSlugs(workouts);
             const programSlugs = buildUniqueContentSlugs(programs);
 
-            await save("workouts:list:all", workouts);
-            await save("programs:list:all", programs);
-            queryClient.setQueryData(["all-workouts"], workouts);
-            queryClient.setQueryData(["all-programs"], programs);
+            // List caches must never become a back door to paid body fields.
+            // Detail caches below retain full bodies only for entitled content.
+            const safeWorkoutList = workouts.map((w: any) => stripBody(w));
+            const safeProgramList = programs.map((p: any) => stripBody(p));
+            await save("workouts:list:all", safeWorkoutList);
+            await save("programs:list:all", safeProgramList);
+            queryClient.setQueryData(["all-workouts"], safeWorkoutList);
+            queryClient.setQueryData(["all-programs"], safeProgramList);
 
             for (const w of workouts) {
               const slug = workoutSlugs.get(w.id) || slugifyContentName(w.name || w.id);
@@ -241,14 +263,40 @@ export const OfflineBootstrap = () => {
         // ---- notifications / inbox --------------------------------------------
         tasks.push(
           (async () => {
-            const [messages, contact] = await Promise.all([
+            const [messages, contact, contactHistory] = await Promise.all([
               table("user_system_messages").select("*").eq("user_id", userId),
               table("contact_messages").select("*").eq("user_id", userId),
+              table("contact_message_history").select("*").eq("user_id", userId),
             ]);
             await Promise.all([
               save("notifications:system-messages", messages.data ?? []),
               save("inbox:contact-messages", contact.data ?? []),
+              save("inbox:contact-history", contactHistory.data ?? []),
             ]);
+          })(),
+        );
+
+        // ---- workout discussion threads + full comments -----------------------
+        tasks.push(
+          (async () => {
+            const { data: comments } = await table("workout_comments")
+              .select("*")
+              .order("created_at", { ascending: true });
+            const allComments = comments ?? [];
+            await save("community:workout-comments", allComments);
+            const byWorkout = new Map<string, any[]>();
+            for (const comment of allComments as any[]) {
+              const workoutId = comment.workout_id;
+              if (!workoutId) continue;
+              const bucket = byWorkout.get(workoutId) ?? [];
+              bucket.push(comment);
+              byWorkout.set(workoutId, bucket);
+            }
+            await Promise.all(
+              [...byWorkout.entries()].map(([workoutId, rows]) =>
+                save(`community:workout-comments:${workoutId}`, rows),
+              ),
+            );
           })(),
         );
 
