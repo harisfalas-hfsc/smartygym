@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchVisibleWorkoutMetadata } from "@/hooks/useTodayWods";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
+import { offlineQueryFn } from "@/lib/offline";
 
 export interface WorkoutData {
   id: string;
@@ -39,7 +40,7 @@ export interface WorkoutData {
 export const useWorkoutData = (workoutId: string | undefined) => {
   return useQuery({
     queryKey: ["workout", workoutId],
-    queryFn: async () => {
+    queryFn: offlineQueryFn(`detail:workout:${workoutId}`, async () => {
       if (!workoutId) throw new Error("Workout ID is required");
       const resolveFromMetadata = async () => {
         const metadata = await fetchVisibleWorkoutMetadata(null);
@@ -85,11 +86,11 @@ export const useWorkoutData = (workoutId: string | undefined) => {
         canonical_slug:
           (metadataMatch as any)?.canonical_slug || slugifyContentName(data.name || data.id),
       } as WorkoutData;
-    },
+    }),
     enabled: !!workoutId,
     // Ensure detail pages always reflect latest backend content updates
     staleTime: 0,
-    gcTime: 0,
+    gcTime: 60 * 60 * 1000,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
   });
@@ -101,17 +102,9 @@ export const useAllWorkouts = () => {
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    queryFn: async () => {
-      if (import.meta.env.DEV) {
-        console.log("🔍 Fetching ALL workouts...");
-      }
+    queryFn: offlineQueryFn("workouts:list:all", async () => {
       const data = await fetchVisibleWorkoutMetadata(null);
-
-      if (import.meta.env.DEV) {
-        console.log("📦 Workouts data:", data);
-      }
-
       return (data || []) as WorkoutData[];
-    },
+    }),
   });
 };

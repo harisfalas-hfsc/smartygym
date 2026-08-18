@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { offlineQueryFn } from "@/lib/offline";
 
 export const useProgramData = (programId: string | undefined) => {
   return useQuery({
     queryKey: ["program", programId],
-    queryFn: async () => {
+    queryFn: offlineQueryFn(`detail:program:${programId}`, async () => {
       if (!programId) return null;
       
       const { data, error } = await supabase
@@ -35,7 +36,7 @@ export const useProgramData = (programId: string | undefined) => {
       }
 
       return data;
-    },
+    }),
     enabled: !!programId,
   });
 };
@@ -46,10 +47,7 @@ export const useAllPrograms = () => {
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    queryFn: async () => {
-      if (import.meta.env.DEV) {
-        console.log("🔍 Fetching ALL programs...");
-      }
+    queryFn: offlineQueryFn("programs:list:all", async () => {
       const { data, error } = await supabase
         .rpc("get_visible_program_metadata" as never, { _program_id: null } as never);
 
@@ -66,6 +64,6 @@ export const useAllPrograms = () => {
       }
 
       return (data || []).sort((a: any, b: any) => a.name.localeCompare(b.name));
-    },
+    }),
   });
 };
