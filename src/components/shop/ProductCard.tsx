@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { platformHeader } from "@/utils/platform";
 import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
 import { PaymentsDisabledNotice } from "@/components/PaymentsDisabledNotice";
+import { openExternal } from "@/utils/native";
 
 interface ProductCardProps {
   product: {
@@ -83,7 +84,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       if (error) throw error;
 
       if (data?.url) {
-        window.location.href = data.url;
+        await openExternal(data.url);
       }
     } catch (error: any) {
       console.error('Purchase error:', error);
