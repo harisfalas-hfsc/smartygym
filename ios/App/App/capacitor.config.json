@@ -1,0 +1,25 @@
+{
+	"appId": "com.smartygym.app",
+	"appName": "SmartyGym",
+	"webDir": "dist",
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 2000,
+			"launchAutoHide": true,
+			"backgroundColor": "#0F172A",
+			"androidSplashResourceName": "splash",
+			"androidScaleType": "CENTER_CROP",
+			"showSpinner": false,
+			"androidSpinnerStyle": "large",
+			"iosSpinnerStyle": "small",
+			"spinnerColor": "#29B6D2",
+			"splashFullScreen": true,
+			"splashImmersive": true
+		}
+	},
+	"packageClassList": [
+		"CAPBrowserPlugin",
+		"CAPNetworkPlugin",
+		"StatusBarPlugin"
+	]
+}
