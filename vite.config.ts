@@ -67,8 +67,11 @@ export default defineConfig(({ mode }) => ({
           /^\/api\//,
           /^\/functions\//,
         ],
-        globPatterns: ["**/*.{js,css,woff2,ico,webmanifest}"],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // A cold offline start must have the SPA document and every lazy route
+        // chunk available. Images used by member content are downloaded by
+        // OfflineBootstrap because many of them live in remote storage.
+        globPatterns: ["**/*.{html,js,css,woff,woff2,ico,png,svg,webmanifest}"],
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.mode === "navigate",
