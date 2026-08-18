@@ -4,6 +4,10 @@ import { DeviceThemeDefault } from "./components/DeviceThemeDefault";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createOfflinePersister } from "./lib/offline/queryPersister";
+import { OfflineBootstrap } from "./components/offline/OfflineBootstrap";
+import { UpdateAvailablePrompt } from "./components/offline/UpdateAvailablePrompt";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, type Location } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Helmet } from "react-helmet";
@@ -135,13 +139,17 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes — reuse cached lists between navigations
-      gcTime: 30 * 60 * 1000, // 30 minutes — keep data around for back-navigation
+      gcTime: 24 * 60 * 60 * 1000, // 24h — keep data around for offline use
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
       retry: 1,
+      networkMode: "offlineFirst",
     },
+    mutations: { networkMode: "offlineFirst" },
   },
 });
+
+const offlinePersister = createOfflinePersister();
 
 const criticalRoutePreloaders = [
   () => import("./pages/WorkoutFlow"),
@@ -205,6 +213,8 @@ const AppContent = () => {
       <LoadingBar />
       <AccessControlProvider>
         <AnnouncementManager />
+        <OfflineBootstrap />
+        <UpdateAvailablePrompt />
         {/* <FreeTrialPopup /> */}
         <SmartyCoachWelcomePopup />
         <SisterAppsPopup />
@@ -389,7 +399,10 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
+  <PersistQueryClientProvider
+    client={queryClient}
+    persistOptions={{ persister: offlinePersister, maxAge: 30 * 24 * 60 * 60 * 1000, buster: "v1" }}
+  >
     <ThemeProvider 
       attribute="class" 
       defaultTheme="dark" 
@@ -407,7 +420,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
-  </QueryClientProvider>
+  </PersistQueryClientProvider>
 );
 
 export default App;
