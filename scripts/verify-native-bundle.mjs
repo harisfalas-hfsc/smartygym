@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
 const targets = [
@@ -16,6 +16,7 @@ const targets = [
 
 for (const target of targets) {
   await access(path.resolve(target.index));
+  const indexHtml = await readFile(path.resolve(target.index), "utf8");
   const rawConfig = await readFile(path.resolve(target.config), "utf8");
   const config = JSON.parse(rawConfig);
 
@@ -27,6 +28,17 @@ for (const target of targets) {
 
   if (config.webDir !== "dist") {
     throw new Error(`${target.name} must use webDir "dist" for offline cold starts.`);
+  }
+
+  const absoluteRemoteEntry = /<(?:script|link)[^>]+(?:src|href)=["']https?:\/\//i.test(indexHtml);
+  if (absoluteRemoteEntry) {
+    throw new Error(`${target.name} index.html references a remote entry file and cannot cold-start offline.`);
+  }
+
+  const publicDir = path.dirname(path.resolve(target.index));
+  const entries = await readdir(publicDir);
+  if (!entries.includes("assets")) {
+    throw new Error(`${target.name} native bundle is missing its local assets directory.`);
   }
 }
 
