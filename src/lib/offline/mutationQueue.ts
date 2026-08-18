@@ -36,17 +36,18 @@ export async function flushMutationQueue(userId: string): Promise<number> {
 
   for (const entry of entries) {
     try {
-      const { kind, table, payload } = entry.mutation as QueuedMutation & { payload: Record<string, unknown> };
+      const mutation = entry.mutation;
+      const { kind, table, payload } = mutation;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const from = (supabase as any).from(table);
       let error: unknown = null;
 
-      if (kind === "insert") ({ error } = await from.insert(payload));
-      else if (kind === "upsert")
-        ({ error } = await from.upsert(payload, { onConflict: entry.mutation.onConflict }));
-      else if (kind === "update") {
+      if (mutation.kind === "insert") ({ error } = await from.insert(payload));
+      else if (mutation.kind === "upsert")
+        ({ error } = await from.upsert(payload, { onConflict: mutation.onConflict }));
+      else if (mutation.kind === "update") {
         let q = from.update(payload);
-        for (const [col, val] of Object.entries(entry.mutation.match)) q = q.eq(col, val);
+        for (const [col, val] of Object.entries(mutation.match)) q = q.eq(col, val);
         ({ error } = await q);
       }
 
