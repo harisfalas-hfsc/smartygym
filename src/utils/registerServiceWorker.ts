@@ -47,6 +47,45 @@ const unregisterAppWorkers = async () => {
   }
 };
 
+type UpdateListener = () => void;
+const updateListeners = new Set<UpdateListener>();
+let waitingWorker: ServiceWorker | null = null;
+
+export const onServiceWorkerUpdate = (listener: UpdateListener) => {
+  updateListeners.add(listener);
+  if (waitingWorker) listener();
+  return () => {
+    updateListeners.delete(listener);
+  };
+};
+
+export const applyServiceWorkerUpdate = () => {
+  if (waitingWorker) {
+    waitingWorker.postMessage({ type: "SKIP_WAITING" });
+  }
+  window.location.reload();
+};
+
+const watchForUpdates = (reg: ServiceWorkerRegistration) => {
+  const notify = (worker: ServiceWorker | null) => {
+    if (!worker) return;
+    waitingWorker = worker;
+    updateListeners.forEach((listener) => listener());
+  };
+
+  if (reg.waiting && navigator.serviceWorker.controller) notify(reg.waiting);
+
+  reg.addEventListener("updatefound", () => {
+    const installing = reg.installing;
+    if (!installing) return;
+    installing.addEventListener("statechange", () => {
+      if (installing.state === "installed" && navigator.serviceWorker.controller) {
+        notify(installing);
+      }
+    });
+  });
+};
+
 export const registerAppServiceWorker = () => {
   if (shouldSkipRegistration()) {
     void unregisterAppWorkers();
@@ -56,6 +95,9 @@ export const registerAppServiceWorker = () => {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register(APP_SW_URL, { scope: "/" })
+      .then((reg) => {
+        if (reg) watchForUpdates(reg);
+      })
       .catch((err) => {
         console.warn("[sw] registration failed", err);
       });
