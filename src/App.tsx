@@ -8,6 +8,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { createOfflinePersister } from "./lib/offline/queryPersister";
 import { OfflineBootstrap } from "./components/offline/OfflineBootstrap";
 import { UpdateAvailablePrompt } from "./components/offline/UpdateAvailablePrompt";
+import { SyncStatusPill } from "./components/offline/SyncStatusPill";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, type Location } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Helmet } from "react-helmet";
@@ -215,6 +216,7 @@ const AppContent = () => {
         <AnnouncementManager />
         <OfflineBootstrap />
         <UpdateAvailablePrompt />
+        <SyncStatusPill />
         {/* <FreeTrialPopup /> */}
         <SmartyCoachWelcomePopup />
         <SisterAppsPopup />
