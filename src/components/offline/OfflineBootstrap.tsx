@@ -428,12 +428,19 @@ export const OfflineBootstrap = () => {
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
+        if (activeUserId && activeUserId !== session.user.id) {
+          queryClient.clear();
+        }
         activeUserId = session.user.id;
         setCurrentUserId(activeUserId);
         void cacheSessionForOffline(session);
         if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
           void run(session.user.id);
         }
+      } else if (event === "SIGNED_OUT") {
+        activeUserId = null;
+        setCurrentUserId(null);
+        queryClient.clear();
       }
     });
 

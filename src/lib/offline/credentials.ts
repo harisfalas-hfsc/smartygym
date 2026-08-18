@@ -73,7 +73,16 @@ export async function getStoredCredentialEmail(): Promise<string | null> {
 
 export async function verifyOfflineCredentials(email: string, password: string): Promise<boolean> {
   const normalizedEmail = email.trim().toLowerCase();
-  const rec = await readOffline<StoredCredential>(`${CRED_KEY}:${normalizedEmail}`, DEVICE_SCOPE);
+  let rec = await readOffline<StoredCredential>(`${CRED_KEY}:${normalizedEmail}`, DEVICE_SCOPE);
+  // One-time compatibility migration from the original single-account key.
+  if (!rec) {
+    const legacy = await readOffline<StoredCredential>(CRED_KEY, DEVICE_SCOPE);
+    if (legacy?.data.email === normalizedEmail) {
+      rec = legacy;
+      await saveOffline(`${CRED_KEY}:${normalizedEmail}`, legacy.data, DEVICE_SCOPE);
+      await removeOffline(CRED_KEY, DEVICE_SCOPE);
+    }
+  }
   if (!rec) return false;
   const { salt, iterations, verifier, email: storedEmail } = rec.data;
   if (storedEmail !== normalizedEmail) return false;
@@ -102,7 +111,17 @@ export async function cacheSessionForOffline(session: Session) {
 export async function getCachedOfflineSession(): Promise<Session | null> {
   const activeUserId = localStorage.getItem(ACTIVE_USER_KEY);
   if (!activeUserId) return null;
-  const rec = await readOffline<StoredSession>(`${SESSION_KEY}:${activeUserId}`, DEVICE_SCOPE);
+  let rec = await readOffline<StoredSession>(`${SESSION_KEY}:${activeUserId}`, DEVICE_SCOPE);
+  // One-time compatibility migration for devices that synced before sessions
+  // became account-scoped.
+  if (!rec) {
+    const legacy = await readOffline<StoredSession>(SESSION_KEY, DEVICE_SCOPE);
+    if (legacy?.data.session.user.id === activeUserId) {
+      rec = legacy;
+      await saveOffline(`${SESSION_KEY}:${activeUserId}`, legacy.data, DEVICE_SCOPE);
+      await removeOffline(SESSION_KEY, DEVICE_SCOPE);
+    }
+  }
   return rec?.data.session ?? null;
 }
 

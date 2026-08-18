@@ -300,8 +300,16 @@ export default function UserDashboard() {
       data: {
         subscription
       }
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session?.user) {
+        if (!navigator.onLine) {
+          const restored = await restoreCachedSessionOffline();
+          if (restored?.user) {
+            setUser(restored.user);
+            setLoading(false);
+            return;
+          }
+        }
         setUser(null);
         setLoading(false);
         navigate('/auth');
