@@ -15,3 +15,6 @@ export const offlineQueryFn =
   <T>(key: string, loader: () => Promise<T>) =>
   () =>
     offlineFirst<T>(key, loader, getCurrentUserId());
+
+export * from "./connectivity";
+export * from "./syncStatus";

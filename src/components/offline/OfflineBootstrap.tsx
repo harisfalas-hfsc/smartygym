@@ -8,7 +8,22 @@ import {
   cacheSessionForOffline,
   setCurrentUserId,
   initOfflineSessionTracking,
+  initLocalDatabase,
+  pendingMutationCount,
+  clearStoredCredentials,
 } from "@/lib/offline";
+import {
+  startConnectivityMonitor,
+  isReachable,
+  probeConnectivity,
+  reportRequestFailure,
+  reportRequestSuccess,
+} from "@/lib/offline/connectivity";
+import {
+  loadSyncDiagnostics,
+  registerSyncHandler,
+  updateSyncDiagnostics,
+} from "@/lib/offline/syncStatus";
 import { getCyprusTodayStr } from "@/lib/cyprusDate";
 import { fetchFreeAccessMode, subscribeFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
@@ -54,13 +69,16 @@ export const OfflineBootstrap = () => {
 
   useEffect(() => {
     initOfflineSessionTracking();
+    startConnectivityMonitor();
+    void initLocalDatabase();
 
     const run = async (userId: string) => {
       if (running.current) return;
       if (Date.now() - lastRunAt.current < 60_000) return;
-      if (typeof navigator !== "undefined" && !navigator.onLine) return;
+      if (!isReachable() && (await probeConnectivity()) !== "online") return;
       running.current = true;
       lastRunAt.current = Date.now();
+      updateSyncDiagnostics({ phase: "syncing", lastAttemptAt: Date.now() }, userId);
 
       const save = (key: string, data: unknown) => saveOffline(key, data, userId);
       const table = (name: string) => (supabase as never as { from: (n: string) => any }).from(name);
@@ -298,7 +316,8 @@ export const OfflineBootstrap = () => {
           })(),
         );
 
-        await Promise.allSettled(tasks);
+        const results = await Promise.allSettled(tasks);
+        const failed = results.filter((r) => r.status === "rejected").length;
 
         // Entitlement dropped since the last sync (e.g. Free Access Mode was
         // switched off, or a subscription lapsed)? Throw away the in-memory
@@ -312,8 +331,24 @@ export const OfflineBootstrap = () => {
         }
 
         await trimCache();
+        reportRequestSuccess();
+        updateSyncDiagnostics(
+          {
+            phase: failed > 0 ? "error" : "idle",
+            lastSuccessAt: Date.now(),
+            lastError: failed > 0 ? `${failed} sync task(s) failed` : null,
+            failedOperations: failed,
+            pendingOperations: await pendingMutationCount(userId),
+          },
+          userId,
+        );
       } catch (error) {
+        reportRequestFailure();
         console.warn("[offline] bootstrap failed", error);
+        updateSyncDiagnostics(
+          { phase: "error", lastError: error instanceof Error ? error.message : "Sync failed" },
+          userId,
+        );
       } finally {
         running.current = false;
       }
@@ -328,13 +363,28 @@ export const OfflineBootstrap = () => {
       activeUserId = session.user.id;
       setCurrentUserId(activeUserId);
       void cacheSessionForOffline(session);
+      void loadSyncDiagnostics(activeUserId);
       void run(activeUserId);
     };
 
     void start();
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        // Device-scoped secrets must never survive a logout — the next person
+        // on this device must not be able to sign in offline as the last one.
+        activeUserId = null;
+        setCurrentUserId(null);
+        void clearStoredCredentials();
+        updateSyncDiagnostics({ phase: "idle", pendingOperations: 0, failedOperations: 0 });
+        return;
+      }
       if (session) {
+        if (activeUserId && activeUserId !== session.user.id) {
+          // Different account on the same device: drop the previous device
+          // credentials so the two identities never mix.
+          void clearStoredCredentials();
+        }
         activeUserId = session.user.id;
         setCurrentUserId(activeUserId);
         void cacheSessionForOffline(session);
@@ -350,6 +400,8 @@ export const OfflineBootstrap = () => {
       void run(activeUserId);
     };
 
+    registerSyncHandler(() => resync(true));
+
     const onOnline = () => resync(true);
     const onFocus = () => {
       if (document.visibilityState === "visible") resync();
@@ -364,7 +416,7 @@ export const OfflineBootstrap = () => {
     });
     // Catch the switch flipping on other devices too.
     const poll = window.setInterval(() => {
-      if (navigator.onLine) void fetchFreeAccessMode(true);
+      if (isReachable()) void fetchFreeAccessMode(true);
     }, 5 * 60 * 1000);
 
     window.addEventListener("online", onOnline);
