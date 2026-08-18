@@ -1,13 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { initializeConnectivity, isNetworkOnline, subscribeConnectivity } from '@/lib/offline';
 
 export function useNetworkStatus() {
-  const [isOnline, setIsOnline] = useState(() => 
-    typeof navigator !== 'undefined' ? navigator.onLine : true
-  );
+  const [isOnline, setIsOnline] = useState(isNetworkOnline);
   const [wasOffline, setWasOffline] = useState(false);
 
-  const updateOnlineStatus = useCallback(() => {
-    const online = navigator.onLine;
+  const updateOnlineStatus = useCallback((online: boolean) => {
     setIsOnline(online);
     
     if (!online) {
@@ -16,13 +14,8 @@ export function useNetworkStatus() {
   }, []);
 
   useEffect(() => {
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-
-    return () => {
-      window.removeEventListener('online', updateOnlineStatus);
-      window.removeEventListener('offline', updateOnlineStatus);
-    };
+    void initializeConnectivity().then(updateOnlineStatus);
+    return subscribeConnectivity(updateOnlineStatus);
   }, [updateOnlineStatus]);
 
   const clearWasOffline = useCallback(() => {
