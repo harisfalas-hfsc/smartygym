@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { offlineQueryFn } from "@/lib/offline";
 
 interface Purchase {
   id: string;
@@ -14,7 +15,7 @@ interface Purchase {
 export const usePurchases = (userId: string | undefined) => {
   return useQuery({
     queryKey: ["purchases", userId],
-    queryFn: async () => {
+    queryFn: offlineQueryFn("purchases:list", async () => {
       if (!userId) return [];
 
       const { data, error } = await supabase
@@ -29,7 +30,7 @@ export const usePurchases = (userId: string | undefined) => {
       }
 
       return data as Purchase[];
-    },
+    }),
     enabled: !!userId,
   });
 };
