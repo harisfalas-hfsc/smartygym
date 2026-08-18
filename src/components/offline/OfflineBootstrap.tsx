@@ -218,6 +218,8 @@ export const OfflineBootstrap = () => {
               await save(`detail:training-program:${slug}`, row);
             }
 
+            await cacheMedia(collectMediaUrls([...workouts, ...programs]));
+
             const today = getCyprusTodayStr();
             const todayWods = workouts.filter(
               (w: any) => w.is_workout_of_day === true && w.generated_for_date === today,
