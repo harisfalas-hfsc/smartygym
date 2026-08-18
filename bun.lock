@@ -10,7 +10,6 @@
         "@capacitor/cli": "^7.6.8",
         "@capacitor/core": "^7.4.3",
         "@capacitor/ios": "^7.4.3",
-        "@capacitor/network": "^7.0.2",
         "@capacitor/status-bar": "^7.0.2",
         "@hookform/resolvers": "^3.10.0",
         "@huggingface/transformers": "^3.8.1",
@@ -352,8 +351,6 @@
     "@capacitor/core": ["@capacitor/core@7.4.3", "", { "dependencies": { "tslib": "^2.1.0" } }, "sha512-wCWr8fQ9Wxn0466vPg7nMn0tivbNVjNy1yL4GvDSIZuZx7UpU2HeVGNe9QjN/quEd+YLRFeKEBLBw619VqUiNg=="],
 
     "@capacitor/ios": ["@capacitor/ios@7.4.3", "", { "peerDependencies": { "@capacitor/core": "^7.4.0" } }, "sha512-VNm7cHODgh3KK/4ZC2rXU9gBlvHii/mYFLI+XMXwq24nhB679QxHhz+pUuI7PatYoM2q4MAL0NR/dRgehKCaSA=="],
-
-    "@capacitor/network": ["@capacitor/network@7.0.4", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/network/-/network-7.0.4.tgz", { "peerDependencies": { "@capacitor/core": ">=7.0.0" } }, "sha512-fNhN3968AQWMnzasPJ0B8e+nyk7+R6V9PWIBQWSQRHrKndDgWRHpxkjEzJPgnJr3EjnKLjbwO+UYy+EwBlGs3A=="],
 
     "@capacitor/status-bar": ["@capacitor/status-bar@7.0.6", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/status-bar/-/status-bar-7.0.6.tgz", { "peerDependencies": { "@capacitor/core": ">=7.0.0" } }, "sha512-7AVqj46b26QikImQzWfsJmzG8NUJZBGkrVSuoeTo+SX/YH3hXH0MqwwFgMqMGHfa/BICDgSvTjM9miVFlq0+RQ=="],
 

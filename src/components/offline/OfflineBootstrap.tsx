@@ -8,8 +8,6 @@ import {
   cacheSessionForOffline,
   setCurrentUserId,
   initOfflineSessionTracking,
-  getNetworkStatus,
-  subscribeConnectivity,
 } from "@/lib/offline";
 import { getCyprusTodayStr } from "@/lib/cyprusDate";
 import { fetchFreeAccessMode, subscribeFreeAccessMode } from "@/hooks/useFreeAccessMode";
@@ -48,45 +46,6 @@ const stripBody = <T extends Record<string, unknown>>(row: T): T => {
   return copy as T;
 };
 
-const MEDIA_FIELDS = [
-  "image_url",
-  "video_url",
-  "gif_url",
-  "thumbnail_url",
-  "avatar_url",
-  "cover_url",
-];
-
-const collectMediaUrls = (rows: unknown[]): string[] => {
-  const urls = new Set<string>();
-  for (const row of rows) {
-    if (!row || typeof row !== "object") continue;
-    for (const field of MEDIA_FIELDS) {
-      const value = (row as Record<string, unknown>)[field];
-      if (typeof value === "string" && /^https?:\/\//i.test(value)) urls.add(value);
-    }
-  }
-  return [...urls];
-};
-
-const cacheMedia = async (urls: string[]) => {
-  if (!("caches" in window) || !(await getNetworkStatus()) || urls.length === 0) return;
-  const mediaCache = await caches.open("smartygym-member-media-v1");
-  const workers = Array.from({ length: Math.min(6, urls.length) }, async (_, workerIndex) => {
-    for (let index = workerIndex; index < urls.length; index += 6) {
-      const url = urls[index];
-      try {
-        if (await mediaCache.match(url)) continue;
-        const response = await fetch(url, { mode: "no-cors", credentials: "omit" });
-        await mediaCache.put(url, response);
-      } catch {
-        // A media host may reject offline caching; the data record remains safe.
-      }
-    }
-  });
-  await Promise.allSettled(workers);
-};
-
 export const OfflineBootstrap = () => {
   const queryClient = useQueryClient();
   const running = useRef(false);
@@ -99,7 +58,7 @@ export const OfflineBootstrap = () => {
     const run = async (userId: string) => {
       if (running.current) return;
       if (Date.now() - lastRunAt.current < 60_000) return;
-      if (!(await getNetworkStatus())) return;
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
       running.current = true;
       lastRunAt.current = Date.now();
 
@@ -110,14 +69,7 @@ export const OfflineBootstrap = () => {
         await flushMutationQueue(userId);
 
         // ---- entitlement first: it decides WHAT may be stored offline --------
-        const [
-          { data: roleRows },
-          { data: subRow },
-          { data: purchaseRows },
-          { data: corpAdmin },
-          { data: corpMember },
-          freeAccessMode,
-        ] =
+        const [{ data: roleRows }, { data: subRow }, { data: purchaseRows }, freeAccessMode] =
           await Promise.all([
             table("user_roles").select("role").eq("user_id", userId),
             table("user_subscriptions")
@@ -128,16 +80,6 @@ export const OfflineBootstrap = () => {
               .select("content_id, content_type")
               .eq("user_id", userId)
               .eq("content_deleted", false),
-            table("corporate_subscriptions")
-              .select("id")
-              .eq("admin_user_id", userId)
-              .eq("status", "active")
-              .maybeSingle(),
-            table("corporate_members")
-              .select("corporate_subscription_id, corporate_subscriptions!inner(status)")
-              .eq("user_id", userId)
-              .eq("corporate_subscriptions.status", "active")
-              .maybeSingle(),
             fetchFreeAccessMode(true),
           ]);
 
@@ -145,8 +87,7 @@ export const OfflineBootstrap = () => {
         const isPersonalPremium =
           subRow?.status === "active" &&
           ["lifetime", "premium", "legacy_premium"].includes(subRow?.plan_type ?? "");
-        const isCorporatePremium = Boolean(corpAdmin || corpMember);
-        const isPremium = isAdmin || isPersonalPremium || isCorporatePremium || freeAccessMode;
+        const isPremium = isAdmin || isPersonalPremium || freeAccessMode;
         const purchased = new Set(
           (purchaseRows ?? []).map((p: any) => `${p.content_type}:${p.content_id}`),
         );
@@ -192,14 +133,10 @@ export const OfflineBootstrap = () => {
             const workoutSlugs = buildUniqueContentSlugs(workouts);
             const programSlugs = buildUniqueContentSlugs(programs);
 
-            // List caches must never become a back door to paid body fields.
-            // Detail caches below retain full bodies only for entitled content.
-            const safeWorkoutList = workouts.map((w: any) => stripBody(w));
-            const safeProgramList = programs.map((p: any) => stripBody(p));
-            await save("workouts:list:all", safeWorkoutList);
-            await save("programs:list:all", safeProgramList);
-            queryClient.setQueryData(["all-workouts"], safeWorkoutList);
-            queryClient.setQueryData(["all-programs"], safeProgramList);
+            await save("workouts:list:all", workouts);
+            await save("programs:list:all", programs);
+            queryClient.setQueryData(["all-workouts"], workouts);
+            queryClient.setQueryData(["all-programs"], programs);
 
             for (const w of workouts) {
               const slug = workoutSlugs.get(w.id) || slugifyContentName(w.name || w.id);
@@ -219,8 +156,6 @@ export const OfflineBootstrap = () => {
               await save(`detail:training-program:${p.id}`, row);
               await save(`detail:training-program:${slug}`, row);
             }
-
-            await cacheMedia(collectMediaUrls([...workouts, ...programs]));
 
             const today = getCyprusTodayStr();
             const todayWods = workouts.filter(
@@ -253,14 +188,13 @@ export const OfflineBootstrap = () => {
               equipment: [...new Set((all as any[]).map((e) => e.equipment).filter(Boolean))],
               muscles: [...new Set((all as any[]).map((e) => e.muscle_group).filter(Boolean))],
             });
-            await cacheMedia(collectMediaUrls(all));
           })(),
         );
 
         // ---- logbook / progress / stats ---------------------------------------
         tasks.push(
           (async () => {
-            const [checkins, progress, calories, bmr, onerm, goals, measurements, badges, scheduled, activity] =
+            const [checkins, progress, calories, bmr, onerm, goals, measurements, badges, scheduled] =
               await Promise.all([
                 table("smarty_checkins").select("*").eq("user_id", userId),
                 table("progress_logs").select("*").eq("user_id", userId),
@@ -271,7 +205,6 @@ export const OfflineBootstrap = () => {
                 table("user_measurement_goals").select("*").eq("user_id", userId),
                 table("user_badges").select("*").eq("user_id", userId),
                 table("scheduled_workouts").select("*").eq("user_id", userId),
-                table("user_activity_log").select("*").eq("user_id", userId),
               ]);
             await Promise.all([
               save("logbook:checkins", checkins.data ?? []),
@@ -283,7 +216,6 @@ export const OfflineBootstrap = () => {
               save("progress:measurement-goals", measurements.data ?? []),
               save("badges", badges.data ?? []),
               save("saved:scheduled-workouts", scheduled.data ?? []),
-              save("logbook:activity", activity.data ?? []),
             ]);
           })(),
         );
@@ -309,40 +241,14 @@ export const OfflineBootstrap = () => {
         // ---- notifications / inbox --------------------------------------------
         tasks.push(
           (async () => {
-            const [messages, contact, contactHistory] = await Promise.all([
+            const [messages, contact] = await Promise.all([
               table("user_system_messages").select("*").eq("user_id", userId),
               table("contact_messages").select("*").eq("user_id", userId),
-              table("contact_message_history").select("*").eq("user_id", userId),
             ]);
             await Promise.all([
               save("notifications:system-messages", messages.data ?? []),
               save("inbox:contact-messages", contact.data ?? []),
-              save("inbox:contact-history", contactHistory.data ?? []),
             ]);
-          })(),
-        );
-
-        // ---- workout discussion threads + full comments -----------------------
-        tasks.push(
-          (async () => {
-            const { data: comments } = await table("workout_comments")
-              .select("*")
-              .order("created_at", { ascending: true });
-            const allComments = comments ?? [];
-            await save("community:workout-comments", allComments);
-            const byWorkout = new Map<string, any[]>();
-            for (const comment of allComments as any[]) {
-              const workoutId = comment.workout_id;
-              if (!workoutId) continue;
-              const bucket = byWorkout.get(workoutId) ?? [];
-              bucket.push(comment);
-              byWorkout.set(workoutId, bucket);
-            }
-            await Promise.all(
-              [...byWorkout.entries()].map(([workoutId, rows]) =>
-                save(`community:workout-comments:${workoutId}`, rows),
-              ),
-            );
           })(),
         );
 
@@ -381,7 +287,6 @@ export const OfflineBootstrap = () => {
             for (const a of (articles ?? []) as any[]) {
               await save(`blog:article:${a.slug || a.id}`, a);
             }
-            await cacheMedia(collectMediaUrls(articles ?? []));
           })(),
         );
 
@@ -430,19 +335,12 @@ export const OfflineBootstrap = () => {
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        if (activeUserId && activeUserId !== session.user.id) {
-          queryClient.clear();
-        }
         activeUserId = session.user.id;
         setCurrentUserId(activeUserId);
         void cacheSessionForOffline(session);
         if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
           void run(session.user.id);
         }
-      } else if (event === "SIGNED_OUT") {
-        activeUserId = null;
-        setCurrentUserId(null);
-        queryClient.clear();
       }
     });
 
@@ -466,21 +364,17 @@ export const OfflineBootstrap = () => {
     });
     // Catch the switch flipping on other devices too.
     const poll = window.setInterval(() => {
-      void getNetworkStatus().then((online) => {
-        if (online) void fetchFreeAccessMode(true);
-      });
+      if (navigator.onLine) void fetchFreeAccessMode(true);
     }, 5 * 60 * 1000);
 
-    const unsubscribeConnectivity = subscribeConnectivity((online) => {
-      if (online) onOnline();
-    });
+    window.addEventListener("online", onOnline);
     document.addEventListener("visibilitychange", onFocus);
 
     return () => {
       sub.subscription.unsubscribe();
       unsubscribeFreeAccess();
       window.clearInterval(poll);
-      unsubscribeConnectivity();
+      window.removeEventListener("online", onOnline);
       document.removeEventListener("visibilitychange", onFocus);
     };
   }, [queryClient]);

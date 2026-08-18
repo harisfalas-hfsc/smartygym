@@ -130,7 +130,7 @@ export default function SmartyCorporate() {
       });
       if (error) throw error;
       if (data?.url) {
-        await openExternal(data.url);
+        window.location.href = data.url;
         return;
       }
     } catch (error) {

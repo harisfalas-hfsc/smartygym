@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
-import { getNetworkStatus, restoreCachedSessionOffline, setCurrentUserId } from "@/lib/offline";
+import { restoreCachedSessionOffline, setCurrentUserId } from "@/lib/offline";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -22,7 +22,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
       // Offline: fall back to the session cached on this device so saved
       // content stays reachable with no internet.
-      if (!current && !(await getNetworkStatus())) {
+      if (!current && typeof navigator !== "undefined" && !navigator.onLine) {
         current = await restoreCachedSessionOffline();
       }
 
@@ -38,12 +38,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      void (async () => {
-        if (!session && !(await getNetworkStatus())) return;
-        if (session) setCurrentUserId(session.user.id);
-        setSession(session);
-        setLoading(false);
-      })();
+      if (!session && typeof navigator !== "undefined" && !navigator.onLine) return;
+      if (session) setCurrentUserId(session.user.id);
+      setSession(session);
+      setLoading(false);
     });
 
     return () => {

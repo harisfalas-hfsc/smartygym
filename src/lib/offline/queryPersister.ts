@@ -5,26 +5,17 @@ import { createStore, get, set, del } from "idb-keyval";
 
 const store = createStore("smartygym-query-cache", "kv");
 
-const scopedPersistenceKey = (key: string) => {
-  try {
-    const userId = localStorage.getItem("smartygym_offline_user_id") || "anon";
-    return `${userId}::${key}`;
-  } catch {
-    return `anon::${key}`;
-  }
-};
-
 export const createOfflinePersister = () =>
   createAsyncStoragePersister({
     key: "smartygym-react-query",
     throttleTime: 2000,
     storage: {
-      getItem: async (key) => ((await get(scopedPersistenceKey(key), store)) as string | undefined) ?? null,
+      getItem: async (key) => ((await get(key, store)) as string | undefined) ?? null,
       setItem: async (key, value) => {
-        await set(scopedPersistenceKey(key), value, store);
+        await set(key, value, store);
       },
       removeItem: async (key) => {
-        await del(scopedPersistenceKey(key), store);
+        await del(key, store);
       },
     },
   });

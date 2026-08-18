@@ -10,7 +10,6 @@ import { platformHeader } from "@/utils/platform";
 import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { PaymentsDisabledNotice } from "@/components/PaymentsDisabledNotice";
-import { openExternal } from "@/utils/native";
 
 interface PurchaseButtonProps {
   contentId: string;
@@ -114,7 +113,7 @@ export const PurchaseButton = ({
       if (error) throw error;
 
       if (data?.url) {
-        await openExternal(data.url);
+        window.location.href = data.url;
       } else {
         throw new Error("No checkout URL returned");
       }

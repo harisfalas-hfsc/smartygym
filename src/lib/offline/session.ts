@@ -9,12 +9,6 @@ export const getCurrentUserId = () => currentUserId;
 
 export const setCurrentUserId = (id: string | null) => {
   currentUserId = id;
-  try {
-    if (id) localStorage.setItem("smartygym_offline_user_id", id);
-    else localStorage.removeItem("smartygym_offline_user_id");
-  } catch {
-    // ignore
-  }
 };
 
 export const initOfflineSessionTracking = () => {

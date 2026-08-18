@@ -6,7 +6,6 @@ import { usePaymentsEnabled } from "@/hooks/usePaymentsEnabled";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { platformHeader } from "@/utils/platform";
 import { PaymentsDisabledNotice } from "@/components/PaymentsDisabledNotice";
-import { openExternal } from "@/utils/native";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -113,7 +112,7 @@ export default function SmartyPremium() {
       if (error) throw error;
 
       if (data?.url) {
-        await openExternal(data.url);
+        window.location.href = data.url;
         return;
       }
       throw new Error("No checkout URL returned");

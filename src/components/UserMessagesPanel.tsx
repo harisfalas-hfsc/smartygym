@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { NotificationPreferencesManager } from "@/components/NotificationPreferencesManager";
-import { openExternal } from "@/utils/native";
 import {
   Select,
   SelectContent,
@@ -155,7 +154,7 @@ export const UserMessagesPanel = () => {
     } catch {
       // Leave malformed links to the browser fallback below.
     }
-    void openExternal(link);
+    window.location.href = link;
   };
 
   const { data: rawContactMessages = [], isLoading: contactLoading, refetch: refetchContact } = useQuery({

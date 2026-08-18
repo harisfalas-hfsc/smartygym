@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { fetchFreeAccessMode } from "@/hooks/useFreeAccessMode";
-import { getNetworkStatus, readOffline, saveOffline, setCurrentUserId } from "@/lib/offline";
+import { readOffline, saveOffline, setCurrentUserId } from "@/lib/offline";
 
 const ENTITLEMENT_KEY = "entitlements:snapshot";
 
@@ -105,7 +105,7 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
       
       if (!session?.user) {
         // Offline with a cached session? keep the member signed in read-only.
-        if (!(await getNetworkStatus())) {
+        if (typeof navigator !== "undefined" && !navigator.onLine) {
           const { restoreCachedSessionOffline } = await import("@/lib/offline");
           const restored = await restoreCachedSessionOffline();
           if (restored?.user) {
@@ -142,7 +142,7 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
 
     // OFFLINE: reuse the exact entitlement level captured on this device the
     // last time we were online. Never elevate, never downgrade.
-    if (!(await getNetworkStatus())) {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
       const snap = await readOffline<EntitlementSnapshot>(ENTITLEMENT_KEY, user.id);
       setState({
         user,

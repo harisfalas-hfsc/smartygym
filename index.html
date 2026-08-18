@@ -28,13 +28,6 @@
     <script>
       (function () {
         try {
-          // Capacitor serves the packaged app from its own localhost origin.
-          // Website-only canonical redirects must never run in that shell,
-          // otherwise an offline native cold start can leave the local bundle.
-          var isNativeShell = window.location.hostname === "localhost"
-            || window.location.protocol === "capacitor:"
-            || window.location.protocol === "ionic:";
-          if (isNativeShell) return;
           var p = window.location.pathname || "/";
           if (p === "/" || /\.html$/i.test(p)) return;
           // Skip private / utility / asset routes — they should never be
@@ -78,26 +71,17 @@
       })();
     </script>
 
-    <!-- Google tag (gtag.js), web only. Native shells must cold-start locally. -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VCRTFQDY85"></script>
     <script>
-      (function () {
-        var isNativeShell = window.location.hostname === "localhost"
-          || window.location.protocol === "capacitor:"
-          || window.location.protocol === "ionic:";
-        if (isNativeShell) return;
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function(){ window.dataLayer.push(arguments); };
-        window.gtag('js', new Date());
-        window.gtag('config', 'G-VCRTFQDY85');
-        var script = document.createElement('script');
-        script.async = true;
-        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-VCRTFQDY85';
-        document.head.appendChild(script);
-      })();
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-VCRTFQDY85');
     </script>
     
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
     <!-- PWA & Mobile Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />

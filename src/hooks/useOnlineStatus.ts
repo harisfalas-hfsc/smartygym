@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
-import { initializeConnectivity, isNetworkOnline, subscribeConnectivity } from "@/lib/offline";
 
 /** Single source of truth for connectivity across the app. */
 export function useOnlineStatus() {
-  const [isOnline, setIsOnline] = useState(isNetworkOnline);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator === "undefined" ? true : navigator.onLine,
+  );
 
   useEffect(() => {
-    void initializeConnectivity().then(setIsOnline);
-    return subscribeConnectivity(setIsOnline);
+    const update = () => setIsOnline(navigator.onLine);
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
   }, []);
 
   return { isOnline, isOffline: !isOnline };
