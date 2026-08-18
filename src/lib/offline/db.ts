@@ -104,3 +104,53 @@ export async function trimCache(maxEntries = 4000): Promise<number> {
   await Promise.all(expendable.slice(0, toRemove).map((e) => idbDel(e.key, store)));
   return toRemove;
 }
+
+// ---- versioning & migrations ----------------------------------------------
+// The local store is a versioned KV database. Migrations must NEVER destroy
+// user-generated data; they only reshape or drop derived/cached entries.
+const META_KEY = "__meta::database-version";
+
+export const LOCAL_DATABASE_VERSION = 2;
+
+type Migration = (keys: string[]) => Promise<void>;
+
+const MIGRATIONS: Record<number, Migration> = {
+  // v1 -> v2: content details gained an entitlement-aware shape. Drop only the
+  // derived detail entries so they are re-synced; personal data is untouched.
+  2: async (keys) => {
+    const derived = keys.filter((k) => {
+      const bare = k.split("::").slice(1).join("::");
+      return bare.startsWith("detail:") && !isProtectedKey(k);
+    });
+    await Promise.all(derived.map((k) => idbDel(k, store)));
+  },
+};
+
+/**
+ * Opens/upgrades the local database. Safe to call on every start.
+ * Returns the version actually in use.
+ */
+export async function initLocalDatabase(): Promise<number> {
+  let current = 0;
+  try {
+    current = ((await idbGet(META_KEY, store)) as number | undefined) ?? 0;
+  } catch {
+    return LOCAL_DATABASE_VERSION;
+  }
+  if (current === LOCAL_DATABASE_VERSION) return current;
+
+  const keys = await allKeys();
+  for (let v = current + 1; v <= LOCAL_DATABASE_VERSION; v += 1) {
+    const migration = MIGRATIONS[v];
+    try {
+      if (migration) await migration(keys);
+      await idbSet(META_KEY, v, store);
+    } catch (e) {
+      // Partial migration: keep the last successfully applied version so the
+      // next start retries from exactly this point instead of restarting.
+      console.warn("[offline] migration failed at v" + v, e);
+      return v - 1;
+    }
+  }
+  return LOCAL_DATABASE_VERSION;
+}
