@@ -37,7 +37,7 @@ export async function flushMutationQueue(userId: string): Promise<number> {
   for (const entry of entries) {
     try {
       const mutation = entry.mutation;
-      const { kind, table, payload } = mutation;
+      const { table, payload } = mutation;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const from = (supabase as any).from(table);
       let error: unknown = null;
