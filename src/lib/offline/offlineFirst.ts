@@ -1,4 +1,5 @@
 import { readOffline, saveOffline } from "./db";
+import { isReachable, reportRequestFailure, reportRequestSuccess } from "./connectivity";
 
 export class OfflineUnavailableError extends Error {
   constructor(message = "You're offline and this device has no saved copy yet.") {
@@ -7,7 +8,7 @@ export class OfflineUnavailableError extends Error {
   }
 }
 
-const isOnline = () => (typeof navigator === "undefined" ? true : navigator.onLine);
+const isOnline = () => (typeof navigator === "undefined" ? true : navigator.onLine && isReachable());
 
 /**
  * Single read path for the whole app: try the network, persist the fresh result
@@ -21,9 +22,11 @@ export async function offlineFirst<T>(
   if (isOnline()) {
     try {
       const fresh = await loader();
+      reportRequestSuccess();
       void saveOffline(key, fresh, userId);
       return fresh;
     } catch (error) {
+      reportRequestFailure();
       const cached = await readOffline<T>(key, userId);
       if (cached) return cached.data;
       throw error;
