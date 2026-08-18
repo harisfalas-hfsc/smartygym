@@ -59,14 +59,14 @@ export const SisterAppsPopup = () => {
 
   useEffect(() => {
     if (!open) return;
-    const handleClick = (e: MouseEvent) => {
+    const handleClick = (e: PointerEvent) => {
       const target = e.target as Node;
       if (panelRef.current && !panelRef.current.contains(target)) {
         setOpen(false);
       }
     };
-    window.addEventListener("mousedown", handleClick);
-    return () => window.removeEventListener("mousedown", handleClick);
+    window.addEventListener("pointerdown", handleClick);
+    return () => window.removeEventListener("pointerdown", handleClick);
   }, [open]);
 
   const others = SISTER_APPS.filter((a) => a.id !== CURRENT_APP);
@@ -75,14 +75,6 @@ export const SisterAppsPopup = () => {
 
   return (
     <>
-      {open && (
-        <div
-          aria-hidden="false"
-          className="fixed inset-0 z-[58] bg-black/20"
-          onClick={() => setOpen(false)}
-        />
-      )}
-
       <div
         ref={panelRef}
         aria-hidden={!open}

@@ -28,6 +28,13 @@
     <script>
       (function () {
         try {
+          // Capacitor serves the packaged app from its own localhost origin.
+          // Website-only canonical redirects must never run in that shell,
+          // otherwise an offline native cold start can leave the local bundle.
+          var isNativeShell = window.location.hostname === "localhost"
+            || window.location.protocol === "capacitor:"
+            || window.location.protocol === "ionic:";
+          if (isNativeShell) return;
           var p = window.location.pathname || "/";
           if (p === "/" || /\.html$/i.test(p)) return;
           // Skip private / utility / asset routes — they should never be
@@ -71,13 +78,22 @@
       })();
     </script>
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VCRTFQDY85"></script>
+    <!-- Google tag (gtag.js), web only. Native shells must cold-start locally. -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-VCRTFQDY85');
+      (function () {
+        var isNativeShell = window.location.hostname === "localhost"
+          || window.location.protocol === "capacitor:"
+          || window.location.protocol === "ionic:";
+        if (isNativeShell) return;
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function(){ window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', 'G-VCRTFQDY85');
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-VCRTFQDY85';
+        document.head.appendChild(script);
+      })();
     </script>
     
     <meta charset="UTF-8" />
