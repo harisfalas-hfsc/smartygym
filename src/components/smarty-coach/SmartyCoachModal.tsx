@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { ChevronRight, ChevronLeft, Clock, Dumbbell, Zap, Brain, BookOpen, Target, Activity, Wrench, Flame, Sparkles, X } from "lucide-react";
 import {
   Dialog,
@@ -127,6 +127,7 @@ type WorkoutStep = 1 | 2 | 3 | 4 | 5 | 'result';
 
 export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: SmartyCoachModalProps) => {
   const zIndex = useOverlayZIndex(isOpen);
+  const touchYRef = useRef<number | null>(null);
 
   const navigate = useNavigate();
   const { user } = useAccessControl();
@@ -287,6 +288,20 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
       <DialogContent
         style={{ zIndex }}
         overlayClassName="pointer-events-none bg-transparent"
+        onTouchStart={(event) => {
+          touchYRef.current = event.touches[0]?.clientY ?? null;
+        }}
+        onTouchMove={(event) => {
+          const nextY = event.touches[0]?.clientY;
+          const previousY = touchYRef.current;
+          if (activePath === 'menu' && nextY !== undefined && previousY !== null) {
+            window.scrollBy({ top: previousY - nextY, behavior: 'auto' });
+            touchYRef.current = nextY;
+          }
+        }}
+        onTouchEnd={() => {
+          touchYRef.current = null;
+        }}
         className={cn(
           "p-0 border-0 overflow-hidden",
           // Use small/dynamic viewport units for consistent mobile-browser chrome behavior.
