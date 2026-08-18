@@ -65,5 +65,7 @@ export const isNetworkOnline = (): boolean => currentOnline;
 
 export const subscribeConnectivity = (listener: ConnectivityListener) => {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 };

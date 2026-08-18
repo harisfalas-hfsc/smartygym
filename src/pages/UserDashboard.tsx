@@ -14,7 +14,7 @@ import { UserMessagesPanel } from "@/components/UserMessagesPanel";
 import { MyOrders } from "@/components/MyOrders";
 import { useQuery } from "@tanstack/react-query";
 import { useAccessControl } from "@/hooks/useAccessControl";
-import { offlineFirst, restoreCachedSessionOffline } from "@/lib/offline";
+import { getNetworkStatus, offlineFirst, restoreCachedSessionOffline } from "@/lib/offline";
 import { openExternal } from "@/utils/native";
 
 import { useAdminRole } from "@/hooks/useAdminRole";
@@ -302,7 +302,7 @@ export default function UserDashboard() {
       }
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session?.user) {
-        if (!navigator.onLine) {
+        if (!(await getNetworkStatus())) {
           const restored = await restoreCachedSessionOffline();
           if (restored?.user) {
             setUser(restored.user);
@@ -364,7 +364,7 @@ export default function UserDashboard() {
           session
         }
       } = await supabase.auth.getSession();
-       const resolvedSession = session || (!navigator.onLine ? await restoreCachedSessionOffline() : null);
+       const resolvedSession = session || (!(await getNetworkStatus()) ? await restoreCachedSessionOffline() : null);
        if (!resolvedSession?.user) {
         setLoading(false);
         navigate('/auth');

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getNetworkStatus } from "@/lib/offline";
 
 export const FREE_ACCESS_SETTING_KEY = "free_access_mode";
 const FREE_ACCESS_LOCAL_KEY = "smartygym_free_access_mode";
@@ -31,7 +32,7 @@ export const fetchFreeAccessMode = async (force = false): Promise<boolean> => {
 
   inflight = (async () => {
     // Offline: keep the last known value instead of failing to "paid".
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
+    if (!(await getNetworkStatus())) {
       cached = readLocal() ?? false;
       listeners.forEach((l) => l(cached!));
       inflight = null;

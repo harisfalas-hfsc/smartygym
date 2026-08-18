@@ -8,6 +8,8 @@ import {
   cacheSessionForOffline,
   setCurrentUserId,
   initOfflineSessionTracking,
+  getNetworkStatus,
+  subscribeConnectivity,
 } from "@/lib/offline";
 import { getCyprusTodayStr } from "@/lib/cyprusDate";
 import { fetchFreeAccessMode, subscribeFreeAccessMode } from "@/hooks/useFreeAccessMode";
@@ -68,7 +70,7 @@ const collectMediaUrls = (rows: unknown[]): string[] => {
 };
 
 const cacheMedia = async (urls: string[]) => {
-  if (!("caches" in window) || !navigator.onLine || urls.length === 0) return;
+  if (!("caches" in window) || !(await getNetworkStatus()) || urls.length === 0) return;
   const mediaCache = await caches.open("smartygym-member-media-v1");
   const workers = Array.from({ length: Math.min(6, urls.length) }, async (_, workerIndex) => {
     for (let index = workerIndex; index < urls.length; index += 6) {
@@ -97,7 +99,7 @@ export const OfflineBootstrap = () => {
     const run = async (userId: string) => {
       if (running.current) return;
       if (Date.now() - lastRunAt.current < 60_000) return;
-      if (typeof navigator !== "undefined" && !navigator.onLine) return;
+      if (!(await getNetworkStatus())) return;
       running.current = true;
       lastRunAt.current = Date.now();
 
@@ -464,17 +466,21 @@ export const OfflineBootstrap = () => {
     });
     // Catch the switch flipping on other devices too.
     const poll = window.setInterval(() => {
-      if (navigator.onLine) void fetchFreeAccessMode(true);
+      void getNetworkStatus().then((online) => {
+        if (online) void fetchFreeAccessMode(true);
+      });
     }, 5 * 60 * 1000);
 
-    window.addEventListener("online", onOnline);
+    const unsubscribeConnectivity = subscribeConnectivity((online) => {
+      if (online) onOnline();
+    });
     document.addEventListener("visibilitychange", onFocus);
 
     return () => {
       sub.subscription.unsubscribe();
       unsubscribeFreeAccess();
       window.clearInterval(poll);
-      window.removeEventListener("online", onOnline);
+      unsubscribeConnectivity();
       document.removeEventListener("visibilitychange", onFocus);
     };
   }, [queryClient]);
