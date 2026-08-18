@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { offlineQueryFn } from "@/lib/offline";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
 
 export interface TrainingProgramData {
@@ -32,7 +33,7 @@ export interface TrainingProgramData {
 export const useTrainingProgramData = (programId: string | undefined) => {
   return useQuery({
     queryKey: ["training-program", programId],
-    queryFn: async () => {
+    queryFn: offlineQueryFn(`detail:training-program:${programId}`, async () => {
       if (!programId) throw new Error("Program ID is required");
       const resolveFromMetadata = async () => {
         const { data: metadata, error: metadataError } = await supabase
@@ -77,7 +78,7 @@ export const useTrainingProgramData = (programId: string | undefined) => {
       if (!data) throw new Error("Training program not found");
 
       return { ...data, canonical_slug: slugifyContentName(data.name || data.id) } as TrainingProgramData;
-    },
+    }),
     enabled: !!programId,
   });
 };

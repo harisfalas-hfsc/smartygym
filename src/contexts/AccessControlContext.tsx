@@ -2,6 +2,15 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { fetchFreeAccessMode } from "@/hooks/useFreeAccessMode";
+import { readOffline, saveOffline, setCurrentUserId } from "@/lib/offline";
+
+const ENTITLEMENT_KEY = "entitlements:snapshot";
+
+interface EntitlementSnapshot {
+  userTier: UserTier;
+  productId: string | null;
+  purchasedContent: string[];
+}
 
 export type UserTier = "guest" | "subscriber" | "premium";
 
@@ -95,6 +104,16 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.user) {
+        // Offline with a cached session? keep the member signed in read-only.
+        if (typeof navigator !== "undefined" && !navigator.onLine) {
+          const { restoreCachedSessionOffline } = await import("@/lib/offline");
+          const restored = await restoreCachedSessionOffline();
+          if (restored?.user) {
+            setCurrentUserId(restored.user.id);
+            await checkSubscription(restored.user);
+            return;
+          }
+        }
         setState({
           user: null,
           userTier: "guest",
@@ -119,6 +138,22 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
   };
 
   const checkSubscription = async (user: User) => {
+    setCurrentUserId(user.id);
+
+    // OFFLINE: reuse the exact entitlement level captured on this device the
+    // last time we were online. Never elevate, never downgrade.
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      const snap = await readOffline<EntitlementSnapshot>(ENTITLEMENT_KEY, user.id);
+      setState({
+        user,
+        userTier: snap?.data.userTier ?? "guest",
+        isLoading: false,
+        productId: snap?.data.productId ?? null,
+        purchasedContent: new Set(snap?.data.purchasedContent ?? []),
+      });
+      return;
+    }
+
     try {
       setState(prev => ({ ...prev, isLoading: true }));
       
@@ -214,13 +249,17 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
       const freeAccessMode = await fetchFreeAccessMode();
       const isPremium = isPersonalPremium || isCorporatePremium || isAdmin || freeAccessMode;
 
-      setState({
-        user,
-        userTier: isPremium ? "premium" : "subscriber",
-        isLoading: false,
-        productId: dbData?.plan_type || (isCorporatePremium ? 'corporate' : null),
-        purchasedContent,
-      });
+      const userTier: UserTier = isPremium ? "premium" : "subscriber";
+      const productId = dbData?.plan_type || (isCorporatePremium ? 'corporate' : null);
+
+      setState({ user, userTier, isLoading: false, productId, purchasedContent });
+
+      // Persist the resolved entitlement for offline sessions.
+      void saveOffline<EntitlementSnapshot>(
+        ENTITLEMENT_KEY,
+        { userTier, productId, purchasedContent: [...purchasedContent] },
+        user.id,
+      );
     } catch (error) {
       console.error("Error checking subscription:", error);
       setState({

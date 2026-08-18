@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { offlineQueryFn } from "@/lib/offline";
 import { getCyprusTodayStr } from "@/lib/cyprusDate";
 import type { WorkoutData } from "@/hooks/useWorkoutData";
 
@@ -29,7 +30,7 @@ export const useTodayWods = (enabled = true) => {
 
   const query = useQuery({
     queryKey: ["today-wods", cyprusToday],
-    queryFn: async () => {
+    queryFn: offlineQueryFn(`wod:today:${cyprusToday}`, async () => {
       const workouts = await fetchVisibleWorkoutMetadata(null);
       const todayWods = workouts.filter(
         (wod) => wod.is_workout_of_day === true && wod.generated_for_date === cyprusToday
@@ -38,7 +39,7 @@ export const useTodayWods = (enabled = true) => {
         todayWodCache.set(cyprusToday, todayWods);
       }
       return todayWods;
-    },
+    }),
     enabled,
     staleTime: 1000 * 60 * 5,
     retry: 2,

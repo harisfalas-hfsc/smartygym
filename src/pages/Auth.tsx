@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  verifyOfflineCredentials,
+  restoreCachedSessionOffline,
+  storeOfflineCredentials,
+  cacheSessionForOffline,
+  setCurrentUserId,
+} from "@/lib/offline";
 import type { Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -357,16 +364,43 @@ export default function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // Offline sign-in: verify against the PBKDF2 verifier saved on this device
+    // during the last successful online login, then restore the cached session.
     if (isOffline) {
-      toast({
-        title: "No Internet Connection",
-        description: "Please connect to the internet to sign in.",
-        variant: "destructive",
-      });
+      setLoading(true);
+      try {
+        const ok = await verifyOfflineCredentials(loginData.email, loginData.password);
+        if (!ok) {
+          toast({
+            title: "Offline sign-in unavailable",
+            description:
+              "This device has no saved sign-in for that account. Connect to the internet once to enable offline access.",
+            variant: "destructive",
+          });
+          return;
+        }
+        const session = await restoreCachedSessionOffline();
+        if (!session) {
+          toast({
+            title: "Offline sign-in unavailable",
+            description: "No saved session on this device. Please connect once and sign in.",
+            variant: "destructive",
+          });
+          return;
+        }
+        setCurrentUserId(session.user.id);
+        toast({
+          title: "Signed in offline",
+          description: "You're viewing your saved copy. Changes need an internet connection.",
+        });
+        setTimeout(() => navigate(safeRedirect), 800);
+      } finally {
+        setLoading(false);
+      }
       return;
     }
-    
+
     setLoading(true);
 
     try {
@@ -397,6 +431,12 @@ export default function Auth() {
           console.log('Remember Me selected - custom session handling pending migration');
         }
 
+
+        if (data.session) {
+          setCurrentUserId(data.session.user.id);
+          void storeOfflineCredentials(loginData.email, loginData.password, data.session.user.id);
+          void cacheSessionForOffline(data.session);
+        }
 
         toast({
           title: "Success!",

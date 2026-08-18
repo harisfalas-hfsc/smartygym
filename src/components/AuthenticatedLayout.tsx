@@ -5,6 +5,7 @@ import { User, Session } from "@supabase/supabase-js";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { restoreCachedSessionOffline, setCurrentUserId } from "@/lib/offline";
 
 const SESSION_CACHE_KEY = 'smartygym_cached_session';
 
@@ -65,7 +66,16 @@ export const AuthenticatedLayout = () => {
       if (isOffline) {
         const cached = getCachedSession();
         if (cached) {
+          setCurrentUserId(cached.user.id);
           setUser(cached.user);
+          setLoading(false);
+          return;
+        }
+        // Fall back to the IndexedDB-cached Supabase session.
+        const restored = await restoreCachedSessionOffline();
+        if (restored) {
+          setCurrentUserId(restored.user.id);
+          setUser(restored.user);
           setLoading(false);
           return;
         }
@@ -85,6 +95,7 @@ export const AuthenticatedLayout = () => {
 
       // Cache the session for offline use
       cacheSession(session);
+      setCurrentUserId(session.user.id);
       setUser(session.user);
       setLoading(false);
     };
