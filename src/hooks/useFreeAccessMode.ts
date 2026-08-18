@@ -2,8 +2,20 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const FREE_ACCESS_SETTING_KEY = "free_access_mode";
+const FREE_ACCESS_LOCAL_KEY = "smartygym_free_access_mode";
 
-let cached: boolean | null = null;
+const readLocal = (): boolean | null => {
+  try {
+    const raw = localStorage.getItem(FREE_ACCESS_LOCAL_KEY);
+    return raw === null ? null : raw === "true";
+  } catch {
+    return null;
+  }
+};
+
+// Seed from the last known value so offline launches render exactly like the
+// last online session (no price badges flashing back on).
+let cached: boolean | null = typeof window === "undefined" ? null : readLocal();
 let inflight: Promise<boolean> | null = null;
 const listeners = new Set<(v: boolean) => void>();
 
@@ -18,6 +30,13 @@ export const fetchFreeAccessMode = async (force = false): Promise<boolean> => {
   if (!force && inflight) return inflight;
 
   inflight = (async () => {
+    // Offline: keep the last known value instead of failing to "paid".
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      cached = readLocal() ?? false;
+      listeners.forEach((l) => l(cached!));
+      inflight = null;
+      return cached;
+    }
     try {
       const { data, error } = await supabase
         .from("system_settings")
@@ -26,8 +45,15 @@ export const fetchFreeAccessMode = async (force = false): Promise<boolean> => {
         .maybeSingle();
       const value = data?.setting_value;
       cached = !error && (value === true || (value as unknown) === "true");
+      if (!error) {
+        try {
+          localStorage.setItem(FREE_ACCESS_LOCAL_KEY, String(cached));
+        } catch {
+          /* storage unavailable */
+        }
+      }
     } catch {
-      cached = false;
+      cached = readLocal() ?? false;
     }
     listeners.forEach((l) => l(cached!));
     inflight = null;
