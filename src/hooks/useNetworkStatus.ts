@@ -1,38 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useOnlineStatus } from './useOnlineStatus';
 
+/**
+ * Legacy-compatible wrapper around the single ConnectivityManager.
+ * Kept so existing callers keep working; do not add a second detection system.
+ */
 export function useNetworkStatus() {
-  const [isOnline, setIsOnline] = useState(() => 
-    typeof navigator !== 'undefined' ? navigator.onLine : true
-  );
+  const { isOnline, isOffline, isServerUnreachable, state } = useOnlineStatus();
   const [wasOffline, setWasOffline] = useState(false);
-
-  const updateOnlineStatus = useCallback(() => {
-    const online = navigator.onLine;
-    setIsOnline(online);
-    
-    if (!online) {
-      setWasOffline(true);
-    }
-  }, []);
+  const previous = useRef(isOnline);
 
   useEffect(() => {
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
+    if (!isOnline) setWasOffline(true);
+    previous.current = isOnline;
+  }, [isOnline]);
 
-    return () => {
-      window.removeEventListener('online', updateOnlineStatus);
-      window.removeEventListener('offline', updateOnlineStatus);
-    };
-  }, [updateOnlineStatus]);
+  const clearWasOffline = useCallback(() => setWasOffline(false), []);
 
-  const clearWasOffline = useCallback(() => {
-    setWasOffline(false);
-  }, []);
-
-  return { 
-    isOnline, 
-    isOffline: !isOnline,
-    wasOffline,
-    clearWasOffline
-  };
+  return { state, isOnline, isOffline, isServerUnreachable, wasOffline, clearWasOffline };
 }
