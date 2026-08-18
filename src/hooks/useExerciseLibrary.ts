@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { offlineQueryFn } from "@/lib/offline";
 import { findBestMatch, normalizeExerciseName, MatchResult } from "@/utils/exerciseMatching";
 
 export interface Exercise {
@@ -82,7 +83,7 @@ const fetchExerciseById = async (id: string): Promise<Exercise | null> => {
 export const useExerciseLibrary = () => {
   const { data: exercises = [], isLoading, error } = useQuery({
     queryKey: ['exercise-library-all'],
-    queryFn: fetchAllExercises,
+    queryFn: offlineQueryFn("library:list:exercises", fetchAllExercises),
     staleTime: 30 * 60 * 1000, // 30 minutes
     gcTime: 60 * 60 * 1000, // 1 hour
   });
@@ -134,7 +135,7 @@ export const useExerciseLibrary = () => {
 export const useExerciseDetails = (exerciseId: string | null) => {
   return useQuery({
     queryKey: ['exercise-details', exerciseId],
-    queryFn: () => exerciseId ? fetchExerciseById(exerciseId) : null,
+    queryFn: offlineQueryFn(`library:exercise:${exerciseId}`, async () => (exerciseId ? fetchExerciseById(exerciseId) : null)),
     enabled: !!exerciseId,
     staleTime: 30 * 60 * 1000,
   });

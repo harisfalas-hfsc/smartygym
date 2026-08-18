@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { offlineQueryFn } from "@/lib/offline";
 
 export const useWorkoutInteractions = (userId: string | undefined) => {
   return useQuery({
     queryKey: ["workout-interactions", userId],
-    queryFn: async () => {
+    queryFn: offlineQueryFn("favorites:workout-interactions", async () => {
       if (!userId) return [];
       
       const { data, error } = await supabase
@@ -18,7 +19,7 @@ export const useWorkoutInteractions = (userId: string | undefined) => {
       }
 
       return data || [];
-    },
+    }),
     enabled: !!userId,
   });
 };
