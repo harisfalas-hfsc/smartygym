@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  verifyOfflineCredentials,
+  restoreCachedSessionOffline,
+  storeOfflineCredentials,
+  cacheSessionForOffline,
+  setCurrentUserId,
+} from "@/lib/offline";
 import type { Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
