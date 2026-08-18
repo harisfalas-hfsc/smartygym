@@ -59,7 +59,9 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        skipWaiting: true,
+        // Leave updates waiting so the in-app refresh prompt can let the member
+        // activate a new version at a safe moment.
+        skipWaiting: false,
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [
           /^\/~oauth/,

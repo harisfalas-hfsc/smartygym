@@ -46,6 +46,45 @@ const stripBody = <T extends Record<string, unknown>>(row: T): T => {
   return copy as T;
 };
 
+const MEDIA_FIELDS = [
+  "image_url",
+  "video_url",
+  "gif_url",
+  "thumbnail_url",
+  "avatar_url",
+  "cover_url",
+];
+
+const collectMediaUrls = (rows: unknown[]): string[] => {
+  const urls = new Set<string>();
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    for (const field of MEDIA_FIELDS) {
+      const value = (row as Record<string, unknown>)[field];
+      if (typeof value === "string" && /^https?:\/\//i.test(value)) urls.add(value);
+    }
+  }
+  return [...urls];
+};
+
+const cacheMedia = async (urls: string[]) => {
+  if (!("caches" in window) || !navigator.onLine || urls.length === 0) return;
+  const mediaCache = await caches.open("smartygym-member-media-v1");
+  const workers = Array.from({ length: Math.min(6, urls.length) }, async (_, workerIndex) => {
+    for (let index = workerIndex; index < urls.length; index += 6) {
+      const url = urls[index];
+      try {
+        if (await mediaCache.match(url)) continue;
+        const response = await fetch(url, { mode: "no-cors", credentials: "omit" });
+        await mediaCache.put(url, response);
+      } catch {
+        // A media host may reject offline caching; the data record remains safe.
+      }
+    }
+  });
+  await Promise.allSettled(workers);
+};
+
 export const OfflineBootstrap = () => {
   const queryClient = useQueryClient();
   const running = useRef(false);
@@ -210,6 +249,7 @@ export const OfflineBootstrap = () => {
               equipment: [...new Set((all as any[]).map((e) => e.equipment).filter(Boolean))],
               muscles: [...new Set((all as any[]).map((e) => e.muscle_group).filter(Boolean))],
             });
+            await cacheMedia(collectMediaUrls(all));
           })(),
         );
 
@@ -335,6 +375,7 @@ export const OfflineBootstrap = () => {
             for (const a of (articles ?? []) as any[]) {
               await save(`blog:article:${a.slug || a.id}`, a);
             }
+            await cacheMedia(collectMediaUrls(articles ?? []));
           })(),
         );
 
