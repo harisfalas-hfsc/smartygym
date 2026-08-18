@@ -355,7 +355,13 @@ export const OfflineBootstrap = () => {
       if (document.visibilityState === "visible") resync();
     };
     // Admin flipped the Free Access switch → re-sync entitlements right away.
-    const unsubscribeFreeAccess = subscribeFreeAccessMode(() => resync(true));
+    // Only react to an actual change in value, never to plain re-reads.
+    let lastFreeAccess: boolean | null = null;
+    const unsubscribeFreeAccess = subscribeFreeAccessMode((value) => {
+      const changed = lastFreeAccess !== null && lastFreeAccess !== value;
+      lastFreeAccess = value;
+      if (changed) resync(true);
+    });
     // Catch the switch flipping on other devices too.
     const poll = window.setInterval(() => {
       if (navigator.onLine) void fetchFreeAccessMode(true);
