@@ -116,7 +116,7 @@ export const OfflineBootstrap = () => {
 
     const run = async (userId: string) => {
       if (running.current) return;
-      if (Date.now() - lastRunAt.current < 60_000) return;
+      if (Date.now() - lastRunAt.current < 10 * 60_000) return;
       if (!isReachable() && (await probeConnectivity()) !== "online") return;
       running.current = true;
       lastRunAt.current = Date.now();
