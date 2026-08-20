@@ -8,7 +8,8 @@ const store = createStore("smartygym-query-cache", "kv");
 export const createOfflinePersister = () =>
   createAsyncStoragePersister({
     key: "smartygym-react-query",
-    throttleTime: 2000,
+    // Serialising the whole cache is main-thread work; do it rarely.
+    throttleTime: 15000,
     storage: {
       getItem: async (key) => ((await get(key, store)) as string | undefined) ?? null,
       setItem: async (key, value) => {
