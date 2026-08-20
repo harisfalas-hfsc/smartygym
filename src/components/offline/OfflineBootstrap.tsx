@@ -182,8 +182,12 @@ export const OfflineBootstrap = () => {
             // for visitors/free members.
             const fullWorkouts = workoutFullResult.error ? [] : (workoutFullResult.data ?? []);
             const fullPrograms = programFullResult.error ? [] : (programFullResult.data ?? []);
-            const workoutFullById = new Map(fullWorkouts.map((row: any) => [row.id, row]));
-            const programFullById = new Map(fullPrograms.map((row: any) => [row.id, row]));
+            const workoutFullById = new Map<string, Record<string, unknown>>(
+              fullWorkouts.map((row: any) => [String(row.id), row as Record<string, unknown>]),
+            );
+            const programFullById = new Map<string, Record<string, unknown>>(
+              fullPrograms.map((row: any) => [String(row.id), row as Record<string, unknown>]),
+            );
             const workouts = workoutMetadata.map((row) => ({ ...row, ...(workoutFullById.get(row.id) ?? {}) }));
             const programs = programMetadata.map((row) => ({ ...row, ...(programFullById.get(row.id) ?? {}) }));
             const workoutSlugs = buildUniqueContentSlugs(workouts);
