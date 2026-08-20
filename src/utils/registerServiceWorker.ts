@@ -86,20 +86,36 @@ const watchForUpdates = (reg: ServiceWorkerRegistration) => {
   });
 };
 
-export const registerAppServiceWorker = () => {
+let registrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
+
+export const registerAppServiceWorker = (): Promise<ServiceWorkerRegistration | null> => {
+  if (registrationPromise) return registrationPromise;
   if (shouldSkipRegistration()) {
-    void unregisterAppWorkers();
-    return;
+    registrationPromise = unregisterAppWorkers().then(() => null).catch(() => null);
+    return registrationPromise;
   }
 
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register(APP_SW_URL, { scope: "/" })
-      .then((reg) => {
-        if (reg) watchForUpdates(reg);
-      })
-      .catch((err) => {
-        console.warn("[sw] registration failed", err);
-      });
-  });
+  registrationPromise = navigator.serviceWorker
+    .register(APP_SW_URL, { scope: "/" })
+    .then(async (reg) => {
+      watchForUpdates(reg);
+      await navigator.serviceWorker.ready;
+      return reg;
+    })
+    .catch((err) => {
+      console.warn("[sw] registration failed", err);
+      return null;
+    });
+  return registrationPromise;
+};
+
+export const warmOfflineUrls = async (urls: string[]): Promise<void> => {
+  if (typeof window === "undefined" || !("caches" in window) || !navigator.onLine) return;
+  const cache = await caches.open("html-pages");
+  await Promise.allSettled(
+    urls.map(async (url) => {
+      const response = await fetch(url, { credentials: "same-origin" });
+      if (response.ok) await cache.put(url, response.clone());
+    }),
+  );
 };

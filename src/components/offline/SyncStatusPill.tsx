@@ -21,8 +21,9 @@ export const SyncStatusPill = () => {
     useSyncStatus();
   const [expanded, setExpanded] = useState(false);
 
-  // Only surface the pill when there is something worth saying.
-  const noteworthy = !isOnline || phase === "syncing" || pendingOperations > 0;
+  // Keep a quiet "Synced" confirmation visible, matching the ecosystem's
+  // offline-first behavior and making background readiness observable.
+  const noteworthy = true;
 
   useEffect(() => {
     if (!noteworthy) setExpanded(false);

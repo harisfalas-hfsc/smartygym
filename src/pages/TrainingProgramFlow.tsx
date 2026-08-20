@@ -21,6 +21,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { CategoryCountBadge } from "@/components/ui/category-count-badge";
 import { SwipeToExplore } from "@/components/ui/SwipeToExplore";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
+import { offlineQueryFn } from "@/lib/offline";
 
 type VisibleProgramMetadata = Database["public"]["Functions"]["get_visible_program_metadata"]["Returns"][number];
 
@@ -50,7 +51,7 @@ const TrainingProgramFlow = () => {
   // Fetch program counts by category
   const { data: programCounts = {} } = useQuery({
     queryKey: ["program-category-counts"],
-    queryFn: async () => {
+    queryFn: offlineQueryFn("programs:category-counts", async () => {
       const { data } = await supabase
         .from("admin_training_programs")
         .select("category")
@@ -72,7 +73,7 @@ const TrainingProgramFlow = () => {
         }
       });
       return counts;
-    },
+    }),
     staleTime: 1000 * 60 * 5,
   });
 
@@ -81,13 +82,13 @@ const TrainingProgramFlow = () => {
   // Latest 3 programs for mobile "Featured" section
   const { data: latestPrograms = [] } = useQuery({
     queryKey: ["featured-latest-programs"],
-    queryFn: async () => {
+    queryFn: offlineQueryFn("programs:featured-latest", async () => {
       const { data } = await supabase.rpc("get_visible_program_metadata", {});
       return (data || [])
         .filter((p) => p.is_visible !== false && !!p.created_at)
         .sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")))
         .slice(0, 3);
-    },
+    }),
     staleTime: 1000 * 60 * 5,
   });
 
