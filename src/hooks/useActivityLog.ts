@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { peekOffline } from "@/lib/offline";
 
 export interface ActivityLog {
   id: string;
@@ -34,10 +36,30 @@ export interface LogActivityParams {
 
 export const useActivityLog = (userId: string | undefined, filterType?: string, startDate?: Date, endDate?: Date) => {
   const queryClient = useQueryClient();
+  const queryKey = ['activity-log', userId, filterType, startDate, endDate] as const;
+
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    void peekOffline<ActivityLog[]>('progress:activity-log', userId).then((cached) => {
+      if (!active || !cached) return;
+      const filtered = cached.filter((activity) => {
+        if (filterType && filterType !== 'all' && activity.content_type !== filterType) return false;
+        const activityTime = new Date(`${activity.activity_date}T00:00:00`).getTime();
+        if (startDate && activityTime < new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()) return false;
+        if (endDate && activityTime > new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()).getTime()) return false;
+        return true;
+      });
+      queryClient.setQueryData(queryKey, filtered);
+    });
+    return () => {
+      active = false;
+    };
+  }, [userId, filterType, startDate, endDate, queryClient]);
 
   // Fetch activities
   const { data: activities = [], isLoading } = useQuery({
-    queryKey: ['activity-log', userId, filterType, startDate, endDate],
+    queryKey,
     queryFn: async () => {
       if (!userId) return [];
 
