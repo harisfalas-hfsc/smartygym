@@ -8,6 +8,27 @@ import { generateLlmsFull } from "./scripts/generate-llms-full";
 import { prerenderSeoHtml } from "./scripts/prerender";
 import { verifyPrerenderedSeo } from "./scripts/verify-prerender";
 
+const offlineRoutes = [
+  "/",
+  "/about",
+  "/faq",
+  "/smarty-premium",
+  "/fitness-training",
+  "/research",
+  "/glossary",
+  "/blog",
+  "/workout",
+  "/trainingprogram",
+  "/tools",
+  "/exerciselibrary",
+  "/community",
+  "/contact",
+  "/privacy-policy",
+  "/termsofservice",
+  "/disclaimer",
+  "/userdashboard",
+];
+
 function smartySeoPrerenderPlugin() {
   let outDir = path.resolve(__dirname, "dist");
 
@@ -67,7 +88,8 @@ export default defineConfig(({ mode }) => ({
           /^\/api\//,
           /^\/functions\//,
         ],
-        globPatterns: ["**/*.{js,css,woff2,ico,webmanifest}"],
+        additionalManifestEntries: offlineRoutes.map((url) => ({ url, revision: null })),
+        globPatterns: ["**/*.{js,css,html,woff,woff2,ttf,otf,ico,png,jpg,jpeg,webp,avif,gif,svg,json,txt}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
           {

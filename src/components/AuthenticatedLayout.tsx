@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { restoreCachedSessionOffline, setCurrentUserId } from "@/lib/offline";
 
 const SESSION_CACHE_KEY = 'smartygym_cached_session';
@@ -163,7 +162,6 @@ export const AuthenticatedLayout = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <OfflineBanner />
       <Outlet />
     </div>
   );

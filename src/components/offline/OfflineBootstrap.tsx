@@ -27,6 +27,19 @@ import {
 import { getCyprusTodayStr } from "@/lib/cyprusDate";
 import { fetchFreeAccessMode, subscribeFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
+import { warmOfflineUrls } from "@/utils/registerServiceWorker";
+
+const OFFLINE_ROUTES = [
+  "/", "/about", "/faq", "/smarty-premium", "/fitness-training", "/research",
+  "/glossary", "/blog", "/workout", "/trainingprogram", "/tools",
+  "/exerciselibrary", "/community", "/contact", "/privacy-policy",
+  "/termsofservice", "/disclaimer", "/userdashboard",
+];
+
+const warmMedia = async (urls: Array<string | null | undefined>) => {
+  const unique = [...new Set(urls.filter((url): url is string => Boolean(url)))];
+  await Promise.allSettled(unique.map((url) => fetch(url, { mode: "cors", credentials: "omit" })));
+};
 
 /**
  * Downloads the signed-in member's entire world in the background so every
@@ -71,6 +84,9 @@ export const OfflineBootstrap = () => {
     initOfflineSessionTracking();
     startConnectivityMonitor();
     void initLocalDatabase();
+    // Public/permanent routes are warmed for everyone, not only signed-in
+    // members. This is what makes a later cold start navigable offline.
+    void warmOfflineUrls(OFFLINE_ROUTES);
 
     const run = async (userId: string) => {
       if (running.current) return;
@@ -82,6 +98,12 @@ export const OfflineBootstrap = () => {
 
       const save = (key: string, data: unknown) => saveOffline(key, data, userId);
       const table = (name: string) => (supabase as never as { from: (n: string) => any }).from(name);
+        const rpc = (name: string, args?: unknown) =>
+          (supabase as never as { rpc: (n: string, a?: unknown) => any }).rpc(name, args);
+        const dataOrThrow = <T,>(result: { data: T; error?: unknown }): T => {
+          if (result.error) throw result.error;
+          return result.data;
+        };
 
       try {
         await flushMutationQueue(userId);
@@ -116,11 +138,14 @@ export const OfflineBootstrap = () => {
           return purchased.has(`${kind}:${row?.id}`);
         };
 
-        const tasks: Promise<unknown>[] = [];
+        const tasks: Array<{ name: string; promise: Promise<unknown> }> = [];
+
+        tasks.push({ name: "app-shell", promise: warmOfflineUrls(OFFLINE_ROUTES) });
 
         // ---- account, access, profile, settings -------------------------------
-        tasks.push(
-          (async () => {
+        tasks.push({
+          name: "account",
+          promise: (async () => {
             const [profile, roles, subscription, purchases, settings] = await Promise.all([
               table("profiles").select("*").eq("user_id", userId).maybeSingle(),
               table("user_roles").select("*").eq("user_id", userId),
@@ -136,23 +161,44 @@ export const OfflineBootstrap = () => {
               save("settings:system", settings.data ?? []),
             ]);
           })(),
-        );
+        });
 
         // ---- content library: workouts + programs (list + every detail) -------
-        tasks.push(
-          (async () => {
-            const [{ data: workoutMeta }, { data: programMeta }] = await Promise.all([
+        tasks.push({
+          name: "content-library",
+          promise: (async () => {
+            const [workoutMetadataResult, programMetadataResult, workoutFullResult, programFullResult] = await Promise.all([
+              rpc("get_visible_workout_metadata", { _workout_id: null }),
+              rpc("get_visible_program_metadata", { _program_id: null }),
               table("admin_workouts").select("*").neq("is_visible", false),
               table("admin_training_programs").select("*").neq("is_visible", false),
             ]);
 
-            const workouts = workoutMeta ?? [];
-            const programs = programMeta ?? [];
+            const workoutMetadata = dataOrThrow<any[]>(workoutMetadataResult) ?? [];
+            const programMetadata = dataOrThrow<any[]>(programMetadataResult) ?? [];
+            // The public RPCs are the authoritative catalog. Direct base-table
+            // rows are merged only when access policies return them, preserving
+            // full paid bodies for entitled members without emptying the list
+            // for visitors/free members.
+            const fullWorkouts = workoutFullResult.error ? [] : (workoutFullResult.data ?? []);
+            const fullPrograms = programFullResult.error ? [] : (programFullResult.data ?? []);
+            const workoutFullById = new Map<string, Record<string, unknown>>(
+              fullWorkouts.map((row: any) => [String(row.id), row as Record<string, unknown>]),
+            );
+            const programFullById = new Map<string, Record<string, unknown>>(
+              fullPrograms.map((row: any) => [String(row.id), row as Record<string, unknown>]),
+            );
+            const workouts = workoutMetadata.map((row) => ({ ...row, ...(workoutFullById.get(row.id) ?? {}) }));
+            const programs = programMetadata.map((row) => ({ ...row, ...(programFullById.get(row.id) ?? {}) }));
             const workoutSlugs = buildUniqueContentSlugs(workouts);
             const programSlugs = buildUniqueContentSlugs(programs);
 
             await save("workouts:list:all", workouts);
             await save("programs:list:all", programs);
+            await warmMedia([
+              ...workouts.map((row: any) => row.image_url),
+              ...programs.map((row: any) => row.image_url),
+            ]);
             queryClient.setQueryData(["all-workouts"], workouts);
             queryClient.setQueryData(["all-programs"], programs);
 
@@ -181,11 +227,12 @@ export const OfflineBootstrap = () => {
             );
             await save(`wod:today:${today}`, todayWods);
           })(),
-        );
+        });
 
         // ---- exercise library (paginated until exhausted) + filters -----------
-        tasks.push(
-          (async () => {
+        tasks.push({
+          name: "exercise-library",
+          promise: (async () => {
             const all: unknown[] = [];
             const pageSize = 1000;
             for (let page = 0; page < 50; page += 1) {
@@ -206,13 +253,15 @@ export const OfflineBootstrap = () => {
               equipment: [...new Set((all as any[]).map((e) => e.equipment).filter(Boolean))],
               muscles: [...new Set((all as any[]).map((e) => e.muscle_group).filter(Boolean))],
             });
+            await warmMedia((all as any[]).flatMap((ex) => [ex.gif_url, ex.image_url, ex.video_url]));
           })(),
-        );
+        });
 
         // ---- logbook / progress / stats ---------------------------------------
-        tasks.push(
-          (async () => {
-            const [checkins, progress, calories, bmr, onerm, goals, measurements, badges, scheduled] =
+        tasks.push({
+          name: "progress-and-logbook",
+          promise: (async () => {
+            const [checkins, progress, calories, bmr, onerm, goals, measurements, badges, scheduled, activity] =
               await Promise.all([
                 table("smarty_checkins").select("*").eq("user_id", userId),
                 table("progress_logs").select("*").eq("user_id", userId),
@@ -223,6 +272,7 @@ export const OfflineBootstrap = () => {
                 table("user_measurement_goals").select("*").eq("user_id", userId),
                 table("user_badges").select("*").eq("user_id", userId),
                 table("scheduled_workouts").select("*").eq("user_id", userId),
+                table("user_activity_log").select("*").eq("user_id", userId),
               ]);
             await Promise.all([
               save("logbook:checkins", checkins.data ?? []),
@@ -234,13 +284,15 @@ export const OfflineBootstrap = () => {
               save("progress:measurement-goals", measurements.data ?? []),
               save("badges", badges.data ?? []),
               save("saved:scheduled-workouts", scheduled.data ?? []),
+              save("progress:activity-log", activity.data ?? []),
             ]);
           })(),
-        );
+        });
 
         // ---- owned / saved items + favourites ---------------------------------
-        tasks.push(
-          (async () => {
+        tasks.push({
+          name: "saved-and-favorites",
+          promise: (async () => {
             const [savedWorkouts, savedPrograms, wInteractions, pInteractions] = await Promise.all([
               table("saved_workouts").select("*").eq("user_id", userId),
               table("saved_training_programs").select("*").eq("user_id", userId),
@@ -254,11 +306,12 @@ export const OfflineBootstrap = () => {
               save("favorites:program-interactions", pInteractions.data ?? []),
             ]);
           })(),
-        );
+        });
 
         // ---- notifications / inbox --------------------------------------------
-        tasks.push(
-          (async () => {
+        tasks.push({
+          name: "notifications",
+          promise: (async () => {
             const [messages, contact] = await Promise.all([
               table("user_system_messages").select("*").eq("user_id", userId),
               table("contact_messages").select("*").eq("user_id", userId),
@@ -268,12 +321,12 @@ export const OfflineBootstrap = () => {
               save("inbox:contact-messages", contact.data ?? []),
             ]);
           })(),
-        );
+        });
 
         // ---- community: leaderboards, testimonials, ratings --------------------
-        tasks.push(
-          (async () => {
-            const rpc = (supabase as never as { rpc: (n: string, a?: unknown) => any }).rpc;
+        tasks.push({
+          name: "community",
+          promise: (async () => {
             const [workoutBoard, programBoard, checkinBoard, testimonials, wRatings, pRatings] =
               await Promise.all([
                 rpc("get_workout_leaderboard"),
@@ -292,32 +345,38 @@ export const OfflineBootstrap = () => {
               save("community:program-ratings", pRatings.data ?? []),
             ]);
           })(),
-        );
+        });
 
         // ---- blog / articles (list + full detail) ------------------------------
-        tasks.push(
-          (async () => {
+        tasks.push({
+          name: "blog",
+          promise: (async () => {
             const { data: articles } = await table("blog_articles")
               .select("*")
               .eq("is_published", true)
               .order("published_at", { ascending: false });
             await save("blog:list", articles ?? []);
+            await warmMedia((articles ?? []).map((article: any) => article.image_url));
             for (const a of (articles ?? []) as any[]) {
               await save(`blog:article:${a.slug || a.id}`, a);
             }
           })(),
-        );
+        });
 
         // ---- daily ritual -------------------------------------------------------
-        tasks.push(
-          (async () => {
+        tasks.push({
+          name: "daily-ritual",
+          promise: (async () => {
             const { data: rituals } = await table("daily_smarty_rituals").select("*");
             await save("rituals:list", rituals ?? []);
           })(),
-        );
+        });
 
-        const results = await Promise.allSettled(tasks);
+        const results = await Promise.allSettled(tasks.map((task) => task.promise));
         const failed = results.filter((r) => r.status === "rejected").length;
+        const completedTasks = tasks
+          .filter((_, index) => results[index]?.status === "fulfilled")
+          .map((task) => task.name);
 
         // Entitlement dropped since the last sync (e.g. Free Access Mode was
         // switched off, or a subscription lapsed)? Throw away the in-memory
@@ -338,6 +397,7 @@ export const OfflineBootstrap = () => {
             lastSuccessAt: Date.now(),
             lastError: failed > 0 ? `${failed} sync task(s) failed` : null,
             failedOperations: failed,
+            completedTasks,
             pendingOperations: await pendingMutationCount(userId),
           },
           userId,
