@@ -111,8 +111,8 @@ export const OfflineBootstrap = () => {
     startConnectivityMonitor();
     void initLocalDatabase();
     // Public/permanent routes are warmed for everyone, not only signed-in
-    // members. This is what makes a later cold start navigable offline.
-    void warmOfflineUrls(OFFLINE_ROUTES);
+    // members. Deferred so it never competes with the first screens.
+    const routeWarmTimer = window.setTimeout(() => void warmOfflineUrls(OFFLINE_ROUTES), 15_000);
 
     const run = async (userId: string) => {
       if (running.current) return;
@@ -469,7 +469,8 @@ export const OfflineBootstrap = () => {
       setCurrentUserId(activeUserId);
       void cacheSessionForOffline(session);
       void loadSyncDiagnostics(activeUserId);
-      void run(activeUserId);
+      // Let the app become interactive first; background sync starts after.
+      window.setTimeout(() => activeUserId && void run(activeUserId), 8_000);
     };
 
     void start();
@@ -494,7 +495,8 @@ export const OfflineBootstrap = () => {
         setCurrentUserId(activeUserId);
         void cacheSessionForOffline(session);
         if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
-          void run(session.user.id);
+          const id = session.user.id;
+          window.setTimeout(() => void run(id), 8_000);
         }
       }
     });
@@ -530,6 +532,7 @@ export const OfflineBootstrap = () => {
     return () => {
       sub.subscription.unsubscribe();
       unsubscribeFreeAccess();
+      window.clearTimeout(routeWarmTimer);
       window.clearInterval(poll);
       window.removeEventListener("online", onOnline);
       document.removeEventListener("visibilitychange", onFocus);
