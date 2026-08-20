@@ -221,13 +221,10 @@ export const OfflineBootstrap = () => {
 
             await save("workouts:list:all", workouts);
             await save("programs:list:all", programs);
-            await warmMedia([
-              ...workouts.map((row: any) => row.image_url),
-              ...programs.map((row: any) => row.image_url),
-            ]);
             queryClient.setQueryData(["all-workouts"], workouts);
             queryClient.setQueryData(["all-programs"], programs);
 
+            let written = 0;
             for (const w of workouts) {
               const slug = workoutSlugs.get(w.id) || slugifyContentName(w.name || w.id);
               const full = { ...w, canonical_slug: slug };
@@ -236,6 +233,7 @@ export const OfflineBootstrap = () => {
               const row = entitledTo(w, "workout") ? full : stripBody(full);
               await save(`detail:workout:${w.id}`, row);
               await save(`detail:workout:${slug}`, row);
+              if ((written += 1) % 20 === 0) await breathe();
             }
             for (const p of programs) {
               const slug = programSlugs.get(p.id) || slugifyContentName(p.name || p.id);
@@ -245,6 +243,7 @@ export const OfflineBootstrap = () => {
               await save(`detail:program:${slug}`, row);
               await save(`detail:training-program:${p.id}`, row);
               await save(`detail:training-program:${slug}`, row);
+              if ((written += 1) % 20 === 0) await breathe();
             }
 
             const today = getCyprusTodayStr();
@@ -252,6 +251,11 @@ export const OfflineBootstrap = () => {
               (w: any) => w.is_workout_of_day === true && w.generated_for_date === today,
             );
             await save(`wod:today:${today}`, todayWods);
+
+            await warmMedia([
+              ...workouts.map((row: any) => row.image_url),
+              ...programs.map((row: any) => row.image_url),
+            ]);
           })(),
         });
 
@@ -268,18 +272,25 @@ export const OfflineBootstrap = () => {
                 .range(page * pageSize, page * pageSize + pageSize - 1);
               if (error || !data?.length) break;
               all.push(...data);
+              await breathe();
               if (data.length < pageSize) break;
             }
             await save("library:list:exercises", all);
+            let count = 0;
             for (const ex of all as any[]) {
               await save(`library:exercise:${ex.id}`, ex);
+              if ((count += 1) % 50 === 0) await breathe();
             }
             await save("library:filters", {
               categories: [...new Set((all as any[]).map((e) => e.category).filter(Boolean))],
               equipment: [...new Set((all as any[]).map((e) => e.equipment).filter(Boolean))],
               muscles: [...new Set((all as any[]).map((e) => e.muscle_group).filter(Boolean))],
             });
-            await warmMedia((all as any[]).flatMap((ex) => [ex.gif_url, ex.image_url, ex.video_url]));
+            // GIFs are heavy; warm only a small slice in the background.
+            await warmMedia(
+              (all as any[]).flatMap((ex) => [ex.gif_url, ex.image_url]),
+              40,
+            );
           })(),
         });
 
