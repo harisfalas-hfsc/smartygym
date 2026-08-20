@@ -84,6 +84,9 @@ export const OfflineBootstrap = () => {
     initOfflineSessionTracking();
     startConnectivityMonitor();
     void initLocalDatabase();
+    // Public/permanent routes are warmed for everyone, not only signed-in
+    // members. This is what makes a later cold start navigable offline.
+    void warmOfflineUrls(OFFLINE_ROUTES);
 
     const run = async (userId: string) => {
       if (running.current) return;
@@ -95,6 +98,12 @@ export const OfflineBootstrap = () => {
 
       const save = (key: string, data: unknown) => saveOffline(key, data, userId);
       const table = (name: string) => (supabase as never as { from: (n: string) => any }).from(name);
+        const rpc = (name: string, args?: unknown) =>
+          (supabase as never as { rpc: (n: string, a?: unknown) => any }).rpc(name, args);
+        const dataOrThrow = <T,>(result: { data: T; error?: unknown }): T => {
+          if (result.error) throw result.error;
+          return result.data;
+        };
 
       try {
         await flushMutationQueue(userId);
@@ -158,13 +167,25 @@ export const OfflineBootstrap = () => {
         tasks.push({
           name: "content-library",
           promise: (async () => {
-            const [{ data: workoutMeta }, { data: programMeta }] = await Promise.all([
+            const [workoutMetadataResult, programMetadataResult, workoutFullResult, programFullResult] = await Promise.all([
+              rpc("get_visible_workout_metadata", { _workout_id: null }),
+              rpc("get_visible_program_metadata", { _program_id: null }),
               table("admin_workouts").select("*").neq("is_visible", false),
               table("admin_training_programs").select("*").neq("is_visible", false),
             ]);
 
-            const workouts = workoutMeta ?? [];
-            const programs = programMeta ?? [];
+            const workoutMetadata = dataOrThrow<any[]>(workoutMetadataResult) ?? [];
+            const programMetadata = dataOrThrow<any[]>(programMetadataResult) ?? [];
+            // The public RPCs are the authoritative catalog. Direct base-table
+            // rows are merged only when access policies return them, preserving
+            // full paid bodies for entitled members without emptying the list
+            // for visitors/free members.
+            const fullWorkouts = workoutFullResult.error ? [] : (workoutFullResult.data ?? []);
+            const fullPrograms = programFullResult.error ? [] : (programFullResult.data ?? []);
+            const workoutFullById = new Map(fullWorkouts.map((row: any) => [row.id, row]));
+            const programFullById = new Map(fullPrograms.map((row: any) => [row.id, row]));
+            const workouts = workoutMetadata.map((row) => ({ ...row, ...(workoutFullById.get(row.id) ?? {}) }));
+            const programs = programMetadata.map((row) => ({ ...row, ...(programFullById.get(row.id) ?? {}) }));
             const workoutSlugs = buildUniqueContentSlugs(workouts);
             const programSlugs = buildUniqueContentSlugs(programs);
 
@@ -302,7 +323,6 @@ export const OfflineBootstrap = () => {
         tasks.push({
           name: "community",
           promise: (async () => {
-            const rpc = (supabase as never as { rpc: (n: string, a?: unknown) => any }).rpc;
             const [workoutBoard, programBoard, checkinBoard, testimonials, wRatings, pRatings] =
               await Promise.all([
                 rpc("get_workout_leaderboard"),

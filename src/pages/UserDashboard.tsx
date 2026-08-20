@@ -48,6 +48,7 @@ import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 
 
 import { AccountSettingsSection } from "@/components/dashboard/AccountSettingsSection";
+import { getCachedOfflineSession, offlineFirst } from "@/lib/offline";
 import { ParQAssessmentSection } from "@/components/dashboard/ParQAssessmentSection";
 import { ActivityListSheet, type ActivityItem } from "@/components/dashboard/ActivityListSheet";
 import { ChevronRight } from "lucide-react";
@@ -207,6 +208,7 @@ export default function UserDashboard() {
     queryKey: ['unread-messages-count', user?.id],
     queryFn: async () => {
       if (!user) return 0;
+      return offlineFirst(`dashboard:unread-count`, async () => {
       const [contactResult, systemResult] = await Promise.all([supabase.from('contact_messages').select('id, response').eq('user_id', user.id).is('response_read_at', null), supabase.from('user_system_messages').select('*', {
         count: 'exact',
         head: true
@@ -228,6 +230,7 @@ export default function UserDashboard() {
       const contactCount = (contactResult.data || []).filter((thread) => Boolean(thread.response) || historyReplyIds.has(thread.id)).length;
       const systemCount = systemResult.count || 0;
       return contactCount + systemCount;
+      }, user.id);
     },
     enabled: !!user
   });
@@ -350,11 +353,12 @@ export default function UserDashboard() {
   }, [searchParams, loading]);
   const initDashboard = async () => {
     try {
-      const {
+      let {
         data: {
           session
         }
       } = await supabase.auth.getSession();
+      if (!session) session = await getCachedOfflineSession();
       if (!session?.user) {
         setLoading(false);
         navigate('/auth');
@@ -383,13 +387,11 @@ export default function UserDashboard() {
   };
   const fetchWorkoutInteractions = async (userId: string) => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from("workout_interactions").select("*").eq("user_id", userId).order("updated_at", {
-        ascending: false
-      });
-      if (error) throw error;
+      const data = await offlineFirst("favorites:workout-interactions", async () => {
+        const result = await supabase.from("workout_interactions").select("*").eq("user_id", userId).order("updated_at", { ascending: false });
+        if (result.error) throw result.error;
+        return result.data ?? [];
+      }, userId);
       if (data) setWorkoutInteractions(data);
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -399,13 +401,11 @@ export default function UserDashboard() {
   };
   const fetchProgramInteractions = async (userId: string) => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from("program_interactions").select("*").eq("user_id", userId).order("updated_at", {
-        ascending: false
-      });
-      if (error) throw error;
+      const data = await offlineFirst("favorites:program-interactions", async () => {
+        const result = await supabase.from("program_interactions").select("*").eq("user_id", userId).order("updated_at", { ascending: false });
+        if (result.error) throw result.error;
+        return result.data ?? [];
+      }, userId);
       if (data) setProgramInteractions(data);
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -457,23 +457,14 @@ export default function UserDashboard() {
   };
   const fetchCalculatorHistory = async (userId: string) => {
     try {
-      // Fetch all calculator histories in parallel
-      const [onermResult, bmrResult, calorieResult] = await Promise.allSettled([supabase.from("onerm_history").select("*").eq("user_id", userId).order("created_at", {
-        ascending: false
-      }).limit(5), supabase.from("bmr_history").select("*").eq("user_id", userId).order("created_at", {
-        ascending: false
-      }).limit(5), supabase.from("calorie_history").select("*").eq("user_id", userId).order("created_at", {
-        ascending: false
-      }).limit(5)]);
-      if (onermResult.status === 'fulfilled' && onermResult.value.data) {
-        setOneRMHistory(onermResult.value.data);
-      }
-      if (bmrResult.status === 'fulfilled' && bmrResult.value.data) {
-        setBMRHistory(bmrResult.value.data);
-      }
-      if (calorieResult.status === 'fulfilled' && calorieResult.value.data) {
-        setCalorieHistory(calorieResult.value.data);
-      }
+      const [onerm, bmr, calories] = await Promise.all([
+        offlineFirst("logbook:onerm", async () => { const r = await supabase.from("onerm_history").select("*").eq("user_id", userId).order("created_at", { ascending: false }); if (r.error) throw r.error; return r.data ?? []; }, userId),
+        offlineFirst("logbook:bmr", async () => { const r = await supabase.from("bmr_history").select("*").eq("user_id", userId).order("created_at", { ascending: false }); if (r.error) throw r.error; return r.data ?? []; }, userId),
+        offlineFirst("logbook:calories", async () => { const r = await supabase.from("calorie_history").select("*").eq("user_id", userId).order("created_at", { ascending: false }); if (r.error) throw r.error; return r.data ?? []; }, userId),
+      ]);
+      setOneRMHistory(onerm.slice(0, 5));
+      setBMRHistory(bmr.slice(0, 5));
+      setCalorieHistory(calories.slice(0, 5));
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error fetching calculator history:", error);
@@ -482,7 +473,8 @@ export default function UserDashboard() {
   };
   const fetchMeasurementHistory = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const data = await offlineFirst("progress:activity-log", async () => {
+      const { data: rows, error } = await supabase
         .from("user_activity_log")
         .select("*")
         .eq("user_id", userId)
@@ -491,6 +483,8 @@ export default function UserDashboard() {
         .limit(5);
       
       if (error) throw error;
+      return rows ?? [];
+      }, userId);
       if (data) setMeasurementHistory(data);
     } catch (error) {
       if (import.meta.env.DEV) {
