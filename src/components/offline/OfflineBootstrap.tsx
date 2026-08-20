@@ -36,9 +36,35 @@ const OFFLINE_ROUTES = [
   "/termsofservice", "/disclaimer", "/userdashboard",
 ];
 
-const warmMedia = async (urls: Array<string | null | undefined>) => {
-  const unique = [...new Set(urls.filter((url): url is string => Boolean(url)))];
-  await Promise.allSettled(unique.map((url) => fetch(url, { mode: "cors", credentials: "omit" })));
+/** Give the browser a breath so background sync never blocks the UI. */
+const breathe = (ms = 0) =>
+  new Promise<void>((resolve) => {
+    const ric = (window as any).requestIdleCallback as undefined | ((cb: () => void, o?: any) => number);
+    if (!ms && ric) ric(() => resolve(), { timeout: 500 });
+    else setTimeout(resolve, ms);
+  });
+
+const saveData = () => {
+  const conn = (navigator as any)?.connection;
+  return Boolean(conn?.saveData) || ["slow-2g", "2g"].includes(conn?.effectiveType);
+};
+
+/**
+ * Media warming is strictly best-effort: capped, serialised, and skipped on
+ * metered/slow links. Firing thousands of image/GIF requests at once was what
+ * made the app feel frozen.
+ */
+const warmMedia = async (urls: Array<string | null | undefined>, cap = 60) => {
+  if (saveData()) return;
+  const unique = [...new Set(urls.filter((url): url is string => Boolean(url)))].slice(0, cap);
+  for (const url of unique) {
+    try {
+      await fetch(url, { mode: "cors", credentials: "omit" });
+    } catch {
+      // ignore
+    }
+    await breathe(150);
+  }
 };
 
 /**
