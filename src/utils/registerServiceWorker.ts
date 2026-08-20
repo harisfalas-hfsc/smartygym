@@ -112,10 +112,15 @@ export const registerAppServiceWorker = (): Promise<ServiceWorkerRegistration | 
 export const warmOfflineUrls = async (urls: string[]): Promise<void> => {
   if (typeof window === "undefined" || !("caches" in window) || !navigator.onLine) return;
   const cache = await caches.open("html-pages");
-  await Promise.allSettled(
-    urls.map(async (url) => {
+  // Warm sequentially with a small pause so page navigation and user actions
+  // always win the network/main-thread race against background warming.
+  for (const url of urls) {
+    try {
       const response = await fetch(url, { credentials: "same-origin" });
       if (response.ok) await cache.put(url, response.clone());
-    }),
-  );
+    } catch {
+      // ignore
+    }
+    await new Promise((resolve) => setTimeout(resolve, 120));
+  }
 };
