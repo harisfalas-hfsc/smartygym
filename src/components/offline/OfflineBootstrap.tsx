@@ -164,9 +164,7 @@ export const OfflineBootstrap = () => {
           return purchased.has(`${kind}:${row?.id}`);
         };
 
-        const tasks: Array<{ name: string; promise: Promise<unknown> }> = [];
-
-        tasks.push({ name: "app-shell", promise: warmOfflineUrls(OFFLINE_ROUTES) });
+        const tasks: Array<{ name: string; run: () => Promise<unknown> }> = [];
 
         // ---- account, access, profile, settings -------------------------------
         tasks.push({
@@ -409,11 +407,21 @@ export const OfflineBootstrap = () => {
           },
         });
 
-        const results = await Promise.allSettled(tasks.map((task) => task.promise));
-        const failed = results.filter((r) => r.status === "rejected").length;
-        const completedTasks = tasks
-          .filter((_, index) => results[index]?.status === "fulfilled")
-          .map((task) => task.name);
+        // Run one task at a time, yielding between them. Firing every task in
+        // parallel flooded the connection and the main thread, which is what
+        // made pages take tens of seconds to open.
+        const completedTasks: string[] = [];
+        let failed = 0;
+        for (const task of tasks) {
+          try {
+            await task.run();
+            completedTasks.push(task.name);
+          } catch (e) {
+            failed += 1;
+            console.warn("[offline] task failed", task.name, e);
+          }
+          await breathe(250);
+        }
 
         // Entitlement dropped since the last sync (e.g. Free Access Mode was
         // switched off, or a subscription lapsed)? Throw away the in-memory
