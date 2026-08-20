@@ -49,6 +49,7 @@ import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 
 import { AccountSettingsSection } from "@/components/dashboard/AccountSettingsSection";
 import { getCachedOfflineSession, offlineFirst } from "@/lib/offline";
+import { isReachable } from "@/lib/offline/connectivity";
 import { ParQAssessmentSection } from "@/components/dashboard/ParQAssessmentSection";
 import { ActivityListSheet, type ActivityItem } from "@/components/dashboard/ActivityListSheet";
 import { ChevronRight } from "lucide-react";
@@ -303,10 +304,14 @@ export default function UserDashboard() {
         subscription
       }
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session?.user) {
+      if (event === 'SIGNED_OUT') {
         setUser(null);
         setLoading(false);
-        navigate('/auth');
+        if (isReachable()) navigate('/auth');
+      } else if (!session?.user) {
+        // A failed refresh while offline is not a logout. Keep the cached
+        // member identity and dashboard data visible until connectivity returns.
+        return;
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         // Defer Supabase calls to prevent deadlock
         setUser(session.user);
