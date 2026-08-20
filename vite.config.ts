@@ -70,6 +70,7 @@ export default defineConfig(({ mode }) => ({
       devOptions: { enabled: false },
       includeAssets: [
         "favicon.ico",
+        "favicon-48.png",
         "robots.txt",
         "icon-192.png",
         "icon-512.png",
@@ -81,7 +82,7 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        navigateFallback: "/index.html",
+        navigateFallback: "/",
         navigateFallbackDenylist: [
           /^\/~oauth/,
           /^\/payment-success/,
@@ -89,16 +90,35 @@ export default defineConfig(({ mode }) => ({
           /^\/functions\//,
         ],
         additionalManifestEntries: offlineRoutes.map((url) => ({ url, revision: null })),
-        globPatterns: ["**/*.{js,css,html,woff,woff2,ttf,otf,ico,png,jpg,jpeg,webp,avif,gif,svg,json,txt}"],
+        // Precache only the executable app shell. The SEO prerender step emits
+        // thousands of route-specific HTML files; including all of them kept
+        // the worker in the "installing" state for minutes, so it never took
+        // control and Chrome displayed its generic offline page.
+        globPatterns: [
+          "index.html",
+          "assets/**/*.{js,css,woff,woff2,ttf,otf}",
+        ],
+        globIgnores: ["**/manifest.webmanifest", "**/icon-*.png", "**/apple-touch-icon*.png", "**/favicon*"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
+          {
+            urlPattern: ({ url }) =>
+              url.pathname === "/manifest.webmanifest" ||
+              /^\/(icon-|apple-touch-icon|favicon)/.test(url.pathname),
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "smartygym-app-identity",
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 7 },
+            },
+          },
           {
             urlPattern: ({ request }) => request.mode === "navigate",
             handler: "NetworkFirst",
             options: {
-              cacheName: "html-pages",
-              networkTimeoutSeconds: 4,
-              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheName: "smartygym-pages",
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
           {
