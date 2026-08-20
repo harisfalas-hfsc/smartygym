@@ -9,6 +9,25 @@ export class OfflineUnavailableError extends Error {
 }
 
 const isOnline = () => (typeof navigator === "undefined" ? true : navigator.onLine && isReachable());
+const FOREGROUND_TIMEOUT_MS = 8_000;
+
+const withForegroundTimeout = <T>(promise: Promise<T>): Promise<T> =>
+  new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(
+      () => reject(new Error("Network request timed out")),
+      FOREGROUND_TIMEOUT_MS,
+    );
+    promise.then(
+      (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
 
 /**
  * Single read path for the whole app: try the network, persist the fresh result
@@ -21,7 +40,7 @@ export async function offlineFirst<T>(
 ): Promise<T> {
   if (isOnline()) {
     try {
-      const fresh = await loader();
+      const fresh = await withForegroundTimeout(loader());
       reportRequestSuccess();
       void saveOffline(key, fresh, userId);
       return fresh;
@@ -38,7 +57,7 @@ export async function offlineFirst<T>(
 
   // Offline with nothing saved — still try (captive portals / flaky flags).
   try {
-    const fresh = await loader();
+    const fresh = await withForegroundTimeout(loader());
     void saveOffline(key, fresh, userId);
     return fresh;
   } catch {
