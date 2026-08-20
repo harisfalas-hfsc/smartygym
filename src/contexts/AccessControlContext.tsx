@@ -140,6 +140,20 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
   const checkSubscription = async (user: User) => {
     setCurrentUserId(user.id);
 
+    // Render from the last verified entitlement immediately. The online
+    // refresh below must never hold the whole application behind billing and
+    // database round trips.
+    const cachedSnapshot = await readOffline<EntitlementSnapshot>(ENTITLEMENT_KEY, user.id);
+    if (cachedSnapshot) {
+      setState({
+        user,
+        userTier: cachedSnapshot.data.userTier,
+        isLoading: false,
+        productId: cachedSnapshot.data.productId,
+        purchasedContent: new Set(cachedSnapshot.data.purchasedContent),
+      });
+    }
+
     // OFFLINE: reuse the exact entitlement level captured on this device the
     // last time we were online. Never elevate, never downgrade.
     if (typeof navigator !== "undefined" && !navigator.onLine) {
@@ -155,75 +169,47 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
     }
 
     try {
-      setState(prev => ({ ...prev, isLoading: true }));
-      
-      let { data: dbData, error: dbError } = await supabase
-        .from('user_subscriptions')
-        .select('plan_type, status, current_period_end, stripe_subscription_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      if (!cachedSnapshot) setState(prev => ({ ...prev, isLoading: true }));
+
+      const [subscriptionResult, purchasesResult, adminResult, corpAdminResult, corpMemberResult, freeAccessMode] = await Promise.all([
+        supabase.from('user_subscriptions').select('plan_type, status, current_period_end, stripe_subscription_id').eq('user_id', user.id).maybeSingle(),
+        supabase.from('user_purchases').select('content_id, content_type').eq('user_id', user.id).eq('content_deleted', false),
+        supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle(),
+        supabase.from('corporate_subscriptions').select('id, plan_type, status').eq('admin_user_id', user.id).eq('status', 'active').maybeSingle(),
+        supabase.from('corporate_members').select('id, corporate_subscription_id').eq('user_id', user.id).maybeSingle(),
+        fetchFreeAccessMode(),
+      ]);
+
+      const { data: dbData, error: dbError } = subscriptionResult;
 
       if (dbError && dbError.code !== 'PGRST116') {
         console.error("Database subscription error:", dbError);
       }
 
-      // If no subscription record exists or it's free, trigger Stripe sync
-      // This ensures users returning from checkout get their subscription synced immediately
+      // Webhooks are authoritative. A recovery check may repair a missing row,
+      // but it runs in the background and never blocks navigation.
       if (!dbData || dbData.plan_type === 'free') {
-        try {
-          const { data: syncResult, error: syncError } = await supabase.functions.invoke('check-subscription');
-          if (!syncError && syncResult?.subscribed) {
-            // Re-read the database after sync
-            const { data: refreshedData } = await supabase
-              .from('user_subscriptions')
-              .select('plan_type, status, current_period_end, stripe_subscription_id')
-              .eq('user_id', user.id)
-              .maybeSingle();
-            if (refreshedData) {
-              dbData = refreshedData;
-            }
-          }
-        } catch (syncErr) {
-          // Sync failure is non-critical, continue with existing data
+        void supabase.functions.invoke('check-subscription').catch((syncErr) => {
           console.warn("Stripe sync failed (non-critical):", syncErr);
-        }
+        });
       }
 
-      // Fetch purchased content (only valid, non-deleted content)
-      const { data: purchases } = await supabase
-        .from('user_purchases')
-        .select('content_id, content_type')
-        .eq('user_id', user.id)
-        .eq('content_deleted', false);
+      const purchases = purchasesResult.data;
 
       const purchasedContent = new Set(
         purchases?.map(p => `${p.content_type}:${p.content_id}`) || []
       );
 
       // Check if user is an admin (admins bypass all access locks)
-      const { data: adminRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
+      const adminRole = adminResult.data;
       
       const isAdmin = !!adminRole;
 
       // Check if user is a corporate admin (has active corporate subscription)
-      const { data: corpAdmin } = await supabase
-        .from('corporate_subscriptions')
-        .select('id, plan_type, status')
-        .eq('admin_user_id', user.id)
-        .eq('status', 'active')
-        .maybeSingle();
+      const corpAdmin = corpAdminResult.data;
 
       // Check if user is a corporate member (added by a corporate admin)
-      const { data: corpMember } = await supabase
-        .from('corporate_members')
-        .select('id, corporate_subscription_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const corpMember = corpMemberResult.data;
 
       // Verify corporate member's subscription is still active
       let isCorporateMemberActive = false;
@@ -246,7 +232,6 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
                          ['lifetime', 'premium', 'legacy_premium'].includes(dbData?.plan_type ?? '');
       const isCorporatePremium = !!corpAdmin || isCorporateMemberActive;
       // Global Free Access Mode (Admin → Payments): every signed-in user is premium.
-      const freeAccessMode = await fetchFreeAccessMode();
       const isPremium = isPersonalPremium || isCorporatePremium || isAdmin || freeAccessMode;
 
       const userTier: UserTier = isPremium ? "premium" : "subscriber";

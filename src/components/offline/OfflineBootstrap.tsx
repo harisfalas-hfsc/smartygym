@@ -182,8 +182,6 @@ export const OfflineBootstrap = () => {
             const workoutSlugs = buildUniqueContentSlugs(workouts);
             const programSlugs = buildUniqueContentSlugs(programs);
 
-            await save("workouts:list:all", workouts);
-            await save("programs:list:all", programs);
             queryClient.setQueryData(["all-workouts"], workouts);
             queryClient.setQueryData(["all-programs"], programs);
 
