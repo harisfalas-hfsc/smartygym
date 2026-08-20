@@ -171,7 +171,7 @@ export const OfflineBootstrap = () => {
         // ---- account, access, profile, settings -------------------------------
         tasks.push({
           name: "account",
-          promise: (async () => {
+          run: async () => {
             const [profile, roles, subscription, purchases, settings] = await Promise.all([
               table("profiles").select("*").eq("user_id", userId).maybeSingle(),
               table("user_roles").select("*").eq("user_id", userId),
@@ -186,13 +186,13 @@ export const OfflineBootstrap = () => {
               save("purchases:list", purchases.data ?? []),
               save("settings:system", settings.data ?? []),
             ]);
-          })(),
+          },
         });
 
         // ---- content library: workouts + programs (list + every detail) -------
         tasks.push({
           name: "content-library",
-          promise: (async () => {
+          run: async () => {
             const [workoutMetadataResult, programMetadataResult, workoutFullResult, programFullResult] = await Promise.all([
               rpc("get_visible_workout_metadata", { _workout_id: null }),
               rpc("get_visible_program_metadata", { _program_id: null }),
@@ -256,13 +256,13 @@ export const OfflineBootstrap = () => {
               ...workouts.map((row: any) => row.image_url),
               ...programs.map((row: any) => row.image_url),
             ]);
-          })(),
+          },
         });
 
         // ---- exercise library (paginated until exhausted) + filters -----------
         tasks.push({
           name: "exercise-library",
-          promise: (async () => {
+          run: async () => {
             const all: unknown[] = [];
             const pageSize = 1000;
             for (let page = 0; page < 50; page += 1) {
@@ -291,13 +291,13 @@ export const OfflineBootstrap = () => {
               (all as any[]).flatMap((ex) => [ex.gif_url, ex.image_url]),
               40,
             );
-          })(),
+          },
         });
 
         // ---- logbook / progress / stats ---------------------------------------
         tasks.push({
           name: "progress-and-logbook",
-          promise: (async () => {
+          run: async () => {
             const [checkins, progress, calories, bmr, onerm, goals, measurements, badges, scheduled, activity] =
               await Promise.all([
                 table("smarty_checkins").select("*").eq("user_id", userId),
@@ -323,13 +323,13 @@ export const OfflineBootstrap = () => {
               save("saved:scheduled-workouts", scheduled.data ?? []),
               save("progress:activity-log", activity.data ?? []),
             ]);
-          })(),
+          },
         });
 
         // ---- owned / saved items + favourites ---------------------------------
         tasks.push({
           name: "saved-and-favorites",
-          promise: (async () => {
+          run: async () => {
             const [savedWorkouts, savedPrograms, wInteractions, pInteractions] = await Promise.all([
               table("saved_workouts").select("*").eq("user_id", userId),
               table("saved_training_programs").select("*").eq("user_id", userId),
@@ -342,13 +342,13 @@ export const OfflineBootstrap = () => {
               save("favorites:workout-interactions", wInteractions.data ?? []),
               save("favorites:program-interactions", pInteractions.data ?? []),
             ]);
-          })(),
+          },
         });
 
         // ---- notifications / inbox --------------------------------------------
         tasks.push({
           name: "notifications",
-          promise: (async () => {
+          run: async () => {
             const [messages, contact] = await Promise.all([
               table("user_system_messages").select("*").eq("user_id", userId),
               table("contact_messages").select("*").eq("user_id", userId),
@@ -357,13 +357,13 @@ export const OfflineBootstrap = () => {
               save("notifications:system-messages", messages.data ?? []),
               save("inbox:contact-messages", contact.data ?? []),
             ]);
-          })(),
+          },
         });
 
         // ---- community: leaderboards, testimonials, ratings --------------------
         tasks.push({
           name: "community",
-          promise: (async () => {
+          run: async () => {
             const [workoutBoard, programBoard, checkinBoard, testimonials, wRatings, pRatings] =
               await Promise.all([
                 rpc("get_workout_leaderboard"),
@@ -381,13 +381,13 @@ export const OfflineBootstrap = () => {
               save("community:workout-ratings", wRatings.data ?? []),
               save("community:program-ratings", pRatings.data ?? []),
             ]);
-          })(),
+          },
         });
 
         // ---- blog / articles (list + full detail) ------------------------------
         tasks.push({
           name: "blog",
-          promise: (async () => {
+          run: async () => {
             const { data: articles } = await table("blog_articles")
               .select("*")
               .eq("is_published", true)
@@ -397,16 +397,16 @@ export const OfflineBootstrap = () => {
             for (const a of (articles ?? []) as any[]) {
               await save(`blog:article:${a.slug || a.id}`, a);
             }
-          })(),
+          },
         });
 
         // ---- daily ritual -------------------------------------------------------
         tasks.push({
           name: "daily-ritual",
-          promise: (async () => {
+          run: async () => {
             const { data: rituals } = await table("daily_smarty_rituals").select("*");
             await save("rituals:list", rituals ?? []);
-          })(),
+          },
         });
 
         const results = await Promise.allSettled(tasks.map((task) => task.promise));
