@@ -137,6 +137,13 @@ export const UserMessagesPanel = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
+  // getSession reads the already-hydrated local auth session. getUser performs
+  // a network verification and was making every inbox click wait behind sync.
+  const getLocalUser = async () => {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.user ?? null;
+  };
+
   const openLinkInternally = (link: string, messageType?: string) => {
     const destination = messageType ? MESSAGE_TYPE_DESTINATIONS[messageType] : null;
     if (destination) {
@@ -160,7 +167,7 @@ export const UserMessagesPanel = () => {
   const { data: rawContactMessages = [], isLoading: contactLoading, refetch: refetchContact } = useQuery({
     queryKey: ['user-contact-messages'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getLocalUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
@@ -177,7 +184,7 @@ export const UserMessagesPanel = () => {
   const { data: systemMessages = [], isLoading: systemLoading, refetch: refetchSystem } = useQuery({
     queryKey: ['user-system-messages'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getLocalUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
@@ -200,7 +207,7 @@ export const UserMessagesPanel = () => {
     queryKey: ['user-contact-message-history', contactMessageIds],
     enabled: contactMessageIds.length > 0,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getLocalUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
@@ -293,7 +300,7 @@ export const UserMessagesPanel = () => {
 
     setExpandedMessages(prev => new Set(prev).add(messageId));
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getLocalUser();
     if (!user) return;
 
     if (type === 'system') {
@@ -336,7 +343,8 @@ export const UserMessagesPanel = () => {
   };
 
   const handleToggleRead = async (messageId: string, type: 'system' | 'contact', currentState: boolean) => {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const user = await getLocalUser();
+    const authError = user ? null : new Error("No local session");
     
     if (authError || !user) {
       console.error('[UserMessagesPanel] Auth error in toggle:', authError);
@@ -391,7 +399,7 @@ export const UserMessagesPanel = () => {
   const handleDeleteConfirm = async () => {
     if (!messageToDelete) return;
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getLocalUser();
     if (!user) {
       toast.error("Authentication failed");
       return;
@@ -466,7 +474,7 @@ export const UserMessagesPanel = () => {
 
   // Bulk action handlers
   const handleBulkMarkRead = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getLocalUser();
     if (!user) {
       toast.error("Authentication failed");
       return;
@@ -522,7 +530,7 @@ export const UserMessagesPanel = () => {
   };
 
   const handleBulkMarkUnread = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getLocalUser();
     if (!user) {
       toast.error("Authentication failed");
       return;
@@ -586,7 +594,7 @@ export const UserMessagesPanel = () => {
   };
 
   const handleBulkDeleteConfirm = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getLocalUser();
     if (!user) {
       toast.error("Authentication failed");
       return;

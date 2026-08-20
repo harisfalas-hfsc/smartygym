@@ -370,9 +370,15 @@ export default function UserDashboard() {
         return;
       }
       setUser(session.user);
-
-      // Fetch all data in parallel with individual error handling
-      await Promise.allSettled([fetchAllData(session.user.id), checkSubscription(session.user.id), fetchCorporateSubscription(session.user.id)]);
+      // A valid local session is enough to render the dashboard. Refresh its
+      // sections in the background instead of holding the entire page behind
+      // the slowest request.
+      setLoading(false);
+      void Promise.allSettled([
+        fetchAllData(session.user.id),
+        checkSubscription(session.user.id),
+        fetchCorporateSubscription(session.user.id),
+      ]);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error initializing dashboard:", error);

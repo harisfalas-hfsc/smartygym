@@ -27,14 +27,6 @@ import {
 import { getCyprusTodayStr } from "@/lib/cyprusDate";
 import { fetchFreeAccessMode, subscribeFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
-import { warmOfflineUrls } from "@/utils/registerServiceWorker";
-
-const OFFLINE_ROUTES = [
-  "/", "/about", "/faq", "/smarty-premium", "/fitness-training", "/research",
-  "/glossary", "/blog", "/workout", "/trainingprogram", "/tools",
-  "/exerciselibrary", "/community", "/contact", "/privacy-policy",
-  "/termsofservice", "/disclaimer", "/userdashboard",
-];
 
 /** Give the browser a breath so background sync never blocks the UI. */
 const breathe = (ms = 0) =>
@@ -43,29 +35,6 @@ const breathe = (ms = 0) =>
     if (!ms && ric) ric(() => resolve(), { timeout: 500 });
     else setTimeout(resolve, ms);
   });
-
-const saveData = () => {
-  const conn = (navigator as any)?.connection;
-  return Boolean(conn?.saveData) || ["slow-2g", "2g"].includes(conn?.effectiveType);
-};
-
-/**
- * Media warming is strictly best-effort: capped, serialised, and skipped on
- * metered/slow links. Firing thousands of image/GIF requests at once was what
- * made the app feel frozen.
- */
-const warmMedia = async (urls: Array<string | null | undefined>, cap = 60) => {
-  if (saveData()) return;
-  const unique = [...new Set(urls.filter((url): url is string => Boolean(url)))].slice(0, cap);
-  for (const url of unique) {
-    try {
-      await fetch(url, { mode: "cors", credentials: "omit" });
-    } catch {
-      // ignore
-    }
-    await breathe(150);
-  }
-};
 
 /**
  * Downloads the signed-in member's entire world in the background so every
@@ -110,10 +79,6 @@ export const OfflineBootstrap = () => {
     initOfflineSessionTracking();
     startConnectivityMonitor();
     void initLocalDatabase();
-    // Public/permanent routes are warmed for everyone, not only signed-in
-    // members. Deferred so it never competes with the first screens.
-    const routeWarmTimer = window.setTimeout(() => void warmOfflineUrls(OFFLINE_ROUTES), 15_000);
-
     const run = async (userId: string) => {
       if (running.current) return;
       if (Date.now() - lastRunAt.current < 10 * 60_000) return;
@@ -222,27 +187,27 @@ export const OfflineBootstrap = () => {
             queryClient.setQueryData(["all-workouts"], workouts);
             queryClient.setQueryData(["all-programs"], programs);
 
-            let written = 0;
+            // Keep the complete entitled catalog in one IndexedDB record. The
+            // previous per-item copies caused thousands of serial transactions
+            // and could monopolise IndexedDB for several minutes on phones.
             for (const w of workouts) {
               const slug = workoutSlugs.get(w.id) || slugifyContentName(w.name || w.id);
               const full = { ...w, canonical_slug: slug };
               // Not entitled? store a listing-safe copy only, which also
               // OVERWRITES any body cached while Free Access Mode was on.
               const row = entitledTo(w, "workout") ? full : stripBody(full);
-              await save(`detail:workout:${w.id}`, row);
-              await save(`detail:workout:${slug}`, row);
-              if ((written += 1) % 20 === 0) await breathe();
+              Object.assign(w, row);
             }
             for (const p of programs) {
               const slug = programSlugs.get(p.id) || slugifyContentName(p.name || p.id);
               const full = { ...p, canonical_slug: slug };
               const row = entitledTo(p, "program") ? full : stripBody(full);
-              await save(`detail:program:${p.id}`, row);
-              await save(`detail:program:${slug}`, row);
-              await save(`detail:training-program:${p.id}`, row);
-              await save(`detail:training-program:${slug}`, row);
-              if ((written += 1) % 20 === 0) await breathe();
+              Object.assign(p, row);
             }
+            await Promise.all([
+              save("workouts:list:all", workouts),
+              save("programs:list:all", programs),
+            ]);
 
             const today = getCyprusTodayStr();
             const todayWods = workouts.filter(
@@ -250,10 +215,6 @@ export const OfflineBootstrap = () => {
             );
             await save(`wod:today:${today}`, todayWods);
 
-            await warmMedia([
-              ...workouts.map((row: any) => row.image_url),
-              ...programs.map((row: any) => row.image_url),
-            ]);
           },
         });
 
@@ -274,21 +235,11 @@ export const OfflineBootstrap = () => {
               if (data.length < pageSize) break;
             }
             await save("library:list:exercises", all);
-            let count = 0;
-            for (const ex of all as any[]) {
-              await save(`library:exercise:${ex.id}`, ex);
-              if ((count += 1) % 50 === 0) await breathe();
-            }
             await save("library:filters", {
               categories: [...new Set((all as any[]).map((e) => e.category).filter(Boolean))],
               equipment: [...new Set((all as any[]).map((e) => e.equipment).filter(Boolean))],
               muscles: [...new Set((all as any[]).map((e) => e.muscle_group).filter(Boolean))],
             });
-            // GIFs are heavy; warm only a small slice in the background.
-            await warmMedia(
-              (all as any[]).flatMap((ex) => [ex.gif_url, ex.image_url]),
-              40,
-            );
           },
         });
 
@@ -391,7 +342,6 @@ export const OfflineBootstrap = () => {
               .eq("is_published", true)
               .order("published_at", { ascending: false });
             await save("blog:list", articles ?? []);
-            await warmMedia((articles ?? []).map((article: any) => article.image_url));
             for (const a of (articles ?? []) as any[]) {
               await save(`blog:article:${a.slug || a.id}`, a);
             }
@@ -532,7 +482,6 @@ export const OfflineBootstrap = () => {
     return () => {
       sub.subscription.unsubscribe();
       unsubscribeFreeAccess();
-      window.clearTimeout(routeWarmTimer);
       window.clearInterval(poll);
       window.removeEventListener("online", onOnline);
       document.removeEventListener("visibilitychange", onFocus);

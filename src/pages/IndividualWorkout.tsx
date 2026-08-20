@@ -59,13 +59,7 @@ const IndividualWorkout = () => {
 
 
   // Fetch from database
-  const { data: dbWorkout, isLoading: isLoadingDb, refetch } = useWorkoutData(lookupId);
-
-  // Force a refetch when opening this page so backend content updates appear immediately
-  useEffect(() => {
-    if (!lookupId) return;
-    refetch();
-  }, [lookupId, refetch]);
+  const { data: dbWorkout, isLoading: isLoadingDb } = useWorkoutData(lookupId);
 
   useEffect(() => {
     if (!dbWorkout || !lookupId) return;
