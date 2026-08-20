@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchVisibleWorkoutMetadata } from "@/hooks/useTodayWods";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
-import { offlineQueryFn } from "@/lib/offline";
+import { offlineQueryFn, peekOffline } from "@/lib/offline";
+import { getCurrentUserId } from "@/lib/offline/session";
 
 export interface WorkoutData {
   id: string;
@@ -42,6 +43,20 @@ export const useWorkoutData = (workoutId: string | undefined) => {
     queryKey: ["workout", workoutId],
     queryFn: offlineQueryFn(`detail:workout:${workoutId}`, async () => {
       if (!workoutId) throw new Error("Workout ID is required");
+      // The background sync stores the entitled catalog as one efficient
+      // record. Resolve from it first so opening a workout is immediate and
+      // does not download the full public catalog before its detail request.
+      const cachedCatalog = await peekOffline<WorkoutData[]>("workouts:list:all", getCurrentUserId());
+      const cachedSlugs = cachedCatalog ? buildUniqueContentSlugs(cachedCatalog) : new Map<string, string>();
+      const cachedMatch = cachedCatalog?.find((workout) =>
+        workout.id === workoutId ||
+        workout.canonical_slug === workoutId ||
+        cachedSlugs.get(workout.id) === workoutId ||
+        slugifyContentName(workout.name || workout.id) === workoutId
+      );
+      if (cachedMatch && (cachedMatch.main_workout || cachedMatch.warm_up || cachedMatch.activation)) {
+        return cachedMatch;
+      }
       const resolveFromMetadata = async () => {
         const metadata = await fetchVisibleWorkoutMetadata(null);
         const uniqueSlugs = buildUniqueContentSlugs(metadata);
@@ -88,11 +103,10 @@ export const useWorkoutData = (workoutId: string | undefined) => {
       } as WorkoutData;
     }),
     enabled: !!workoutId,
-    // Ensure detail pages always reflect latest backend content updates
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 };
 
