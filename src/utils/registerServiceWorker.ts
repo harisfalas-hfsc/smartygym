@@ -1,3 +1,4 @@
+import { isReachable } from "@/lib/offline/connectivity";
 // Guarded service worker registration. Refuses to register in Lovable preview,
 // dev mode, iframes, or when ?sw=off is set. In refused contexts it actively
 // unregisters any existing /sw.js to avoid stale workers.
@@ -110,7 +111,7 @@ export const registerAppServiceWorker = (): Promise<ServiceWorkerRegistration | 
 };
 
 export const warmOfflineUrls = async (urls: string[]): Promise<void> => {
-  if (typeof window === "undefined" || !("caches" in window) || !navigator.onLine) return;
+  if (typeof window === "undefined" || !("caches" in window) || !isReachable()) return;
   const cache = await caches.open("html-pages");
   // Warm sequentially with a small pause so page navigation and user actions
   // always win the network/main-thread race against background warming.

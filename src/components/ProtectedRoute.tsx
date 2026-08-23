@@ -24,7 +24,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       // Offline: fall back to the session cached on this device so saved
       // content stays reachable with no internet.
       // "Offline" also covers: network present but the backend unreachable.
-      if (!current && (!isReachable() || (typeof navigator !== "undefined" && !navigator.onLine))) {
+      if (!current && !isReachable()) {
         current = await restoreCachedSessionOffline();
       }
 

@@ -252,6 +252,7 @@ const IndividualWorkout = () => {
               stripeProductId={dbWorkout.stripe_product_id || undefined}
             >
               <WorkoutDisplay
+                offlineLocked={(dbWorkout as any)?.offline_locked === true}
                 exercises={[]}
                 planContent=""
                 title={dbWorkout.name}
