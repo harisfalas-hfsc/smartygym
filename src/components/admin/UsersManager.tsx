@@ -95,7 +95,13 @@ export function UsersManager() {
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [syncingUserId, setSyncingUserId] = useState<string | null>(null);
-  const SUPER_ADMIN_EMAIL = "harisfalas@gmail.com";
+  // The signed-in admin viewing this panel is treated as the "Main" admin:
+  // labelled accordingly and protected from revoking their own admin role.
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setCurrentUserId(data.session?.user?.id ?? null));
+  }, []);
+  const isMainAdmin = (userId: string) => !!currentUserId && userId === currentUserId;
 
   // --- Status determination ---
   const getUserStatus = (user: UserData, hasPurchases: boolean) => {
@@ -196,7 +202,7 @@ export function UsersManager() {
 
   // --- Actions ---
   const toggleAdminRole = async (userId: string, userEmail: string | null, isCurrentlyAdmin: boolean) => {
-    if (userEmail === SUPER_ADMIN_EMAIL && isCurrentlyAdmin) {
+    if (isMainAdmin(userId) && isCurrentlyAdmin) {
       toast.error("Cannot remove admin privileges from the main administrator");
       return;
     }
@@ -834,7 +840,7 @@ export function UsersManager() {
                       <div className="flex flex-wrap items-center gap-1">
                         {userRoles[user.user_id]?.includes('admin') && (
                           <Badge variant="destructive" className="text-xs">
-                            👑 Admin{user.email === SUPER_ADMIN_EMAIL && " (Main)"}
+                            👑 Admin{isMainAdmin(user.user_id) && " (Main)"}
                           </Badge>
                         )}
                         {isCorporateMember && !user.stripe_subscription_id && user.subscription_source !== 'admin_grant' ? (
@@ -929,7 +935,7 @@ export function UsersManager() {
                           e.stopPropagation();
                           toggleAdminRole(user.user_id, user.email, userRoles[user.user_id]?.includes('admin') || false);
                         }}
-                        disabled={user.email === SUPER_ADMIN_EMAIL && userRoles[user.user_id]?.includes('admin')}
+                        disabled={isMainAdmin(user.user_id) && userRoles[user.user_id]?.includes('admin')}
                       >
                         {userRoles[user.user_id]?.includes('admin') ? "Remove Admin" : "Make Admin"}
                       </Button>
