@@ -8,7 +8,7 @@ export class OfflineUnavailableError extends Error {
   }
 }
 
-const isOnline = () => (typeof navigator === "undefined" ? true : navigator.onLine && isReachable());
+const isOnline = () => isReachable();
 const FOREGROUND_TIMEOUT_MS = 8_000;
 
 const withForegroundTimeout = <T>(promise: Promise<T>): Promise<T> =>
