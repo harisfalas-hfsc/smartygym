@@ -88,6 +88,7 @@ interface WorkoutDisplayProps {
   workoutId?: string;
   workoutCategory?: string;
   programId?: string;
+  offlineLocked?: boolean;
   programType?: string;
   isFreeContent?: boolean;
 }
@@ -151,7 +152,8 @@ export const WorkoutDisplay = ({
   workoutCategory,
   programId,
   programType,
-  isFreeContent = false
+  isFreeContent = false,
+  offlineLocked = false
 }: WorkoutDisplayProps) => {
   const navigate = useNavigate();
   const { userTier } = useAccessControl();
@@ -212,6 +214,26 @@ export const WorkoutDisplay = ({
     if (diff <= 4) return 'Intermediate';
     return 'Advanced';
   };
+
+  if (offlineLocked) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-4xl font-bold mb-4">{title}</h1>
+        <Card className="border-2 border-primary/30">
+          <CardHeader className="bg-primary/5">
+            <CardTitle className="flex items-center gap-2 text-xl font-bold">
+              <Info className="h-5 w-5" /> Content locked
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <p className="text-foreground/80 leading-relaxed">
+              This content now requires Premium. Reconnect to the internet or upgrade to view it.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
