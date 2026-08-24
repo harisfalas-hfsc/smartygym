@@ -967,6 +967,7 @@ export default function UserDashboard() {
                               if (data?.url) window.location.href = data.url;
                             } catch (err) {
                               console.error('Portal error:', err);
+                              toast({ title: "Billing portal unavailable", description: "Couldn't open the billing portal — please try again in a moment, or contact support if this continues.", variant: "destructive" });
                             }
                           }}
                           variant="outline"
