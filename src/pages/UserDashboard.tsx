@@ -916,7 +916,10 @@ export default function UserDashboard() {
                                 const { data, error } = await supabase.functions.invoke('customer-portal');
                                 if (error) throw error;
                                 if (data?.url) window.location.href = data.url;
-                              } catch (err) { console.error('Portal error:', err); }
+                              } catch (err) {
+                                console.error('Portal error:', err);
+                                toast({ title: "Billing portal unavailable", description: "Couldn't open the billing portal — please try again in a moment, or contact support if this continues.", variant: "destructive" });
+                              }
                             }}
                             className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-red-600 hover:bg-red-700 rounded px-2 py-1"
                           >
