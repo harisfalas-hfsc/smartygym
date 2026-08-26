@@ -12,6 +12,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { withTimeout } from "@/utils/withTimeout";
 
 interface ForgotPasswordDialogProps {
   open: boolean;
@@ -43,9 +44,9 @@ export const ForgotPasswordDialog = ({ open, onOpenChange }: ForgotPasswordDialo
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(validation.data, {
+      const { error } = await withTimeout(supabase.auth.resetPasswordForEmail(validation.data, {
         redirectTo: `${window.location.origin}/reset-password`,
-      });
+      }), 15000);
 
       if (error) throw error;
 
@@ -54,10 +55,10 @@ export const ForgotPasswordDialog = ({ open, onOpenChange }: ForgotPasswordDialo
         title: "Reset email sent!",
         description: "Check your email for the password reset link.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Reset email not sent",
+        description: error instanceof Error ? error.message : "Please check your connection and try again.",
         variant: "destructive",
       });
     } finally {

@@ -23,6 +23,7 @@ import { AvatarSetupDialog } from "@/components/AvatarSetupDialog";
 import { ForgotPasswordDialog } from "@/components/auth/ForgotPasswordDialog";
 import { trackSocialMediaEvent } from "@/utils/socialMediaTracking";
 import { lovable } from "@/integrations/lovable";
+import { withTimeout } from "@/utils/withTimeout";
 
 import { checkPasswordBreach } from "@/utils/passwordBreachCheck";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
@@ -259,7 +260,11 @@ export default function Auth() {
     setLoading(true);
 
     // Check if password has been found in data breaches
-    const breachResult = await checkPasswordBreach(signUpData.password);
+    const breachResult = await withTimeout(checkPasswordBreach(signUpData.password), 8000).catch(() => ({
+      isBreached: false,
+      count: 0,
+      error: "Password safety check timed out",
+    }));
     
     if (breachResult.isBreached) {
       setLoading(false);
@@ -281,7 +286,7 @@ export default function Auth() {
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await withTimeout(supabase.auth.signUp({
         email: signUpData.email,
         password: signUpData.password,
         options: {
@@ -292,7 +297,7 @@ export default function Auth() {
             full_name: signUpData.fullName,
           },
         },
-      });
+      }), 15000);
 
       if (error) {
         if (error.message.includes("already registered")) {
@@ -335,7 +340,7 @@ export default function Auth() {
     if (!signUpData.email || resending || resendCooldown > 0) return;
     setResending(true);
     try {
-      const { error } = await supabase.auth.resend({
+      const { error } = await withTimeout(supabase.auth.resend({
         type: "signup",
         email: signUpData.email,
         options: {
@@ -343,7 +348,7 @@ export default function Auth() {
             hasRedirect ? `?redirect=${encodeURIComponent(safeRedirect)}` : ""
           }`,
         },
-      });
+      }), 15000);
       if (error) {
         toast({
           title: "Could not resend",
@@ -366,6 +371,12 @@ export default function Auth() {
           });
         }, 1000);
       }
+    } catch (error: unknown) {
+      toast({
+        title: "Could not resend",
+        description: error instanceof Error ? error.message : "Please check your connection and try again.",
+        variant: "destructive",
+      });
     } finally {
       setResending(false);
     }
