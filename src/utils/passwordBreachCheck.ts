@@ -37,6 +37,7 @@ export async function checkPasswordBreach(password: string): Promise<BreachCheck
       headers: {
         'Add-Padding': 'true', // Adds padding to prevent response size analysis
       },
+      signal: AbortSignal.timeout(8000),
     });
     
     if (!response.ok) {
