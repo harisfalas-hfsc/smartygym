@@ -309,7 +309,16 @@ export default function Auth() {
           });
         }
       } else if (data.user) {
-        setShowVerificationMessage(true);
+        const isExistingAccount = Array.isArray(data.user.identities) && data.user.identities.length === 0;
+
+        if (isExistingAccount) {
+          toast({
+            title: "Account already exists",
+            description: "This email is already registered. Sign in or use Forgot password to regain access.",
+          });
+        } else {
+          setShowVerificationMessage(true);
+        }
       }
     } catch (error: any) {
       toast({
