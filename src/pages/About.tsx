@@ -470,7 +470,8 @@ const About = () => {
           </ScrollReveal>
 
 
-          {/* Ready to Start Your Journey */}
+          {/* Ready to Start Your Journey — hidden while Free Access Mode is ON */}
+          {!hidePayments && (
           <ScrollReveal>
             <Card className="mb-12 border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-background">
               <CardHeader className="text-center">
