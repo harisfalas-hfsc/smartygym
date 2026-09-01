@@ -7,6 +7,7 @@ import { CheckCircle2, Target, Heart, Users, Shield, Award, Compass, GraduationC
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import harisPhoto from "@/assets/haris-falas-coach.png";
 import { useAccessControl } from "@/hooks/useAccessControl";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { useState, useEffect, useRef } from "react";
@@ -15,7 +16,10 @@ import { DesktopAboutContent } from "@/components/home/DesktopAboutContent";
 const About = () => {
   const navigate = useNavigate();
   const { user, userTier } = useAccessControl();
+  const { freeAccessMode } = useFreeAccessMode();
   const isPremium = userTier === "premium";
+  // Global Free Access Mode: hide every payment / premium-purchase reference.
+  const hidePayments = freeAccessMode;
   const [activeAudienceTooltipMobile, setActiveAudienceTooltipMobile] = useState<string | null>(null);
   const audienceGridRef = useRef<HTMLDivElement>(null);
 
@@ -199,7 +203,7 @@ const About = () => {
                   <p className="text-base text-muted-foreground text-center leading-relaxed">
                     Everything a complete gym must offer, built by real professionals, in your pocket at <strong className="text-primary">smartygym.com</strong>.
                   </p>
-                  {!isPremium && (
+                  {!isPremium && !hidePayments && (
                     <Link
                       to="/smarty-premium"
                       className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-500 hover:text-green-600 hover:underline md:hidden"
@@ -297,8 +301,9 @@ const About = () => {
                </CardContent>
              </Card>
 
-           {/* Premium CTA card (mobile only) */}
-           <Card
+            {/* Premium CTA card (mobile only) — hidden while Free Access Mode is ON */}
+            {!hidePayments && (
+            <Card
              role="button"
              tabIndex={0}
              onClick={() => navigate('/smarty-premium')}
@@ -317,9 +322,10 @@ const About = () => {
                     Unlock Smarty Premium
                     <ChevronRight className="w-4 h-4" />
                   </span>
-               </div>
-             </CardContent>
-           </Card>
+                </div>
+              </CardContent>
+            </Card>
+            )}
 
           {/* Core Values - Desktop grid with descriptions */}
           <ScrollReveal>
