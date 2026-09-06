@@ -244,6 +244,9 @@ function normalise(raw: any): Preferences {
 
 export const NotificationPreferencesManager = () => {
   const [prefs, setPrefs] = useState<Preferences>(DEFAULT_PREFS);
+  // The untouched row exactly as stored in the database. Every save is merged on
+  // top of this so legacy/one-click-unsubscribe flags are never silently dropped.
+  const [rawPrefs, setRawPrefs] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
 
@@ -261,35 +264,57 @@ export const NotificationPreferencesManager = () => {
           console.error("Load prefs failed:", error);
           return;
         }
-        setPrefs(normalise(data?.notification_preferences));
+        const raw = (data?.notification_preferences as Record<string, any>) || {};
+        setRawPrefs(raw);
+        setPrefs(normalise(raw));
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
+  const persist = async (nextRaw: Record<string, any>) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Please log in.");
+      return false;
+    }
+    const { error } = await supabase
+      .from("profiles")
+      .update({ notification_preferences: nextRaw as any })
+      .eq("user_id", user.id);
+    if (error) throw error;
+    // Read back so the UI always reflects what is actually stored.
+    const { data: verify } = await supabase
+      .from("profiles")
+      .select("notification_preferences")
+      .eq("user_id", user.id)
+      .single();
+    const stored = (verify?.notification_preferences as Record<string, any>) || nextRaw;
+    setRawPrefs(stored);
+    setPrefs(normalise(stored));
+    return true;
+  };
+
   const toggleChannel = async (key: AutomationKey, channel: Channel, value: boolean) => {
     const saveKey = `${key}:${channel}`;
     setSaving(saveKey);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please log in.");
-        return;
-      }
-      const next: Preferences = {
-        ...prefs,
-        [key]: { ...prefs[key], [channel]: value },
+      const existingNode =
+        rawPrefs[key] && typeof rawPrefs[key] === "object" ? rawPrefs[key] : {};
+      const nextRaw: Record<string, any> = {
+        ...rawPrefs,
+        [key]: { ...existingNode, ...prefs[key], [channel]: value },
       };
-      const nextRaw: Record<string, any> = { ...next };
       mergeLegacyKeys(nextRaw, key, channel, value);
-      const { error } = await supabase
-        .from("profiles")
-        .update({ notification_preferences: nextRaw as any })
-        .eq("user_id", user.id);
-      if (error) throw error;
-      setPrefs(next);
-      toast.success(value ? "Subscribed" : "Unsubscribed");
+      if (value) {
+        // Turning something back on must also lift a previous global opt-out,
+        // otherwise the switch would look ON while nothing is delivered.
+        nextRaw.opt_out_all = false;
+        if (channel === "email") nextRaw.email_notifications = true;
+      }
+      const ok = await persist(nextRaw);
+      if (ok) toast.success(value ? "Turned on" : "Turned off");
     } catch (e) {
       console.error(e);
       toast.error("Could not update preference");
@@ -301,16 +326,25 @@ export const NotificationPreferencesManager = () => {
   const toggleOptOutAll = async (value: boolean) => {
     setSaving("opt_out_all");
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const next: Preferences = { ...prefs, opt_out_all: value };
-      const { error } = await supabase
-        .from("profiles")
-        .update({ notification_preferences: next as any })
-        .eq("user_id", user.id);
-      if (error) throw error;
-      setPrefs(next);
-      toast.success(value ? "All notifications paused" : "Notifications resumed");
+      const nextRaw: Record<string, any> = { ...rawPrefs, opt_out_all: value };
+      if (value) {
+        nextRaw.email_notifications = false;
+        nextRaw.opted_out_at = new Date().toISOString();
+      } else {
+        // Resuming clears the flat flags a one-click unsubscribe may have set,
+        // so the per-item switches below become the single source of truth.
+        nextRaw.email_notifications = true;
+        for (const row of ROWS) {
+          for (const ch of CHANNELS) {
+            for (const legacyKey of LEGACY_PREF_KEYS[row.key][ch.id]) {
+              if (nextRaw[legacyKey] === false) delete nextRaw[legacyKey];
+            }
+          }
+        }
+        if (nextRaw.checkin_reminders === false) delete nextRaw.checkin_reminders;
+      }
+      const ok = await persist(nextRaw);
+      if (ok) toast.success(value ? "All notifications paused" : "Notifications resumed");
     } catch (e) {
       console.error(e);
       toast.error("Could not update preference");
