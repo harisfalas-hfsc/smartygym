@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -130,7 +130,13 @@ export const UserMessagesPanel = () => {
   const [messageToDelete, setMessageToDelete] = useState<{ id: string; type: 'system' | 'contact' } | null>(null);
   const [viewFilter, setViewFilter] = useState<ViewFilter>('all');
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
-  const [activeTab, setActiveTab] = useState('all');
+  const [searchParams] = useSearchParams();
+  // Deep-link support: /userdashboard?tab=messages&mtab=subscriptions opens the
+  // notification settings directly (used by the "Manage / unsubscribe" email link).
+  const [activeTab, setActiveTab] = useState(() => {
+    const mtab = searchParams.get('mtab');
+    return mtab && ['all', 'system', 'contact', 'subscriptions'].includes(mtab) ? mtab : 'all';
+  });
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [sendingReplyFor, setSendingReplyFor] = useState<string | null>(null);
   const [expandedSystemMessages, setExpandedSystemMessages] = useState<Set<string>>(new Set());
@@ -1051,7 +1057,7 @@ export const UserMessagesPanel = () => {
         View your messages, system notifications, and responses from the team
       </p>
 
-      <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+      <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
         {/* Header row with tabs, filter, and bulk actions */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
           <TabsList className="w-full sm:w-auto grid grid-cols-4 gap-1">

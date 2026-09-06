@@ -111,7 +111,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const { contactMessage }: { contactMessage: ContactMessage } = await req.json();
+    const { contactMessage, performedActions }: { contactMessage: ContactMessage; performedActions?: string[] } = await req.json();
     
     if (!contactMessage) {
       throw new Error("Contact message data is required");
@@ -136,7 +136,14 @@ serve(async (req) => {
 **Their Message**:
 ${contactMessage.message}
 
-Please provide a helpful, personalized response to ${contactMessage.name}'s message. Remember to sound completely human and never reveal you are AI.`;
+${(performedActions && performedActions.length)
+  ? `**ACTIONS ALREADY COMPLETED BY THE SYSTEM (these are facts — state them plainly and do not promise anything beyond them):**
+${performedActions.map((a) => `- ${a}`).join("\n")}
+`
+  : ""}
+Please provide a helpful, personalized response to ${contactMessage.name}'s message. Remember to sound completely human and never reveal you are AI.
+
+CRITICAL HONESTY RULE: never say an action has been taken (unsubscribing, removing data, cancelling, refunding, changing settings) unless it is listed above as already completed. If it is not listed, say a team member is taking care of it instead of claiming it is done.`;
 
     console.log('[ai-contact-response] Calling Lovable AI...');
 

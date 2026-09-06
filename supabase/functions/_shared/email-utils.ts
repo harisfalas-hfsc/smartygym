@@ -38,14 +38,10 @@ export function getEmailHeaders(userEmail: string, emailType?: EmailType): Recor
  * Required for CAN-SPAM and GDPR compliance
  */
 export function getEmailFooter(userEmail: string, emailType?: EmailType): string {
-  // One-click, signed unsubscribe link — same URL used in the List-Unsubscribe header.
-  // (Previously this pointed at /unsubscribe-help, which only showed instructions.)
-  const unsubscribeUrl = buildUnsubscribeUrl(
-    "https://smartygym.com/unsubscribe",
-    userEmail,
-    emailType,
-  );
-  const manageUrl = `https://smartygym.com/userdashboard?tab=messages`;
+  // The visible link takes the reader straight to their notification settings,
+  // where every email/dashboard/push switch can be turned off individually.
+  // (The signed one-click URL stays in the List-Unsubscribe header for Gmail/Yahoo.)
+  const unsubscribeUrl = `https://smartygym.com/userdashboard?tab=messages&mtab=subscriptions`;
   
   return `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top: 32px;">
@@ -56,8 +52,7 @@ export function getEmailFooter(userEmail: string, emailType?: EmailType): string
             Designed by Haris Falas, Sports Scientist (CSCS Certified)
           </p>
           <p style="font-size: 12px; color: #999999; line-height: 1.5; margin: 0; text-align: center;">
-            <a href="${unsubscribeUrl}" style="color: #999999; text-decoration: underline;">Unsubscribe from this email</a> · 
-            <a href="${manageUrl}" style="color: #999999; text-decoration: underline;">Manage all preferences</a> · 
+            <a href="${unsubscribeUrl}" style="color: #999999; text-decoration: underline;">Unsubscribe / manage email settings</a> · 
             <a href="https://smartygym.com/privacy-policy" style="color: #999999; text-decoration: underline;">Privacy Policy</a>
           </p>
         </td>
