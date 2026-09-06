@@ -1057,7 +1057,7 @@ export const UserMessagesPanel = () => {
         View your messages, system notifications, and responses from the team
       </p>
 
-      <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+      <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
         {/* Header row with tabs, filter, and bulk actions */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
           <TabsList className="w-full sm:w-auto grid grid-cols-4 gap-1">
