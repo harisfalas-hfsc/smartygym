@@ -38,14 +38,11 @@ export function getEmailHeaders(userEmail: string, emailType?: EmailType): Recor
  * Required for CAN-SPAM and GDPR compliance
  */
 export function getEmailFooter(userEmail: string, emailType?: EmailType): string {
-  // One-click, signed unsubscribe link — same URL used in the List-Unsubscribe header.
-  // (Previously this pointed at /unsubscribe-help, which only showed instructions.)
-  const unsubscribeUrl = buildUnsubscribeUrl(
-    "https://smartygym.com/unsubscribe",
-    userEmail,
-    emailType,
-  );
-  const manageUrl = `https://smartygym.com/userdashboard?tab=messages`;
+  // The visible link takes the reader straight to their notification settings,
+  // where every email/dashboard/push switch can be turned off individually.
+  // (The signed one-click URL stays in the List-Unsubscribe header for Gmail/Yahoo.)
+  const unsubscribeUrl = `https://smartygym.com/userdashboard?tab=messages&mtab=subscriptions`;
+  const manageUrl = unsubscribeUrl;
   
   return `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top: 32px;">
