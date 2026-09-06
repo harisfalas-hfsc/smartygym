@@ -130,7 +130,13 @@ export const UserMessagesPanel = () => {
   const [messageToDelete, setMessageToDelete] = useState<{ id: string; type: 'system' | 'contact' } | null>(null);
   const [viewFilter, setViewFilter] = useState<ViewFilter>('all');
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
-  const [activeTab, setActiveTab] = useState('all');
+  const [searchParams] = useSearchParams();
+  // Deep-link support: /userdashboard?tab=messages&mtab=subscriptions opens the
+  // notification settings directly (used by the "Manage / unsubscribe" email link).
+  const [activeTab, setActiveTab] = useState(() => {
+    const mtab = searchParams.get('mtab');
+    return mtab && ['all', 'system', 'contact', 'subscriptions'].includes(mtab) ? mtab : 'all';
+  });
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [sendingReplyFor, setSendingReplyFor] = useState<string | null>(null);
   const [expandedSystemMessages, setExpandedSystemMessages] = useState<Set<string>>(new Set());
