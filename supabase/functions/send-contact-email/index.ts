@@ -3,6 +3,7 @@ import { Resend } from "https://esm.sh/resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { getAdminNotificationEmail } from "../_shared/admin-settings.ts";
 import { logEmailDelivery } from "../_shared/email-log.ts";
+import { detectsUnsubscribeRequest, unsubscribeEmailEverywhere } from "../_shared/self-service-actions.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
