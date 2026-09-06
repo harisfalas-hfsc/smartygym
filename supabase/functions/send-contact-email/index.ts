@@ -246,6 +246,35 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
 
+      // ── Self-service actions: DO the job before writing about it ──────────
+      // If the customer asks to be removed from emails, actually remove them now.
+      const performedActions: string[] = [];
+      if (detectsUnsubscribeRequest(`${subject}\n${message}`)) {
+        const result = await unsubscribeEmailEverywhere(supabaseAdmin, email);
+        if (result.performed) {
+          performedActions.push(
+            "You have now been unsubscribed. Every optional email (daily digest, reminders, new content, weekly report, announcements) has been switched off for this address. Only essential account emails such as purchase or renewal confirmations will still be sent. This has already been done — no further action is needed."
+          );
+          await supabaseAdmin.from("contact_message_history").insert({
+            contact_message_id: messageId ?? null,
+            message_type: "system_action",
+            content: "Automatic action: all optional emails switched off for this address at the customer's request.",
+            sender: "system",
+          }).then(({ error }: any) => {
+            if (error) console.error("Failed to log unsubscribe action:", error);
+          });
+        } else if (result.alreadyUnsubscribed) {
+          performedActions.push(
+            "This address was already unsubscribed — every optional email is off. Confirm this is the case; do not promise any further action."
+          );
+        } else {
+          performedActions.push(
+            "The automatic unsubscribe could not be completed. Do NOT claim it was done; say a team member is handling it right now."
+          );
+        }
+        console.log(`[contact] unsubscribe intent handled for ${email}:`, JSON.stringify(result));
+      }
+
       // Call AI to generate intelligent response
       let aiResponseContent = '';
       try {
@@ -272,7 +301,8 @@ const handler = async (req: Request): Promise<Response> => {
               message: message,
               category: 'contact',
               userType: userType
-            }
+            },
+            performedActions,
           })
         });
 
