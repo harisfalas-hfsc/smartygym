@@ -38,7 +38,13 @@ export function getEmailHeaders(userEmail: string, emailType?: EmailType): Recor
  * Required for CAN-SPAM and GDPR compliance
  */
 export function getEmailFooter(userEmail: string, emailType?: EmailType): string {
-  const unsubscribeHelpUrl = `https://smartygym.com/unsubscribe-help`;
+  // One-click, signed unsubscribe link — same URL used in the List-Unsubscribe header.
+  // (Previously this pointed at /unsubscribe-help, which only showed instructions.)
+  const unsubscribeUrl = buildUnsubscribeUrl(
+    "https://smartygym.com/unsubscribe",
+    userEmail,
+    emailType,
+  );
   const manageUrl = `https://smartygym.com/userdashboard?tab=messages`;
   
   return `
@@ -50,7 +56,7 @@ export function getEmailFooter(userEmail: string, emailType?: EmailType): string
             Designed by Haris Falas, Sports Scientist (CSCS Certified)
           </p>
           <p style="font-size: 12px; color: #999999; line-height: 1.5; margin: 0; text-align: center;">
-            <a href="${unsubscribeHelpUrl}" style="color: #999999; text-decoration: underline;">Unsubscribe from this email</a> · 
+            <a href="${unsubscribeUrl}" style="color: #999999; text-decoration: underline;">Unsubscribe from this email</a> · 
             <a href="${manageUrl}" style="color: #999999; text-decoration: underline;">Manage all preferences</a> · 
             <a href="https://smartygym.com/privacy-policy" style="color: #999999; text-decoration: underline;">Privacy Policy</a>
           </p>
@@ -59,6 +65,8 @@ export function getEmailFooter(userEmail: string, emailType?: EmailType): string
     </table>
   `;
 }
+
+
 
 /**
  * Converts tiptap HTML classes to inline-styled email HTML
