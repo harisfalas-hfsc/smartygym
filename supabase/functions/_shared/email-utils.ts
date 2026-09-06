@@ -66,11 +66,7 @@ export function getEmailFooter(userEmail: string, emailType?: EmailType): string
   `;
 }
 
-        </td>
-      </tr>
-    </table>
-  `;
-}
+
 
 /**
  * Converts tiptap HTML classes to inline-styled email HTML
