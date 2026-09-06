@@ -11,7 +11,7 @@ const UNSUBSCRIBE_PATTERNS = [
   /\bunsubscribe\b/i,
   /\bun-?subscribe\b/i,
   /\bopt[\s-]?out\b/i,
-  /\bstop (sending|the )?(me )?(all )?(these |your )?(e-?mails?|notifications?|messages?)\b/i,
+  /\bstop\b[^.!?]{0,40}\b(e-?mails?|notifications?|messages?|newsletter)\b/i,
   /\bremove (me|my e-?mail|my address)\b[^.]*\b(list|mailing|database|e-?mails?)\b/i,
   /\btake me off\b/i,
   /\bno (more|longer) (want |wish )?(to )?(receive )?(any )?(e-?mails?|notifications?)/i,
