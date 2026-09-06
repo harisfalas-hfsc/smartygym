@@ -42,7 +42,6 @@ export function getEmailFooter(userEmail: string, emailType?: EmailType): string
   // where every email/dashboard/push switch can be turned off individually.
   // (The signed one-click URL stays in the List-Unsubscribe header for Gmail/Yahoo.)
   const unsubscribeUrl = `https://smartygym.com/userdashboard?tab=messages&mtab=subscriptions`;
-  const manageUrl = unsubscribeUrl;
   
   return `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top: 32px;">
