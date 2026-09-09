@@ -134,18 +134,16 @@ const normalizeRouteLocation = (location: Location): Location => {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes — reuse cached lists between navigations
-      gcTime: 24 * 60 * 60 * 1000, // 24h — keep data around for offline use
-      refetchOnWindowFocus: false,
+      staleTime: 60 * 1000, // 1 minute — always close to live data
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: true,
       refetchOnReconnect: true,
       retry: 1,
-      networkMode: "offlineFirst",
+      networkMode: "online",
     },
-    mutations: { networkMode: "offlineFirst" },
+    mutations: { networkMode: "online" },
   },
 });
-
-const offlinePersister = createOfflinePersister();
 
 const criticalRoutePreloaders = [
   () => import("./pages/WorkoutFlow"),
@@ -209,9 +207,6 @@ const AppContent = () => {
       <LoadingBar />
       <AccessControlProvider>
         <AnnouncementManager />
-        <OfflineBootstrap />
-        <UpdateAvailablePrompt />
-        <SyncStatusPill />
         {/* <FreeTrialPopup /> */}
         <SmartyCoachWelcomePopup />
         <SisterAppsPopup />

@@ -1,9 +1,7 @@
-import { SyncStatusPill } from "@/components/offline/SyncStatusPill";
-
 /**
- * Kept for backwards compatibility. The old full-width banner blocked the
- * header, so it now renders the small non-blocking status pill instead.
+ * Kept for backwards compatibility. Offline mode was removed, so this renders
+ * nothing.
  */
 export function OfflineBanner(_props: { showReconnectedMessage?: boolean } = {}) {
-  return <SyncStatusPill />;
+  return null;
 }
