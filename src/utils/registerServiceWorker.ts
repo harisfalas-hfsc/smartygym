@@ -49,4 +49,11 @@ export const purgeAppServiceWorkers = async (): Promise<void> => {
   } catch {
     // ignore
   }
+
+  // Drop the old persisted react-query cache so no page renders stale data.
+  try {
+    indexedDB.deleteDatabase("smartygym-query-cache");
+  } catch {
+    // ignore
+  }
 };
