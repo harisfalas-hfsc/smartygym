@@ -3,12 +3,7 @@ import { useEffect, lazy, Suspense } from "react";
 import { DeviceThemeDefault } from "./components/DeviceThemeDefault";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient } from "@tanstack/react-query";
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createOfflinePersister } from "./lib/offline/queryPersister";
-import { OfflineBootstrap } from "./components/offline/OfflineBootstrap";
-import { UpdateAvailablePrompt } from "./components/offline/UpdateAvailablePrompt";
-import { SyncStatusPill } from "./components/offline/SyncStatusPill";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, type Location } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Helmet } from "react-helmet";
@@ -139,18 +134,16 @@ const normalizeRouteLocation = (location: Location): Location => {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes — reuse cached lists between navigations
-      gcTime: 24 * 60 * 60 * 1000, // 24h — keep data around for offline use
-      refetchOnWindowFocus: false,
+      staleTime: 60 * 1000, // 1 minute — always close to live data
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: true,
       refetchOnReconnect: true,
       retry: 1,
-      networkMode: "offlineFirst",
+      networkMode: "online",
     },
-    mutations: { networkMode: "offlineFirst" },
+    mutations: { networkMode: "online" },
   },
 });
-
-const offlinePersister = createOfflinePersister();
 
 const criticalRoutePreloaders = [
   () => import("./pages/WorkoutFlow"),
@@ -214,9 +207,6 @@ const AppContent = () => {
       <LoadingBar />
       <AccessControlProvider>
         <AnnouncementManager />
-        <OfflineBootstrap />
-        <UpdateAvailablePrompt />
-        <SyncStatusPill />
         {/* <FreeTrialPopup /> */}
         <SmartyCoachWelcomePopup />
         <SisterAppsPopup />
@@ -401,23 +391,7 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <PersistQueryClientProvider
-    client={queryClient}
-    persistOptions={{
-      persister: offlinePersister,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      buster: "v1",
-      dehydrateOptions: {
-        // Bulk catalogs already live in the offline IndexedDB store; keeping
-        // them out of the persisted query cache avoids multi-MB serialisation.
-        shouldDehydrateQuery: (query) => {
-          const head = String(query.queryKey?.[0] ?? "");
-          const heavy = ["all-workouts", "all-programs", "exercises", "exercise-library", "blog-articles"];
-          return query.state.status === "success" && !heavy.includes(head);
-        },
-      },
-    }}
-  >
+  <QueryClientProvider client={queryClient}>
     <ThemeProvider 
       attribute="class" 
       defaultTheme="dark" 
@@ -435,7 +409,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
-  </PersistQueryClientProvider>
+  </QueryClientProvider>
 );
 
 export default App;

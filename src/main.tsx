@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { configureStatusBar } from "./utils/native";
-import { registerAppServiceWorker } from "./utils/registerServiceWorker";
+import { purgeAppServiceWorkers } from "./utils/registerServiceWorker";
 import { Capacitor } from "@capacitor/core";
 
 // Configure native status bar on app launch
@@ -41,22 +41,8 @@ const clearLovableDeploymentPinCookie = () => {
 // older deployment until cookies are cleared. Remove it on every app start.
 clearLovableDeploymentPinCookie();
 
-// In a true Capacitor native shell we don't want a web SW — the native
-// container handles caching. Everywhere else (browser + WebView APK wrappers
-// like AppMySite) we register the guarded service worker for fast repeat
-// loads + offline support. The guard inside registerAppServiceWorker handles
-// dev, iframe, and Lovable preview hosts.
-if (Capacitor.isNativePlatform()) {
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.getRegistrations().then((regs) => {
-      regs.forEach((r) => r.unregister());
-    });
-  }
-  if ("caches" in window) {
-    caches.keys().then((names) => names.forEach((n) => caches.delete(n)));
-  }
-} else {
-  registerAppServiceWorker();
-}
+// No offline app-shell caching anywhere: browser, installed PWA, WebView
+// wrapper or native shell. Every launch loads the current deployment.
+void purgeAppServiceWorkers();
 
 createRoot(document.getElementById("root")!).render(<App />);

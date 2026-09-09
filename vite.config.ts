@@ -2,32 +2,10 @@ import { defineConfig, type ResolvedConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import { VitePWA } from "vite-plugin-pwa";
 import { generateSitemap } from "./scripts/generate-sitemap";
 import { generateLlmsFull } from "./scripts/generate-llms-full";
 import { prerenderSeoHtml } from "./scripts/prerender";
 import { verifyPrerenderedSeo } from "./scripts/verify-prerender";
-
-const offlineRoutes = [
-  "/",
-  "/about",
-  "/faq",
-  "/smarty-premium",
-  "/fitness-training",
-  "/research",
-  "/glossary",
-  "/blog",
-  "/workout",
-  "/trainingprogram",
-  "/tools",
-  "/exerciselibrary",
-  "/community",
-  "/contact",
-  "/privacy-policy",
-  "/termsofservice",
-  "/disclaimer",
-  "/userdashboard",
-];
 
 function smartySeoPrerenderPlugin() {
   let outDir = path.resolve(__dirname, "dist");
@@ -62,104 +40,6 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     smartySeoPrerenderPlugin(),
-    VitePWA({
-      registerType: "autoUpdate",
-      injectRegister: null,
-      filename: "sw.js",
-      strategies: "generateSW",
-      devOptions: { enabled: false },
-      includeAssets: [
-        "favicon.ico",
-        "favicon-48.png",
-        "robots.txt",
-        "icon-192.png",
-        "icon-512.png",
-        "icon-maskable-192.png",
-        "icon-maskable-512.png",
-      ],
-      manifest: false,
-      workbox: {
-        cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: true,
-        navigateFallback: "/",
-        navigateFallbackDenylist: [
-          /^\/~oauth/,
-          /^\/payment-success/,
-          /^\/api\//,
-          /^\/functions\//,
-        ],
-        additionalManifestEntries: offlineRoutes.map((url) => ({ url, revision: null })),
-        // Precache only the executable app shell. The SEO prerender step emits
-        // thousands of route-specific HTML files; including all of them kept
-        // the worker in the "installing" state for minutes, so it never took
-        // control and Chrome displayed its generic offline page.
-        globPatterns: [
-          "index.html",
-          "assets/**/*.{js,css,woff,woff2,ttf,otf}",
-        ],
-        globIgnores: ["**/manifest.webmanifest", "**/icon-*.png", "**/apple-touch-icon*.png", "**/favicon*"],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-        runtimeCaching: [
-          {
-            urlPattern: ({ url }) =>
-              url.pathname === "/manifest.webmanifest" ||
-              /^\/(icon-|apple-touch-icon|favicon)/.test(url.pathname),
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "smartygym-app-identity",
-              networkTimeoutSeconds: 3,
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 7 },
-            },
-          },
-          {
-            urlPattern: ({ request }) => request.mode === "navigate",
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "smartygym-pages",
-              networkTimeoutSeconds: 3,
-              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            },
-          },
-          {
-            urlPattern: /\/assets\/.*\.(?:js|css|woff2?)$/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "static-assets",
-              expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 60 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|webp|avif|gif|svg)$/i,
-            handler: "StaleWhileRevalidate",
-            options: {
-              cacheName: "images",
-              expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\//,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "google-fonts",
-              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\//,
-            handler: "StaleWhileRevalidate",
-            options: {
-              cacheName: "supabase-storage",
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-        ],
-      },
-    }),
     mode === "development" && componentTagger()
   ].filter(Boolean),
   resolve: {
