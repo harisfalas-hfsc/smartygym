@@ -391,23 +391,7 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <PersistQueryClientProvider
-    client={queryClient}
-    persistOptions={{
-      persister: offlinePersister,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      buster: "v1",
-      dehydrateOptions: {
-        // Bulk catalogs already live in the offline IndexedDB store; keeping
-        // them out of the persisted query cache avoids multi-MB serialisation.
-        shouldDehydrateQuery: (query) => {
-          const head = String(query.queryKey?.[0] ?? "");
-          const heavy = ["all-workouts", "all-programs", "exercises", "exercise-library", "blog-articles"];
-          return query.state.status === "success" && !heavy.includes(head);
-        },
-      },
-    }}
-  >
+  <QueryClientProvider client={queryClient}>
     <ThemeProvider 
       attribute="class" 
       defaultTheme="dark" 
@@ -425,7 +409,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
-  </PersistQueryClientProvider>
+  </QueryClientProvider>
 );
 
 export default App;
