@@ -2,32 +2,10 @@ import { defineConfig, type ResolvedConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import { VitePWA } from "vite-plugin-pwa";
 import { generateSitemap } from "./scripts/generate-sitemap";
 import { generateLlmsFull } from "./scripts/generate-llms-full";
 import { prerenderSeoHtml } from "./scripts/prerender";
 import { verifyPrerenderedSeo } from "./scripts/verify-prerender";
-
-const offlineRoutes = [
-  "/",
-  "/about",
-  "/faq",
-  "/smarty-premium",
-  "/fitness-training",
-  "/research",
-  "/glossary",
-  "/blog",
-  "/workout",
-  "/trainingprogram",
-  "/tools",
-  "/exerciselibrary",
-  "/community",
-  "/contact",
-  "/privacy-policy",
-  "/termsofservice",
-  "/disclaimer",
-  "/userdashboard",
-];
 
 function smartySeoPrerenderPlugin() {
   let outDir = path.resolve(__dirname, "dist");
