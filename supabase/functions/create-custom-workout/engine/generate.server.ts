@@ -29,7 +29,7 @@ import {
   type StrengthFocus,
 } from "./spec.ts";
 
-const MODELS = ["google/gemini-3-pro-preview", "google/gemini-3-flash-preview"];
+const MODELS = ["google/gemini-3.1-pro-preview", "google/gemini-3.8-flash"];
 
 export type GenerateInput = {
   category: Category;
