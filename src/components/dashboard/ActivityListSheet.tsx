@@ -2,7 +2,8 @@ import { ReactNode, useMemo, useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, Heart, Star, CalendarClock, ArrowDownUp } from "lucide-react";
+import { ArrowLeft, CheckCircle, Heart, Star, CalendarClock } from "lucide-react";
+import { CompactFilters } from "@/components/CompactFilters";
 
 export type ActivityFilter =
   | "all"
@@ -72,7 +73,7 @@ export function ActivityListSheet({
     if (open) setFilter(initialFilter);
   }, [open, initialFilter]);
 
-  const chips: { key: ActivityFilter; label: string }[] = [
+  const filterOptions: { value: ActivityFilter; label: string }[] = [
     { key: "all", label: "All" },
     { key: "favorites", label: "Favorites" },
     { key: "completed", label: "Completed" },
@@ -80,7 +81,10 @@ export function ActivityListSheet({
     { key: "rated", label: "Rated" },
     { key: "scheduled", label: "Scheduled" },
     ...(showInProgress ? [{ key: "inprogress" as const, label: "In Progress" }] : []),
-  ];
+  ].map(({ key, label }) => ({
+    value: key,
+    label: `${label} (${items.filter((item) => matchesFilter(item, key)).length})`,
+  }));
 
   const visible = useMemo(() => {
     const list = items.filter((i) => matchesFilter(i, filter));
@@ -102,36 +106,27 @@ export function ActivityListSheet({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Filters + sort */}
-        <div className="px-4 pt-3 pb-2 border-b space-y-2">
-          <div className="flex gap-1.5 overflow-x-auto pb-1">
-            {chips.map((c) => {
-              const count = items.filter((i) => matchesFilter(i, c.key)).length;
-              return (
-                <Button
-                  key={c.key}
-                  type="button"
-                  size="sm"
-                  variant={filter === c.key ? "default" : "outline"}
-                  className="h-8 shrink-0 rounded-full text-xs"
-                  onClick={() => setFilter(c.key)}
-                >
-                  {c.label}
-                  <span className="ml-1 opacity-70">{count}</span>
-                </Button>
-              );
-            })}
-          </div>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="h-8 px-2 text-xs gap-1"
-            onClick={() => setSort((s) => (s === "newest" ? "oldest" : "newest"))}
-          >
-            <ArrowDownUp className="h-3.5 w-3.5" />
-            {sort === "newest" ? "Newest first" : "Oldest first"}
-          </Button>
+        <div className="px-4 pt-3 border-b">
+          <CompactFilters
+            compact
+            filters={[
+              {
+                name: "Status",
+                value: filter,
+                onChange: (value) => setFilter(value as ActivityFilter),
+                options: filterOptions,
+              },
+              {
+                name: "Sort",
+                value: sort,
+                onChange: (value) => setSort(value as "newest" | "oldest"),
+                options: [
+                  { value: "newest", label: "Newest first" },
+                  { value: "oldest", label: "Oldest first" },
+                ],
+              },
+            ]}
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-3">
