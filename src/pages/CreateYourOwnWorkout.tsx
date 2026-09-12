@@ -390,31 +390,39 @@ const CreateYourOwnWorkout = () => {
         <QuestionCard
           step={showFocus ? 4 : 3}
           icon={Flame}
-          title="How hard should it be?"
-          hint="Auto blends your profile level with today's mood. Pick a level to override it."
+          title="Choose the difficulty level"
+          hint="Beginner, Intermediate or Advanced — or let Smarty decide from your profile and today's mood."
         >
-          <div className="grid gap-2.5 sm:grid-cols-2">
-            {LEVELS_6.map((l) => (
-              <button
-                key={l.id}
-                type="button"
-                onClick={() => setLevel(l.id)}
-                className={`min-h-14 rounded-2xl border px-4 py-3 text-left transition ${
-                  level === l.id
-                    ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                    : "border-border bg-background hover:border-primary/50"
-                }`}
-              >
-                <span className="block text-sm font-semibold">
-                  {l.stars ? "\u2605".repeat(l.stars) + "\u2606".repeat(6 - l.stars) + "  " : ""}
-                  {l.label}
-                </span>
-                <span
-                  className={`block text-xs ${level === l.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}
-                >
-                  {l.hint}
-                </span>
-              </button>
+          <div className="mb-2.5">
+            <Chip active={level === "auto"} onClick={() => setLevel("auto")}>
+              Let Smarty decide
+            </Chip>
+          </div>
+          <div className="grid gap-2.5 sm:grid-cols-3">
+            {LEVEL_GROUPS.map((g) => (
+              <div key={g.label} className="rounded-2xl border border-border bg-background p-3">
+                <p className="mb-2 text-center text-sm font-semibold">{g.label}</p>
+                <div className="grid gap-2">
+                  {g.levels.map((l) => (
+                    <button
+                      key={l.id}
+                      type="button"
+                      onClick={() => setLevel(l.id)}
+                      className={`rounded-xl border px-3 py-2.5 text-center transition ${
+                        level === l.id
+                          ? "border-primary bg-primary/10 shadow-sm"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <span className="block text-base leading-none tracking-wide text-yellow-400">
+                        {"\u2605".repeat(l.stars)}
+                        <span className="text-muted-foreground/40">{"\u2606".repeat(6 - l.stars)}</span>
+                      </span>
+                      <span className="mt-1 block text-xs text-muted-foreground">{l.hint}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </QuestionCard>
