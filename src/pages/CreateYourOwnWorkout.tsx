@@ -13,10 +13,12 @@ import {
   MessageSquare,
   Flame,
   ListChecks,
+  Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { useAccessControl } from "@/hooks/useAccessControl";
 import { useToast } from "@/hooks/use-toast";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { GeneratingDialog } from "@/components/workout/GeneratingDialog";
