@@ -255,7 +255,7 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
                   key={day}
                   onClick={() => handleDayClick(day)}
                   className={`
-                    relative p-2 rounded-lg text-center transition-all
+                    relative p-1 sm:p-2 rounded-lg text-center transition-all min-w-0
                     ${hasActivity ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted'}
                     ${isToday ? 'ring-2 ring-primary' : ''}
                     ${isFuture && scheduledItems.length > 0 ? 'bg-purple-500/10' : ''}
