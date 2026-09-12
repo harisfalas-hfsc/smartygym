@@ -9,8 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
+import { CompactFilters } from "@/components/CompactFilters";
 import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
 import { useToast } from "@/hooks/use-toast";
+
+type StatusFilter = "all" | "favorites" | "completed" | "viewed" | "rated";
+type SortOrder = "newest" | "oldest";
 
 export interface CustomWorkoutRow {
   id: string;
