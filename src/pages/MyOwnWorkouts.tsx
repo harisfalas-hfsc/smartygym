@@ -9,8 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
+import { CompactFilters } from "@/components/CompactFilters";
 import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
 import { useToast } from "@/hooks/use-toast";
+
+type StatusFilter = "all" | "favorites" | "completed" | "viewed" | "rated";
+type SortOrder = "newest" | "oldest";
 
 export interface CustomWorkoutRow {
   id: string;
@@ -47,6 +51,8 @@ const MyOwnWorkouts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -69,6 +75,27 @@ const MyOwnWorkouts = () => {
       return (data ?? []) as CustomWorkoutRow[];
     },
   });
+
+  const filteredWorkouts = workouts
+    .filter((w) => {
+      switch (statusFilter) {
+        case "favorites":
+          return !!w.is_favorite;
+        case "completed":
+          return !!w.completed_at;
+        case "viewed":
+          return !!w.has_viewed;
+        case "rated":
+          return w.rating != null;
+        default:
+          return true;
+      }
+    })
+    .sort((a, b) =>
+      sortOrder === "newest"
+        ? b.created_at.localeCompare(a.created_at)
+        : a.created_at.localeCompare(b.created_at),
+    );
 
   const remove = async (id: string) => {
     const { error } = await supabase.from("user_custom_workouts").delete().eq("id", id);
@@ -108,6 +135,35 @@ const MyOwnWorkouts = () => {
         </Button>
       </div>
 
+      {!isLoading && workouts.length > 0 && (
+        <CompactFilters
+          compact
+          filters={[
+            {
+              name: "Status",
+              value: statusFilter,
+              onChange: (v) => setStatusFilter(v as StatusFilter),
+              options: [
+                { value: "all", label: "All" },
+                { value: "favorites", label: "Favorites" },
+                { value: "completed", label: "Completed" },
+                { value: "viewed", label: "Viewed" },
+                { value: "rated", label: "Rated" },
+              ],
+            },
+            {
+              name: "Sort",
+              value: sortOrder,
+              onChange: (v) => setSortOrder(v as SortOrder),
+              options: [
+                { value: "newest", label: "Newest first" },
+                { value: "oldest", label: "Oldest first" },
+              ],
+            },
+          ]}
+        />
+      )}
+
       {isLoading ? (
         <div className="space-y-3">
           <Skeleton className="h-28 w-full rounded-2xl" />
@@ -129,9 +185,17 @@ const MyOwnWorkouts = () => {
             </Button>
           </CardContent>
         </Card>
+      ) : filteredWorkouts.length === 0 ? (
+        <Card className="rounded-3xl border-2 border-border">
+          <CardContent className="p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              No workouts match this filter yet.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-3">
-          {workouts.map((w) => (
+          {filteredWorkouts.map((w) => (
             <Card
               key={w.id}
               className="cursor-pointer rounded-2xl border-2 border-border transition hover:border-primary"
