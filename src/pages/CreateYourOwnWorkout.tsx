@@ -58,7 +58,7 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-12 w-full items-center justify-center truncate whitespace-nowrap rounded-2xl border px-2.5 text-[13px] font-semibold leading-none transition sm:text-sm ${
+      className={`flex h-12 w-full items-center justify-start truncate whitespace-nowrap rounded-2xl border px-3 text-left text-[13px] font-semibold leading-none transition sm:text-sm ${
         active
           ? "border-primary bg-primary text-primary-foreground shadow-sm"
           : "border-border bg-background text-foreground hover:border-primary/50"
@@ -398,30 +398,31 @@ const CreateYourOwnWorkout = () => {
               Let Smarty decide
             </Chip>
           </div>
-          <div className="grid gap-2.5 sm:grid-cols-3">
+          <div className="space-y-2">
             {LEVEL_GROUPS.map((g) => (
-              <div key={g.label} className="rounded-2xl border border-border bg-background p-3">
-                <p className="mb-2 text-center text-sm font-semibold">{g.label}</p>
-                <div className="grid gap-2">
-                  {g.levels.map((l) => (
-                    <button
-                      key={l.id}
-                      type="button"
-                      onClick={() => setLevel(l.id)}
-                      className={`rounded-xl border px-3 py-2.5 text-center transition ${
-                        level === l.id
-                          ? "border-primary bg-primary/10 shadow-sm"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      <span className="block text-base leading-none tracking-wide text-yellow-400">
-                        {"\u2605".repeat(l.stars)}
-                        <span className="text-muted-foreground/40">{"\u2606".repeat(6 - l.stars)}</span>
-                      </span>
-                      <span className="mt-1 block text-xs text-muted-foreground">{l.hint}</span>
-                    </button>
-                  ))}
-                </div>
+              <div
+                key={g.label}
+                className="grid grid-cols-2 items-center gap-2 rounded-2xl border border-border bg-background p-2"
+              >
+                <p className="col-span-2 px-1 text-sm font-semibold">{g.label}</p>
+                {g.levels.map((l) => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    onClick={() => setLevel(l.id)}
+                    className={`flex flex-col items-start justify-center rounded-xl border px-3 py-2 text-left transition ${
+                      level === l.id
+                        ? "border-primary bg-primary/10 shadow-sm"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <span className="text-base leading-none tracking-wide text-yellow-400">
+                      {"\u2605".repeat(l.stars)}
+                      <span className="text-muted-foreground/40">{"\u2606".repeat(6 - l.stars)}</span>
+                    </span>
+                    <span className="mt-0.5 text-xs text-muted-foreground">{l.hint}</span>
+                  </button>
+                ))}
               </div>
             ))}
           </div>
