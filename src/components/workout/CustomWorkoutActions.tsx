@@ -71,7 +71,7 @@ export const CustomWorkoutActions = ({ workout, compact = false, onScheduled }: 
           }
         >
           <Heart className={cn("mr-2 h-4 w-4", isFavorite && "fill-red-500 text-red-500")} />
-          {isFavorite ? "Favorited" : "Favorite"}
+          Favorite
         </Button>
 
         <Button
