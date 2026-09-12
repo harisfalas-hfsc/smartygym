@@ -302,6 +302,11 @@ const AppContent = () => {
                   <Route path="/userdashboard" element={<UserDashboard />} />
                   <Route path="/calculator-history" element={<CalculatorHistory />} />
                 </Route>
+
+                {/* Create Your Own Workout — members only, never indexed */}
+                <Route path="/create-your-own-workout" element={<ProtectedRoute><CreateYourOwnWorkout /></ProtectedRoute>} />
+                <Route path="/my-workouts" element={<ProtectedRoute><MyOwnWorkouts /></ProtectedRoute>} />
+                <Route path="/my-workouts/:id" element={<ProtectedRoute><MyOwnWorkoutDetail /></ProtectedRoute>} />
                 
                 {/* Public calorie counter - no auth required */}
                 <Route path="/tools/calorie-counter" element={<CalorieCounter />} />
