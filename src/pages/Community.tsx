@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccessControl } from "@/hooks/useAccessControl";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
@@ -92,7 +93,11 @@ interface Testimonial {
 const Community = () => {
   const navigate = useNavigate();
   const { userTier, purchasedContent } = useAccessControl();
+  const { freeAccessMode } = useFreeAccessMode();
+  // While payments are switched off everything is free for everyone, including
+  // visitors who are not signed in. The paywall returns as soon as it is on.
   const canViewLeaderboard =
+    freeAccessMode ||
     userTier === "premium" ||
     (userTier === "subscriber" && purchasedContent.size > 0);
 
