@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccessControl } from "@/hooks/useAccessControl";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
