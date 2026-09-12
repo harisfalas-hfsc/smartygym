@@ -1965,6 +1965,7 @@ export default function UserDashboard() {
           completed: <CheckCircle className="h-4 w-4 text-green-500" />,
           viewed: <Clock className="h-4 w-4 text-blue-500" />,
           rated: <Star className="h-4 w-4 text-yellow-500" />,
+          scheduled: <CalendarClock className="h-4 w-4 text-purple-500" />,
           inprogress: <Play className="h-4 w-4 text-purple-500" />,
         };
         // Every list shows the full set for that kind; the chips inside the sheet
