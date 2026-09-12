@@ -165,7 +165,18 @@ export default function UserDashboard() {
     | { kind: "workout" | "program"; bucket: "favorites" | "completed" | "viewed" | "rated" | "scheduled" | "inprogress" }
     | null
   >(null);
-  const [customWorkoutCount, setCustomWorkoutCount] = useState(0);
+  const [customWorkoutRows, setCustomWorkoutRows] = useState<{
+    id: string;
+    name: string;
+    category: string | null;
+    is_favorite: boolean | null;
+    completed_at: string | null;
+    has_viewed: boolean | null;
+    rating: number | null;
+    created_at: string;
+    updated_at: string | null;
+  }[]>([]);
+  const customWorkoutCount = customWorkoutRows.length;
   const dashboardScrollY = useRef(0);
 
   // Check-in hooks
@@ -190,16 +201,17 @@ export default function UserDashboard() {
   // Scheduled sessions (workouts + programs) so every list can filter by "Scheduled"
   const { scheduledWorkouts } = useScheduledWorkouts(user?.id ?? null);
 
-  // Count of the athlete's own generated workouts
+  // The athlete's own generated workouts — counted and folded into the
+  // Favorites / Completed / Viewed / Rated / Scheduled activity lists.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      const { count } = await supabase
+      const { data } = await supabase
         .from('user_custom_workouts')
-        .select('id', { count: 'exact', head: true })
+        .select('id,name,category,is_favorite,completed_at,has_viewed,rating,created_at,updated_at')
         .eq('user_id', user.id);
-      if (!cancelled) setCustomWorkoutCount(count || 0);
+      if (!cancelled) setCustomWorkoutRows(data ?? []);
     })();
     return () => { cancelled = true; };
   }, [user]);
@@ -810,6 +822,25 @@ export default function UserDashboard() {
   const ratedPrograms = visibleProgramInteractions.filter(p => p.rating && p.rating > 0);
   const inProgressPrograms = visibleProgramInteractions.filter(p => p.is_ongoing);
   const scheduledWorkoutItems = visibleWorkoutInteractions.filter(w => scheduledWorkoutDates.has(w.workout_id));
+
+  // The athlete's own generated workouts join the same activity lists.
+  const customWorkoutItems: ActivityItem[] = customWorkoutRows.map((w) => ({
+    id: `custom:${w.id}`,
+    name: w.name,
+    type: w.category || 'My own workout',
+    rating: w.rating,
+    is_completed: !!w.completed_at,
+    is_favorite: !!w.is_favorite,
+    is_viewed: !!w.has_viewed,
+    is_scheduled: scheduledWorkoutDates.has(w.id),
+    scheduled_date: scheduledWorkoutDates.get(w.id) ?? null,
+    sort_date: w.updated_at || w.created_at,
+  }));
+  const customFavorites = customWorkoutItems.filter(i => i.is_favorite);
+  const customCompleted = customWorkoutItems.filter(i => i.is_completed);
+  const customViewed = customWorkoutItems.filter(i => i.is_viewed);
+  const customRated = customWorkoutItems.filter(i => i.rating && i.rating > 0);
+  const customScheduled = customWorkoutItems.filter(i => i.is_scheduled);
   const scheduledProgramItems = visibleProgramInteractions.filter(p => scheduledProgramDates.has(p.program_id));
 
   // Tab-level access: allow non-premium users in if they have relevant purchases.
@@ -1345,11 +1376,11 @@ export default function UserDashboard() {
                 </CardContent>
               </Card>
               {([
-                { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length },
-                { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedWorkouts.length },
-                { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedWorkouts.length },
-                { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedWorkouts.length },
-                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledWorkoutItems.length },
+                { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length + customFavorites.length },
+                { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedWorkouts.length + customCompleted.length },
+                { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedWorkouts.length + customViewed.length },
+                { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedWorkouts.length + customRated.length },
+                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledWorkoutItems.length + customScheduled.length },
               ]).map(s => (
                 <Card
                   key={s.bucket}
@@ -1611,11 +1642,11 @@ export default function UserDashboard() {
                 </CardContent>
               </Card>
               {([
-                { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length },
-                { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedWorkouts.length },
-                { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedWorkouts.length },
-                { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedWorkouts.length },
-                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledWorkoutItems.length },
+                { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length + customFavorites.length },
+                { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedWorkouts.length + customCompleted.length },
+                { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedWorkouts.length + customViewed.length },
+                { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedWorkouts.length + customRated.length },
+                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledWorkoutItems.length + customScheduled.length },
               ]).map(s => (
                 <Card
                   key={s.bucket}
@@ -2011,7 +2042,7 @@ export default function UserDashboard() {
         // cross-filters (for example, scheduled + completed) and date sorting.
         const items: ActivityItem[] = s
           ? isWorkout
-            ? visibleWorkoutInteractions.map(toWorkoutItem)
+            ? [...visibleWorkoutInteractions.map(toWorkoutItem), ...customWorkoutItems]
             : visibleProgramInteractions.map(toProgramItem)
           : [];
         return (
@@ -2025,7 +2056,8 @@ export default function UserDashboard() {
             showInProgress={!isWorkout}
             emptyText={isWorkout ? "No workouts in this list yet" : "No programs in this list yet"}
             onItemClick={(item) => {
-              if (isWorkout) handleNavigateToWorkout(item.type, (visibleWorkoutInteractions.find(w => w.id === item.id))?.workout_id || item.id);
+              if (item.id.startsWith('custom:')) navigate(`/my-workouts/${item.id.slice('custom:'.length)}`);
+              else if (isWorkout) handleNavigateToWorkout(item.type, (visibleWorkoutInteractions.find(w => w.id === item.id))?.workout_id || item.id);
               else handleNavigateToProgram(item.type, (visibleProgramInteractions.find(p => p.id === item.id))?.program_id || item.id);
             }}
           />

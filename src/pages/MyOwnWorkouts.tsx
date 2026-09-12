@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CalendarClock, Clock, Dumbbell, ListChecks, MapPin, Plus, Star, Trash2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, CalendarClock, Clock, Dumbbell, ListChecks, MapPin, Plus, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
-import { useToast } from "@/hooks/use-toast";
 import { useScheduledWorkouts } from "@/hooks/useScheduledWorkouts";
 import { CompactFilters } from "@/components/CompactFilters";
 
@@ -49,8 +48,6 @@ const Stars = ({ count }: { count: number }) => (
 
 const MyOwnWorkouts = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
@@ -126,16 +123,6 @@ const MyOwnWorkouts = () => {
         ? b.created_at.localeCompare(a.created_at)
         : a.created_at.localeCompare(b.created_at),
     );
-
-  const remove = async (id: string) => {
-    const { error } = await supabase.from("user_custom_workouts").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Couldn't delete", description: error.message, variant: "destructive" });
-      return;
-    }
-    toast({ title: "Workout deleted" });
-    void queryClient.invalidateQueries({ queryKey: ["my-own-workouts", userId] });
-  };
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-12 lg:max-w-6xl lg:px-8 lg:py-12">
@@ -275,17 +262,6 @@ const MyOwnWorkouts = () => {
                      <CustomWorkoutActions workout={w} compact onScheduled={() => void refetchScheduled()} />
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={`Delete ${w.name}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void remove(w.id);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 text-muted-foreground" />
-                </Button>
               </CardContent>
             </Card>
           ))}
