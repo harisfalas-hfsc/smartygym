@@ -187,7 +187,7 @@ const MyOwnWorkouts = () => {
         </Card>
       ) : (
         <div className="space-y-3">
-          {workouts.map((w) => (
+          {filteredWorkouts.map((w) => (
             <Card
               key={w.id}
               className="cursor-pointer rounded-2xl border-2 border-border transition hover:border-primary"
