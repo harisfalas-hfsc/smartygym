@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { ChevronRight, ChevronLeft, Clock, Dumbbell, Zap, Brain, BookOpen, Target, Activity, Wrench, Flame, Sparkles, X } from "lucide-react";
+import { ChevronRight, ChevronLeft, Clock, Dumbbell, Zap, Brain, BookOpen, Target, Activity, Wrench, Flame, Sparkles, Wand2, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -349,6 +349,14 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
                   Icon={Activity}
                   accent="primary"
                   onClick={() => handleMenuSelect('workout')}
+                />
+                <MenuCard
+                  emoji="🪄"
+                  title="Create Your Own Workout"
+                  description="Answer a few questions and get a workout built for today"
+                  Icon={Wand2}
+                  accent="sky"
+                  onClick={() => handleNavigateTo('/create-your-own-workout')}
                 />
                 <MenuCard
                   emoji="🎯"
