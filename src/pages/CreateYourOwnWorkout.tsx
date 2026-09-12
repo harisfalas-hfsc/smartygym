@@ -177,9 +177,13 @@ const CreateYourOwnWorkout = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      // The session is assembled in the background (it takes longer than a
+      // single request allows), so wait here until the row is ready.
+      const ready = await waitForSession(String(data.id));
       setBuiltToday((n) => (n ?? 0) + 1);
-      if (data?.notes?.length) {
-        toast({ title: "A note from Smarty Coach", description: data.notes[0] });
+      if (ready.review_warnings?.length) {
+        toast({ title: "A note from Smarty Coach", description: ready.review_warnings[0] });
       }
       navigate(`/my-workouts/${data.id}`);
     } catch (e) {
