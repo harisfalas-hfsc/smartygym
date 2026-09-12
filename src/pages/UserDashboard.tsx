@@ -634,6 +634,15 @@ export default function UserDashboard() {
     navigate(`/trainingprogram/${programType}/${programId}`);
   };
 
+  // Scheduled lookups by content id (earliest upcoming date wins)
+  const scheduledWorkoutDates = new Map<string, string>();
+  const scheduledProgramDates = new Map<string, string>();
+  scheduledWorkouts.forEach((s) => {
+    const target = s.content_type === 'program' ? scheduledProgramDates : scheduledWorkoutDates;
+    const existing = target.get(s.content_id);
+    if (!existing || s.scheduled_date < existing) target.set(s.content_id, s.scheduled_date);
+  });
+
   // Map a WorkoutInteraction / ProgramInteraction to a generic ActivityItem for the sheet
   const toWorkoutItem = (w: WorkoutInteraction): ActivityItem => ({
     id: w.id,
@@ -642,6 +651,10 @@ export default function UserDashboard() {
     rating: w.rating,
     is_completed: w.is_completed,
     is_favorite: w.is_favorite,
+    is_viewed: w.has_viewed,
+    is_scheduled: scheduledWorkoutDates.has(w.workout_id),
+    scheduled_date: scheduledWorkoutDates.get(w.workout_id) ?? null,
+    sort_date: w.updated_at || w.created_at,
   });
   const toProgramItem = (p: ProgramInteraction): ActivityItem => ({
     id: p.id,
@@ -650,6 +663,11 @@ export default function UserDashboard() {
     rating: p.rating,
     is_completed: p.is_completed,
     is_favorite: p.is_favorite,
+    is_viewed: p.has_viewed,
+    is_ongoing: p.is_ongoing,
+    is_scheduled: scheduledProgramDates.has(p.program_id),
+    scheduled_date: scheduledProgramDates.get(p.program_id) ?? null,
+    sort_date: (p as any).updated_at || (p as any).created_at,
   });
   const handleRefreshSubscription = async () => {
     if (!user) return;
