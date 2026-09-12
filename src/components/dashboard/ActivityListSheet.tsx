@@ -6,7 +6,6 @@ import { ArrowLeft, CheckCircle, Heart, Star, CalendarClock } from "lucide-react
 import { CompactFilters } from "@/components/CompactFilters";
 
 export type ActivityFilter =
-  | "all"
   | "favorites"
   | "completed"
   | "viewed"
@@ -37,8 +36,8 @@ interface ActivityListSheetProps {
   items: ActivityItem[];
   emptyText?: string;
   onItemClick: (item: ActivityItem) => void;
-  /** Which filter chip is active when the sheet opens. */
-  initialFilter?: ActivityFilter;
+  /** The card that opened the sheet. This status always remains enforced. */
+  primaryFilter: ActivityFilter;
   /** Set to false to hide the "In Progress" chip (workouts). */
   showInProgress?: boolean;
 }
@@ -63,18 +62,17 @@ export function ActivityListSheet({
   items,
   emptyText = "Nothing here yet",
   onItemClick,
-  initialFilter = "all",
+  primaryFilter,
   showInProgress = false,
 }: ActivityListSheetProps) {
-  const [filter, setFilter] = useState<ActivityFilter>(initialFilter);
+  const [crossFilter, setCrossFilter] = useState<ActivityFilter | "none">("none");
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
 
   useEffect(() => {
-    if (open) setFilter(initialFilter);
-  }, [open, initialFilter]);
+    if (open) setCrossFilter("none");
+  }, [open, primaryFilter]);
 
-  const filters: { key: ActivityFilter; label: string }[] = [
-    { key: "all", label: "All" },
+  const availableFilters: { key: ActivityFilter; label: string }[] = [
     { key: "favorites", label: "Favorites" },
     { key: "completed", label: "Completed" },
     { key: "viewed", label: "Viewed" },
@@ -82,20 +80,30 @@ export function ActivityListSheet({
     { key: "scheduled", label: "Scheduled" },
     ...(showInProgress ? [{ key: "inprogress" as const, label: "In Progress" }] : []),
   ];
+  const filters = availableFilters.filter(({ key }) => key !== primaryFilter);
+  const primaryLabel = availableFilters.find(({ key }) => key === primaryFilter)?.label ?? "Current list";
 
-  const filterOptions: { value: ActivityFilter; label: string }[] = filters.map(({ key, label }) => ({
-    value: key,
-    label: `${label} (${items.filter((item) => matchesFilter(item, key)).length})`,
-  }));
+  const primaryItems = useMemo(
+    () => items.filter((item) => matchesFilter(item, primaryFilter)),
+    [items, primaryFilter],
+  );
+
+  const filterOptions: { value: ActivityFilter | "none"; label: string }[] = [
+    { value: "none", label: `${primaryLabel} only` },
+    ...filters.map(({ key, label }) => ({
+      value: key,
+      label: `${label} (${primaryItems.filter((item) => matchesFilter(item, key)).length})`,
+    })),
+  ];
 
   const visible = useMemo(() => {
-    const list = items.filter((i) => matchesFilter(i, filter));
+    const list = primaryItems.filter((item) => crossFilter === "none" || matchesFilter(item, crossFilter));
     const value = (i: ActivityItem) =>
       new Date(
-        (filter === "scheduled" ? i.scheduled_date : null) || i.sort_date || i.scheduled_date || 0
+        (primaryFilter === "scheduled" ? i.scheduled_date : null) || i.sort_date || i.scheduled_date || 0
       ).getTime();
     return [...list].sort((a, b) => (sort === "newest" ? value(b) - value(a) : value(a) - value(b)));
-  }, [items, filter, sort]);
+  }, [primaryItems, primaryFilter, crossFilter, sort]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -113,9 +121,9 @@ export function ActivityListSheet({
             compact
             filters={[
               {
-                name: "Status",
-                value: filter,
-                onChange: (value) => setFilter(value as ActivityFilter),
+                name: "Also",
+                value: crossFilter,
+                onChange: (value) => setCrossFilter(value as ActivityFilter | "none"),
                 options: filterOptions,
               },
               {
@@ -134,7 +142,7 @@ export function ActivityListSheet({
         <div className="flex-1 overflow-y-auto px-4 py-3">
           {visible.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
-              {items.length === 0 ? emptyText : "Nothing matches this filter"}
+              {primaryItems.length === 0 ? emptyText : "Nothing matches this filter"}
             </p>
           ) : (
             <div className="space-y-2">

@@ -2007,8 +2007,8 @@ export default function UserDashboard() {
           scheduled: <CalendarClock className="h-4 w-4 text-purple-500" />,
           inprogress: <Play className="h-4 w-4 text-purple-500" />,
         };
-        // Every list shows the full set for that kind; the chips inside the sheet
-        // switch between All / Favorites / Completed / Viewed / Rated / Scheduled.
+        // The card's status is always enforced. The sheet only offers positive
+        // cross-filters (for example, scheduled + completed) and date sorting.
         const items: ActivityItem[] = s
           ? isWorkout
             ? visibleWorkoutInteractions.map(toWorkoutItem)
@@ -2021,7 +2021,7 @@ export default function UserDashboard() {
             title={s ? titleMap[s.bucket] : ""}
             icon={s ? iconMap[s.bucket] : null}
             items={items}
-            initialFilter={s ? s.bucket : "all"}
+            primaryFilter={s ? s.bucket : "favorites"}
             showInProgress={!isWorkout}
             emptyText={isWorkout ? "No workouts in this list yet" : "No programs in this list yet"}
             onItemClick={(item) => {
