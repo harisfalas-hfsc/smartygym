@@ -477,6 +477,12 @@ export const Navigation = () => {
                 <DropdownMenuItem onSelect={() => handleProfileNavigate("/userdashboard")}>
                   <LayoutDashboard className="mr-2 h-4 w-4" /><span>Dashboard</span>
                 </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleProfileNavigate("/create-your-own-workout")}>
+                  <Sparkles className="mr-2 h-4 w-4" /><span>Create Your Own Workout</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleProfileNavigate("/my-workouts")}>
+                  <ListChecks className="mr-2 h-4 w-4" /><span>My Own Workouts</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => handleProfileNavigate("/userdashboard?tab=messages")}>
                   <div className="relative mr-2">
                     <Mail className={`h-4 w-4 ${unreadCount > 0 ? 'text-red-500' : ''}`} />
@@ -656,6 +662,12 @@ export const Navigation = () => {
                 )}
                 <DropdownMenuItem onSelect={() => handleProfileNavigate("/userdashboard")}>
                   <LayoutDashboard className="mr-2 h-4 w-4" /><span>Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleProfileNavigate("/create-your-own-workout")}>
+                  <Sparkles className="mr-2 h-4 w-4" /><span>Create Your Own Workout</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleProfileNavigate("/my-workouts")}>
+                  <ListChecks className="mr-2 h-4 w-4" /><span>My Own Workouts</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => handleProfileNavigate("/userdashboard?tab=messages")}>
                   <div className="relative mr-2">
