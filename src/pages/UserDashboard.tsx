@@ -17,7 +17,7 @@ import { useAccessControl } from "@/hooks/useAccessControl";
 import { openExternal } from "@/utils/native";
 
 import { useAdminRole } from "@/hooks/useAdminRole";
-import { Heart, CheckCircle, Clock, Star, Play, Dumbbell, Calendar, Crown, Calculator, ShoppingBag, MessageSquare, Loader2, RefreshCw, ExternalLink, ClipboardList, TrendingUp, BookOpen, Headphones, Sparkles, Quote, User as UserIcon, Scale, Building2, Users, ClipboardCheck, FileText, Trash2, Settings } from "lucide-react";
+import { Heart, CheckCircle, Clock, Star, Play, Dumbbell, Calendar, Crown, Calculator, ShoppingBag, MessageSquare, Loader2, RefreshCw, ExternalLink, ClipboardList, TrendingUp, BookOpen, Headphones, Sparkles, Quote, User as UserIcon, Scale, Building2, Users, ClipboardCheck, FileText, Trash2, Settings, CalendarClock } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
