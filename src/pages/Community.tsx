@@ -92,7 +92,11 @@ interface Testimonial {
 const Community = () => {
   const navigate = useNavigate();
   const { userTier, purchasedContent } = useAccessControl();
+  const { freeAccessMode } = useFreeAccessMode();
+  // While payments are switched off everything is free for everyone, including
+  // visitors who are not signed in. The paywall returns as soon as it is on.
   const canViewLeaderboard =
+    freeAccessMode ||
     userTier === "premium" ||
     (userTier === "subscriber" && purchasedContent.size > 0);
 
