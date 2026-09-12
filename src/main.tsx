@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { configureStatusBar } from "./utils/native";
-import { purgeAppServiceWorkers } from "./utils/registerServiceWorker";
+import { purgeAppServiceWorkers, startDeploymentUpdateWatcher } from "./utils/registerServiceWorker";
 import { Capacitor } from "@capacitor/core";
 
 // Configure native status bar on app launch
@@ -45,4 +45,10 @@ clearLovableDeploymentPinCookie();
 // wrapper or native shell. Every launch loads the current deployment.
 void purgeAppServiceWorkers();
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Already-open browser/PWA tabs check the published bundle every 30 seconds
+// and refresh themselves when a new deployment reaches the live domain.
+startDeploymentUpdateWatcher();
+
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Application root element is missing");
+createRoot(rootElement).render(<App />);
