@@ -36,6 +36,9 @@ const UserDashboard = lazy(() => import("./pages/UserDashboard"));
 const WorkoutFlow = lazy(() => import("./pages/WorkoutFlow"));
 const WorkoutDetail = lazy(() => import("./pages/WorkoutDetail"));
 const IndividualWorkout = lazy(() => import("./pages/IndividualWorkout"));
+const CreateYourOwnWorkout = lazy(() => import("./pages/CreateYourOwnWorkout"));
+const MyOwnWorkouts = lazy(() => import("./pages/MyOwnWorkouts"));
+const MyOwnWorkoutDetail = lazy(() => import("./pages/MyOwnWorkoutDetail"));
 const WODArchive = lazy(() => import("./pages/WODArchive"));
 const DailySmartyRitual = lazy(() => import("./pages/DailySmartyRitual"));
 const WODCategory = lazy(() => import("./pages/WODCategory"));
@@ -299,6 +302,11 @@ const AppContent = () => {
                   <Route path="/userdashboard" element={<UserDashboard />} />
                   <Route path="/calculator-history" element={<CalculatorHistory />} />
                 </Route>
+
+                {/* Create Your Own Workout — members only, never indexed */}
+                <Route path="/create-your-own-workout" element={<ProtectedRoute><CreateYourOwnWorkout /></ProtectedRoute>} />
+                <Route path="/my-workouts" element={<ProtectedRoute><MyOwnWorkouts /></ProtectedRoute>} />
+                <Route path="/my-workouts/:id" element={<ProtectedRoute><MyOwnWorkoutDetail /></ProtectedRoute>} />
                 
                 {/* Public calorie counter - no auth required */}
                 <Route path="/tools/calorie-counter" element={<CalorieCounter />} />

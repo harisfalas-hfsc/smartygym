@@ -1,0 +1,193 @@
+import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Clock, Dumbbell, ListChecks, MapPin, Plus, Star, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DesktopPageIntro } from "@/components/DesktopPageIntro";
+import { useToast } from "@/hooks/use-toast";
+
+export interface CustomWorkoutRow {
+  id: string;
+  name: string;
+  category: string;
+  format: string | null;
+  focus: string | null;
+  difficulty_stars: number;
+  difficulty_label: string | null;
+  duration_label: string | null;
+  duration_min: number;
+  equipment: string[] | null;
+  location: string | null;
+  created_at: string;
+}
+
+const Stars = ({ count }: { count: number }) => (
+  <span className="flex items-center gap-0.5" aria-label={`${count} out of 6`}>
+    {Array.from({ length: 6 }).map((_, i) => (
+      <Star
+        key={i}
+        className={`h-3.5 w-3.5 ${i < count ? "fill-primary text-primary" : "text-muted-foreground/40"}`}
+      />
+    ))}
+  </span>
+);
+
+const MyOwnWorkouts = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) navigate("/auth", { replace: true });
+      else setUserId(data.user.id);
+    });
+  }, [navigate]);
+
+  const { data: workouts = [], isLoading } = useQuery({
+    queryKey: ["my-own-workouts", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_custom_workouts")
+        .select(
+          "id,name,category,format,focus,difficulty_stars,difficulty_label,duration_label,duration_min,equipment,location,created_at",
+        )
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as CustomWorkoutRow[];
+    },
+  });
+
+  const remove = async (id: string) => {
+    const { error } = await supabase.from("user_custom_workouts").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Couldn't delete", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Workout deleted" });
+    void queryClient.invalidateQueries({ queryKey: ["my-own-workouts", userId] });
+  };
+
+  return (
+    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-12 lg:max-w-6xl lg:px-8 lg:py-12">
+      <Helmet>
+        <title>My Own Workouts | Smarty Gym</title>
+        <meta
+          name="description"
+          content="Every workout you built with Smarty Gym's Create Your Own Workout, ready to open and train."
+        />
+        <meta name="robots" content="noindex" />
+      </Helmet>
+
+      <DesktopPageIntro icon={ListChecks} title="My Own Workouts">
+        <p>
+          Every session you built yourself lives here. Open one to train it, or build a new one
+          whenever you like.
+        </p>
+      </DesktopPageIntro>
+
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-extrabold uppercase tracking-tight text-primary lg:hidden">
+          My Own Workouts
+        </h1>
+        <Button className="rounded-2xl font-bold" onClick={() => navigate("/create-your-own-workout")}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create a workout
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3">
+          <Skeleton className="h-28 w-full rounded-2xl" />
+          <Skeleton className="h-28 w-full rounded-2xl" />
+        </div>
+      ) : workouts.length === 0 ? (
+        <Card className="rounded-3xl border-2 border-primary/30">
+          <CardContent className="p-8 text-center">
+            <p className="text-base font-semibold">You haven't built a workout yet.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Answer a few questions and Smarty Coach builds one around your goal, your time and
+              your equipment.
+            </p>
+            <Button
+              className="mt-5 h-12 rounded-2xl font-bold"
+              onClick={() => navigate("/create-your-own-workout")}
+            >
+              Create your first workout
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {workouts.map((w) => (
+            <Card
+              key={w.id}
+              className="cursor-pointer rounded-2xl border-2 border-border transition hover:border-primary"
+              onClick={() => navigate(`/my-workouts/${w.id}`)}
+            >
+              <CardContent className="flex items-start justify-between gap-3 p-4 sm:p-5">
+                <div className="min-w-0">
+                  <h2 className="truncate text-base font-extrabold sm:text-lg">{w.name}</h2>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {w.category}
+                    </Badge>
+                    {w.focus ? (
+                      <Badge variant="outline" className="text-xs">
+                        {w.focus}
+                      </Badge>
+                    ) : null}
+                    {w.format ? (
+                      <Badge variant="outline" className="text-xs">
+                        {w.format}
+                      </Badge>
+                    ) : null}
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      {w.duration_label ?? `${w.duration_min} min`}
+                    </span>
+                    {w.location ? (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5" />
+                        {w.location}
+                      </span>
+                    ) : null}
+                    {w.equipment?.length ? (
+                      <span className="flex items-center gap-1">
+                        <Dumbbell className="h-3.5 w-3.5" />
+                        {w.equipment.join(", ")}
+                      </span>
+                    ) : null}
+                    <Stars count={w.difficulty_stars} />
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Delete ${w.name}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void remove(w.id);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MyOwnWorkouts;
