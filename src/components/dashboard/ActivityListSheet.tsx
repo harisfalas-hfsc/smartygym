@@ -72,14 +72,15 @@ export function ActivityListSheet({
     if (open) setCrossFilter("none");
   }, [open, primaryFilter]);
 
-  const filters: { key: ActivityFilter; label: string }[] = [
+  const availableFilters: { key: ActivityFilter; label: string }[] = [
     { key: "favorites", label: "Favorites" },
     { key: "completed", label: "Completed" },
     { key: "viewed", label: "Viewed" },
     { key: "rated", label: "Rated" },
     { key: "scheduled", label: "Scheduled" },
     ...(showInProgress ? [{ key: "inprogress" as const, label: "In Progress" }] : []),
-  ].filter(({ key }) => key !== primaryFilter);
+  ];
+  const filters = availableFilters.filter(({ key }) => key !== primaryFilter);
 
   const primaryItems = useMemo(
     () => items.filter((item) => matchesFilter(item, primaryFilter)),
