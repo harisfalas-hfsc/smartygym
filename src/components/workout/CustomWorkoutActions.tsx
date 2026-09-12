@@ -142,7 +142,7 @@ export const CustomWorkoutActions = ({ workout, compact = false }: Props) => {
         onClose={() => setScheduleOpen(false)}
         contentId={workout.id}
         contentName={workout.name}
-        contentType="workout"
+        contentType="custom_workout"
         contentRouteType="custom"
       />
     </>
