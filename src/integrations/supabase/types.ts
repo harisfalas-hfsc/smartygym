@@ -2882,6 +2882,84 @@ export type Database = {
         }
         Relationships: []
       }
+      user_custom_workouts: {
+        Row: {
+          category: string
+          completed_at: string | null
+          created_at: string
+          description_html: string | null
+          difficulty_label: string | null
+          difficulty_stars: number
+          duration_label: string | null
+          duration_min: number
+          equipment: string[]
+          focus: string | null
+          format: string | null
+          id: string
+          instructions_html: string | null
+          location: string | null
+          main_workout: string | null
+          mood: string | null
+          name: string
+          needs_review: boolean
+          review_warnings: string[]
+          status: string
+          tips_html: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          completed_at?: string | null
+          created_at?: string
+          description_html?: string | null
+          difficulty_label?: string | null
+          difficulty_stars?: number
+          duration_label?: string | null
+          duration_min?: number
+          equipment?: string[]
+          focus?: string | null
+          format?: string | null
+          id?: string
+          instructions_html?: string | null
+          location?: string | null
+          main_workout?: string | null
+          mood?: string | null
+          name: string
+          needs_review?: boolean
+          review_warnings?: string[]
+          status?: string
+          tips_html?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          description_html?: string | null
+          difficulty_label?: string | null
+          difficulty_stars?: number
+          duration_label?: string | null
+          duration_min?: number
+          equipment?: string[]
+          focus?: string | null
+          format?: string | null
+          id?: string
+          instructions_html?: string | null
+          location?: string | null
+          main_workout?: string | null
+          mood?: string | null
+          name?: string
+          needs_review?: boolean
+          review_warnings?: string[]
+          status?: string
+          tips_html?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_fitness_goals: {
         Row: {
           created_at: string
