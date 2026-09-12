@@ -1376,11 +1376,11 @@ export default function UserDashboard() {
                 </CardContent>
               </Card>
               {([
-                { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length },
-                { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedWorkouts.length },
-                { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedWorkouts.length },
-                { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedWorkouts.length },
-                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledWorkoutItems.length },
+                { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length + customFavorites.length },
+                { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedWorkouts.length + customCompleted.length },
+                { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedWorkouts.length + customViewed.length },
+                { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedWorkouts.length + customRated.length },
+                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledWorkoutItems.length + customScheduled.length },
               ]).map(s => (
                 <Card
                   key={s.bucket}
@@ -1642,11 +1642,11 @@ export default function UserDashboard() {
                 </CardContent>
               </Card>
               {([
-                { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length },
-                { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedWorkouts.length },
-                { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedWorkouts.length },
-                { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedWorkouts.length },
-                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledWorkoutItems.length },
+                { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length + customFavorites.length },
+                { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedWorkouts.length + customCompleted.length },
+                { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedWorkouts.length + customViewed.length },
+                { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedWorkouts.length + customRated.length },
+                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledWorkoutItems.length + customScheduled.length },
               ]).map(s => (
                 <Card
                   key={s.bucket}
@@ -2042,7 +2042,7 @@ export default function UserDashboard() {
         // cross-filters (for example, scheduled + completed) and date sorting.
         const items: ActivityItem[] = s
           ? isWorkout
-            ? visibleWorkoutInteractions.map(toWorkoutItem)
+            ? [...visibleWorkoutInteractions.map(toWorkoutItem), ...customWorkoutItems]
             : visibleProgramInteractions.map(toProgramItem)
           : [];
         return (
@@ -2056,7 +2056,8 @@ export default function UserDashboard() {
             showInProgress={!isWorkout}
             emptyText={isWorkout ? "No workouts in this list yet" : "No programs in this list yet"}
             onItemClick={(item) => {
-              if (isWorkout) handleNavigateToWorkout(item.type, (visibleWorkoutInteractions.find(w => w.id === item.id))?.workout_id || item.id);
+              if (item.id.startsWith('custom:')) navigate(`/my-workouts/${item.id.slice('custom:'.length)}`);
+              else if (isWorkout) handleNavigateToWorkout(item.type, (visibleWorkoutInteractions.find(w => w.id === item.id))?.workout_id || item.id);
               else handleNavigateToProgram(item.type, (visibleProgramInteractions.find(p => p.id === item.id))?.program_id || item.id);
             }}
           />
