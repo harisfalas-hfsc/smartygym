@@ -185,6 +185,14 @@ const MyOwnWorkouts = () => {
             </Button>
           </CardContent>
         </Card>
+      ) : filteredWorkouts.length === 0 ? (
+        <Card className="rounded-3xl border-2 border-border">
+          <CardContent className="p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              No workouts match this filter yet.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-3">
           {filteredWorkouts.map((w) => (
