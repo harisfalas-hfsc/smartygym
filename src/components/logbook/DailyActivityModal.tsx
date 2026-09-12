@@ -64,7 +64,7 @@ export const DailyActivityModal = ({ date, isOpen, onClose, userId }: DailyActiv
     }
   }, [userId, dateStr, isOpen]);
 
-  const workouts = dayActivities.filter(a => a.content_type === 'workout' || a.content_type === 'custom_workout');
+  const workouts = dayActivities.filter(a => a.content_type === 'workout' || (a.content_type as string) === 'custom_workout');
   const programs = dayActivities.filter(a => a.content_type === 'program');
   const personalTraining = dayActivities.filter(a => a.content_type === 'personal_training');
   const tools = dayActivities.filter(a => a.content_type === 'tool');
