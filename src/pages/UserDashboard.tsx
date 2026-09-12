@@ -165,7 +165,18 @@ export default function UserDashboard() {
     | { kind: "workout" | "program"; bucket: "favorites" | "completed" | "viewed" | "rated" | "scheduled" | "inprogress" }
     | null
   >(null);
-  const [customWorkoutCount, setCustomWorkoutCount] = useState(0);
+  const [customWorkoutRows, setCustomWorkoutRows] = useState<{
+    id: string;
+    name: string;
+    category: string | null;
+    is_favorite: boolean | null;
+    completed_at: string | null;
+    has_viewed: boolean | null;
+    rating: number | null;
+    created_at: string;
+    updated_at: string | null;
+  }[]>([]);
+  const customWorkoutCount = customWorkoutRows.length;
   const dashboardScrollY = useRef(0);
 
   // Check-in hooks
