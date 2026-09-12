@@ -303,7 +303,7 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
         {activePath === 'menu' ? (
           <>
             {/* Rich header band */}
-            <div className="relative px-3 sm:px-5 pt-3 pb-2 sm:pt-4 sm:pb-3 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent">
+            <div className="relative px-3 sm:px-5 pt-4 pb-3 sm:pt-4 sm:pb-3 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent">
               <button
                 onClick={handleDismiss}
                 aria-label="Close"
@@ -583,7 +583,7 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
         </div>
         )}
         {/* Always-available footer */}
-        <div className="px-5 sm:px-7 py-2 sm:py-3 bg-muted/40 border-t border-border text-center">
+        <div className="px-5 sm:px-7 py-3 bg-muted/40 border-t border-border text-center">
           <p className="text-xs sm:text-sm text-muted-foreground inline-flex items-center justify-center gap-1.5 flex-wrap">
             <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
             I'm always here for you — tap the <span className="font-semibold text-foreground">Smarty Coach</span> button anytime to get help.
