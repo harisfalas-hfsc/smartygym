@@ -11,20 +11,20 @@ export const ScrollToTop = () => {
     const currentKey = location.key;
     const target = navigationType === "POP" ? positions.get(currentKey) ?? 0 : 0;
     let attempts = 0;
-    let frame = 0;
+    let timer = 0;
 
     const restore = () => {
       window.scrollTo(0, target);
       attempts += 1;
-      if (navigationType === "POP" && Math.abs(window.scrollY - target) > 2 && attempts < 30) {
-        frame = window.requestAnimationFrame(restore);
+      if (navigationType === "POP" && Math.abs(window.scrollY - target) > 2 && attempts < 50) {
+        timer = window.setTimeout(restore, 100);
       }
     };
 
-    frame = window.requestAnimationFrame(restore);
+    timer = window.setTimeout(restore, 0);
     return () => {
       positions.set(currentKey, window.scrollY);
-      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
     };
   }, [location.key, navigationType]);
 
