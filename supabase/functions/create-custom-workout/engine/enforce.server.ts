@@ -374,9 +374,20 @@ function estimateMinutes(html: string, sections: string[], transitionSec: number
     if (timing.mode === "tabata") seconds += timing.rounds * (timing.work + timing.rest);
     else if (timing.mode === "timed") seconds += timing.seconds + 20;
     else {
-      const sets = Number(step.prescription.match(/(\d+)\s*sets?/i)?.[1] ?? 1);
-      const reps = Number(step.prescription.match(/(\d+)\s*reps?/i)?.[1] ?? 12);
-      seconds += sets * (reps * 4 + 60);
+      const line = `${step.prescription} ${step.notes ?? ""}`;
+      const sets = Number(line.match(/(\d+)\s*sets?/i)?.[1] ?? 1);
+      const reps = Number(line.match(/(\d+)\s*reps?/i)?.[1] ?? 12);
+      // Honour the rest actually written on the line — heavy strength rests of
+      // 2-3 min cost real time and must not be counted as a flat 60 sec.
+      const restMatch = line.match(/rest[^.;]*?(\d+)(?:\s*-\s*(\d+))?\s*(sec|second|s\b|min|minute)/i);
+      let restSec = 60;
+      if (restMatch) {
+        const low = Number(restMatch[1]);
+        const high = restMatch[2] ? Number(restMatch[2]) : low;
+        const value = (low + high) / 2;
+        restSec = /min/i.test(restMatch[3]!) ? value * 60 : value;
+      }
+      seconds += sets * (reps * 4 + Math.max(20, Math.min(240, restSec)));
     }
     seconds += transitionSec;
   }
