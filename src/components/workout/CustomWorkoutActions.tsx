@@ -20,6 +20,7 @@ export interface CustomWorkoutFlags {
 interface Props {
   workout: CustomWorkoutFlags;
   compact?: boolean;
+  onScheduled?: () => void;
 }
 
 /**
@@ -27,7 +28,7 @@ interface Props {
  * Ratings here are personal only — they never feed the community pages,
  * comments or leaderboards.
  */
-export const CustomWorkoutActions = ({ workout, compact = false }: Props) => {
+export const CustomWorkoutActions = ({ workout, compact = false, onScheduled }: Props) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [scheduleOpen, setScheduleOpen] = useState(false);
@@ -144,6 +145,7 @@ export const CustomWorkoutActions = ({ workout, compact = false }: Props) => {
         contentName={workout.name}
         contentType="custom_workout"
         contentRouteType="custom"
+        onScheduled={onScheduled}
       />
     </>
   );
