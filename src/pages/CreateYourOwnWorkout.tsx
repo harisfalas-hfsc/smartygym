@@ -305,20 +305,21 @@ const CreateYourOwnWorkout = () => {
       </Helmet>
 
       <DesktopPageIntro icon={Sparkles} title="Create Your Own Workout">
-        <p>
-          Tell Smarty Coach your goal, how you feel, how long you have and what you can train with.
-          Every session is assembled from the same human-designed exercise library and the same
-          coaching rules Haris uses — never invented movements.
-        </p>
+        <p>{PAGE_DESCRIPTION}</p>
       </DesktopPageIntro>
 
       <div className="mb-6 lg:hidden">
         <h1 className="text-2xl font-extrabold uppercase tracking-tight text-primary">
           Create Your Own Workout
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {name ? `${name}, what's your workout today?` : "What's your workout today?"}
-        </p>
+        <div className="mt-3 rounded-3xl border-2 border-primary bg-card p-5 shadow-sm">
+          {name ? (
+            <p className="mb-2 text-sm font-bold text-foreground">
+              {name}, what's your workout today?
+            </p>
+          ) : null}
+          <p className="text-sm leading-relaxed text-muted-foreground">{PAGE_DESCRIPTION}</p>
+        </div>
       </div>
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 p-4">
