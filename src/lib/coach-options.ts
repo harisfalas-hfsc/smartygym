@@ -69,18 +69,32 @@ export const EQUIPMENT = [
 ] as const;
 
 /**
- * SIX-STAR DIFFICULTY PICKER.
+ * SIX-STAR DIFFICULTY PICKER, grouped into the three familiar bands.
  * 1-2 Beginner, 3-4 Intermediate, 5-6 Advanced. The second star of each band
  * is only slightly harder: more volume / less rest, never harder exercises.
  */
-export const LEVELS_6 = [
-  { id: "auto", label: "Let Smarty decide", stars: 0, hint: "Uses your profile + today's mood" },
-  { id: "1", label: "Beginner - easier", stars: 1, hint: "Simple patterns, generous rest" },
-  { id: "2", label: "Beginner - solid", stars: 2, hint: "Same movements, a little more work" },
-  { id: "3", label: "Intermediate - easier", stars: 3, hint: "Standard variations, moderate rest" },
-  { id: "4", label: "Intermediate - solid", stars: 4, hint: "More volume, tighter rest" },
-  { id: "5", label: "Advanced - easier", stars: 5, hint: "High demand, familiar movements" },
-  { id: "6", label: "Advanced - solid", stars: 6, hint: "Highest volume and density" },
+export const LEVEL_GROUPS = [
+  {
+    label: "Beginner",
+    levels: [
+      { id: "1", stars: 1, hint: "Easier" },
+      { id: "2", stars: 2, hint: "A bit more work" },
+    ],
+  },
+  {
+    label: "Intermediate",
+    levels: [
+      { id: "3", stars: 3, hint: "Moderate" },
+      { id: "4", stars: 4, hint: "Harder" },
+    ],
+  },
+  {
+    label: "Advanced",
+    levels: [
+      { id: "5", stars: 5, hint: "Hard" },
+      { id: "6", stars: 6, hint: "Hardest" },
+    ],
+  },
 ] as const;
 
 /** Moods where an "Advanced" pick should be double-checked with the athlete. */
