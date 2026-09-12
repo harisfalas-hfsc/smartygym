@@ -81,6 +81,7 @@ export function ActivityListSheet({
     ...(showInProgress ? [{ key: "inprogress" as const, label: "In Progress" }] : []),
   ];
   const filters = availableFilters.filter(({ key }) => key !== primaryFilter);
+  const primaryLabel = availableFilters.find(({ key }) => key === primaryFilter)?.label ?? "Current list";
 
   const primaryItems = useMemo(
     () => items.filter((item) => matchesFilter(item, primaryFilter)),
@@ -88,7 +89,7 @@ export function ActivityListSheet({
   );
 
   const filterOptions: { value: ActivityFilter | "none"; label: string }[] = [
-    { value: "none", label: "No extra filter" },
+    { value: "none", label: `${primaryLabel} only` },
     ...filters.map(({ key, label }) => ({
       value: key,
       label: `${label} (${primaryItems.filter((item) => matchesFilter(item, key)).length})`,
