@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
+import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
 import { useToast } from "@/hooks/use-toast";
 
 export interface CustomWorkoutRow {
@@ -23,6 +24,10 @@ export interface CustomWorkoutRow {
   duration_min: number;
   equipment: string[] | null;
   location: string | null;
+  is_favorite: boolean | null;
+  completed_at: string | null;
+  has_viewed: boolean | null;
+  rating: number | null;
   created_at: string;
 }
 
@@ -57,7 +62,7 @@ const MyOwnWorkouts = () => {
       const { data, error } = await supabase
         .from("user_custom_workouts")
         .select(
-          "id,name,category,format,focus,difficulty_stars,difficulty_label,duration_label,duration_min,equipment,location,created_at",
+          "id,name,category,format,focus,difficulty_stars,difficulty_label,duration_label,duration_min,equipment,location,is_favorite,completed_at,has_viewed,rating,created_at",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -168,6 +173,9 @@ const MyOwnWorkouts = () => {
                       </span>
                     ) : null}
                     <Stars count={w.difficulty_stars} />
+                  </div>
+                  <div onClick={(e) => e.stopPropagation()} className="mt-3">
+                    <CustomWorkoutActions workout={w} compact />
                   </div>
                 </div>
                 <Button
