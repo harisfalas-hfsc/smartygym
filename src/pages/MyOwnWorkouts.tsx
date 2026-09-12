@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, CalendarClock, Clock, Dumbbell, ListChecks, MapPin, Plus, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
-import { useToast } from "@/hooks/use-toast";
 import { useScheduledWorkouts } from "@/hooks/useScheduledWorkouts";
 import { CompactFilters } from "@/components/CompactFilters";
 
@@ -49,8 +48,6 @@ const Stars = ({ count }: { count: number }) => (
 
 const MyOwnWorkouts = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
