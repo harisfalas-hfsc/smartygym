@@ -385,6 +385,13 @@ export async function generateWorkoutContent(
     ...packValidation.errors,
   ]);
   if (packSplit.structural.length) {
+    console.error("[create-custom-workout] pack structural failure", {
+      poolSize: pool.length,
+      activationPool: activationPool.length,
+      cooldownPool: cooldownPool.length,
+      structural: packSplit.structural,
+      lastError,
+    });
     throw new Error(
       `Smarty Coach could not build a compliant workout (${lastError}). Please try again.`,
     );
