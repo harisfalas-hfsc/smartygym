@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarPlus, CheckCircle, Heart, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { ScheduleWorkoutDialog } from "@/components/ScheduleWorkoutDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -36,7 +37,7 @@ export const CustomWorkoutActions = ({ workout, compact = false }: Props) => {
   const isCompleted = !!workout.completed_at;
   const rating = workout.rating ?? 0;
 
-  const patch = async (values: Record<string, unknown>, message: string) => {
+  const patch = async (values: TablesUpdate<"user_custom_workouts">, message: string) => {
     setSaving(true);
     const { error } = await supabase
       .from("user_custom_workouts")
