@@ -292,12 +292,12 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
           "p-0 border-0 overflow-hidden",
           // Use small/dynamic viewport units for consistent mobile-browser chrome behavior.
           "w-[calc(100svw-2rem)] max-w-[22rem] sm:max-w-md md:max-w-3xl lg:max-w-4xl mx-auto",
-          "max-h-[calc(100svh-2rem)] supports-[height:100dvh]:max-h-[calc(100dvh-2rem)] sm:max-h-[85vh] overflow-y-auto overscroll-contain",
+          "max-h-[calc(100vh-2rem)] max-h-[calc(100dvh-2rem)] sm:max-h-[85vh] overflow-y-auto overscroll-contain",
           // Mobile-only: lift and shorten the modal so it clears the fixed bottom nav.
-          "max-sm:max-h-[calc(100svh-7rem)] max-sm:supports-[height:100dvh]:max-h-[calc(100dvh-7rem)]",
-          // Re-center vertically using small/dynamic viewport units so the modal
-          // is truly centered in the visible area on mobile (where vh != svh).
-          "!top-[50svh] supports-[height:100dvh]:!top-[50dvh] max-sm:!top-[46svh] max-sm:supports-[height:100dvh]:!top-[46dvh] sm:!top-[50vh]",
+          "max-sm:max-h-[calc(100vh-7rem)] max-sm:max-h-[calc(100dvh-7rem)]",
+          // Re-center vertically using dynamic viewport units so the modal
+          // is truly centered in the visible area on mobile (where vh != dvh).
+          "!top-[50vh] !top-[50dvh] max-sm:!top-[46vh] max-sm:!top-[46dvh] sm:!top-[50dvh]",
           "rounded-2xl bg-card border-2 border-primary/30 shadow-2xl shadow-primary/20",
           activePath === 'menu' ? "[&>button]:hidden" : ""
         )}
