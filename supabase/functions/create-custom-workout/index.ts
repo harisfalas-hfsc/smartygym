@@ -72,6 +72,35 @@ serve(async (req) => {
     // Service client: reads the full exercise library and writes the session.
     const db = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 
+    // ── Premium gate ────────────────────────────────────────────────────────
+    // Building workouts is a Premium feature. When Free Access Mode is on,
+    // every signed-in member is treated as premium (the client agrees).
+    // Workouts already built stay with the member forever — this gate only
+    // controls creating NEW ones.
+    const { data: freeRow } = await db
+      .from("system_settings")
+      .select("setting_value")
+      .eq("setting_key", "free_access_mode")
+      .maybeSingle();
+    const freeAccessMode =
+      freeRow?.setting_value === true || freeRow?.setting_value === "true";
+    if (!freeAccessMode) {
+      const [{ data: premiumAccess }, { data: adminRole }] = await Promise.all([
+        db.rpc("user_has_active_premium_access", { _user_id: user.id }),
+        db.rpc("has_role", { _user_id: user.id, _role: "admin" }),
+      ]);
+      if (!premiumAccess && !adminRole) {
+        return json(
+          {
+            error:
+              "Create Your Own Workout is a Premium feature. Upgrade to Premium to build your own workouts.",
+            premiumRequired: true,
+          },
+          403,
+        );
+      }
+    }
+
     // ── Daily limit ───────────────────────────────────────────────────────────
     const dayStart = new Date();
     dayStart.setUTCHours(0, 0, 0, 0);
