@@ -47,6 +47,13 @@ import {
 /** Member-built workouts allowed per calendar day. Mirrors the backend limit. */
 const DAILY_LIMIT = 2;
 
+/** Page description — human coaching knowledge, never AI talk. */
+const PAGE_DESCRIPTION =
+  "Create Your Own Workout puts Coach Haris Falas's knowledge and experience in your pocket. " +
+  "Every session is assembled from his coaching rules and the Smarty Gym exercise library — a huge collection " +
+  "of human-designed movements — matched to your goal, your time, your equipment and how you feel today. " +
+  "Nothing generic, nothing random: the right workout for you, built on real coaching.";
+
 function Chip({
   active,
   onClick,
@@ -110,6 +117,8 @@ function Grid({ children }: { children: React.ReactNode }) {
 const CreateYourOwnWorkout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userTier, isLoading: accessLoading } = useAccessControl();
+  const isPremium = userTier === "premium";
 
   const [goal, setGoal] = useState<string>("");
   const [focus, setFocus] = useState<string>("");
