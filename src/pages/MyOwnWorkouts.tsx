@@ -135,6 +135,35 @@ const MyOwnWorkouts = () => {
         </Button>
       </div>
 
+      {!isLoading && workouts.length > 0 && (
+        <CompactFilters
+          compact
+          filters={[
+            {
+              name: "Status",
+              value: statusFilter,
+              onChange: (v) => setStatusFilter(v as StatusFilter),
+              options: [
+                { value: "all", label: "All" },
+                { value: "favorites", label: "Favorites" },
+                { value: "completed", label: "Completed" },
+                { value: "viewed", label: "Viewed" },
+                { value: "rated", label: "Rated" },
+              ],
+            },
+            {
+              name: "Sort",
+              value: sortOrder,
+              onChange: (v) => setSortOrder(v as SortOrder),
+              options: [
+                { value: "newest", label: "Newest first" },
+                { value: "oldest", label: "Oldest first" },
+              ],
+            },
+          ]}
+        />
+      )}
+
       {isLoading ? (
         <div className="space-y-3">
           <Skeleton className="h-28 w-full rounded-2xl" />
