@@ -31,6 +31,7 @@ import {
 import { MyRecordsReport } from "@/components/dashboard/MyRecordsReport";
 import { LogBookFilters } from "@/components/logbook/LogBookFilters";
 import { LogBookCalendar } from "@/components/logbook/LogBookCalendar";
+import { useScheduledWorkouts } from "@/hooks/useScheduledWorkouts";
 import { LogBookAdvancedCharts } from "@/components/logbook/LogBookAdvancedCharts";
 import { LogBookAdvancedExport } from "@/components/logbook/LogBookAdvancedExport";
 import { MeasurementDialog } from "@/components/logbook/MeasurementDialog";
