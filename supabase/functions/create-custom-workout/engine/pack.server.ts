@@ -196,7 +196,20 @@ export function buildPackWorkout(
   const favouriteIds = input.favoriteIds ?? [];
   const used = new Set<string>();
 
-  const mainCount = isMicro ? 4 : input.minutes >= 45 ? 6 : input.minutes >= 25 ? 5 : 4;
+  // The main block is sized against the requested training time using the same
+  // arithmetic the duration check uses (sets × (reps × 4 sec + 60 sec rest)),
+  // so a 30-minute request never ships as a 50-minute session.
+  const budgetCount = (() => {
+    if (isMicro) return 4;
+    const probe = doseFor(input.format, input.level, 0);
+    const sets = Number(probe.text.match(/(\d+)\s*sets?/i)?.[1] ?? 1);
+    const reps = Number(probe.text.match(/(\d+)\s*reps?/i)?.[1] ?? 12);
+    const secondsPerExercise = sets * (reps * 4 + 60) + 15;
+    const finisherSeconds = noFinisher ? 0 : 3 * (12 * 4 + 60);
+    const available = Math.max(120, input.minutes * 60 - finisherSeconds);
+    return Math.max(3, Math.min(6, Math.round(available / secondsPerExercise)));
+  })();
+  const mainCount = budgetCount;
   const mainPicks = pickBalanced(pool, mainCount, { favoriteIds: favouriteIds, exclude: used });
   mainPicks.forEach((e) => used.add(e.id));
 
