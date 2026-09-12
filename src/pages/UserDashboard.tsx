@@ -822,6 +822,25 @@ export default function UserDashboard() {
   const ratedPrograms = visibleProgramInteractions.filter(p => p.rating && p.rating > 0);
   const inProgressPrograms = visibleProgramInteractions.filter(p => p.is_ongoing);
   const scheduledWorkoutItems = visibleWorkoutInteractions.filter(w => scheduledWorkoutDates.has(w.workout_id));
+
+  // The athlete's own generated workouts join the same activity lists.
+  const customWorkoutItems: ActivityItem[] = customWorkoutRows.map((w) => ({
+    id: `custom:${w.id}`,
+    name: w.name,
+    type: w.category || 'My own workout',
+    rating: w.rating,
+    is_completed: !!w.completed_at,
+    is_favorite: !!w.is_favorite,
+    is_viewed: !!w.has_viewed,
+    is_scheduled: scheduledWorkoutDates.has(w.id),
+    scheduled_date: scheduledWorkoutDates.get(w.id) ?? null,
+    sort_date: w.updated_at || w.created_at,
+  }));
+  const customFavorites = customWorkoutItems.filter(i => i.is_favorite);
+  const customCompleted = customWorkoutItems.filter(i => i.is_completed);
+  const customViewed = customWorkoutItems.filter(i => i.is_viewed);
+  const customRated = customWorkoutItems.filter(i => i.rating && i.rating > 0);
+  const customScheduled = customWorkoutItems.filter(i => i.is_scheduled);
   const scheduledProgramItems = visibleProgramInteractions.filter(p => scheduledProgramDates.has(p.program_id));
 
   // Tab-level access: allow non-premium users in if they have relevant purchases.
