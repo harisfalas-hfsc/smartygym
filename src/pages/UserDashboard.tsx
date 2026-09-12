@@ -1966,10 +1966,12 @@ export default function UserDashboard() {
           rated: <Star className="h-4 w-4 text-yellow-500" />,
           inprogress: <Play className="h-4 w-4 text-purple-500" />,
         };
+        // Every list shows the full set for that kind; the chips inside the sheet
+        // switch between All / Favorites / Completed / Viewed / Rated / Scheduled.
         const items: ActivityItem[] = s
           ? isWorkout
-            ? sourceWorkouts[s.bucket].map(toWorkoutItem)
-            : sourcePrograms[s.bucket].map(toProgramItem)
+            ? visibleWorkoutInteractions.map(toWorkoutItem)
+            : visibleProgramInteractions.map(toProgramItem)
           : [];
         return (
           <ActivityListSheet
@@ -1978,10 +1980,12 @@ export default function UserDashboard() {
             title={s ? titleMap[s.bucket] : ""}
             icon={s ? iconMap[s.bucket] : null}
             items={items}
+            initialFilter={s ? s.bucket : "all"}
+            showInProgress={!isWorkout}
             emptyText={isWorkout ? "No workouts in this list yet" : "No programs in this list yet"}
             onItemClick={(item) => {
-              if (isWorkout) handleNavigateToWorkout(item.type, (sourceWorkouts[s!.bucket].find(w => w.id === item.id))?.workout_id || item.id);
-              else handleNavigateToProgram(item.type, (sourcePrograms[s!.bucket].find(p => p.id === item.id))?.program_id || item.id);
+              if (isWorkout) handleNavigateToWorkout(item.type, (visibleWorkoutInteractions.find(w => w.id === item.id))?.workout_id || item.id);
+              else handleNavigateToProgram(item.type, (visibleProgramInteractions.find(p => p.id === item.id))?.program_id || item.id);
             }}
           />
         );
