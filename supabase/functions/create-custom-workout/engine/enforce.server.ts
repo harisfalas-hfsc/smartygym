@@ -374,7 +374,7 @@ function estimateMinutes(html: string, sections: string[], transitionSec: number
     if (timing.mode === "tabata") seconds += timing.rounds * (timing.work + timing.rest);
     else if (timing.mode === "timed") seconds += timing.seconds + 20;
     else {
-      const line = `${step.prescription} ${step.notes ?? ""}`;
+      const line = step.prescription;
       const sets = Number(line.match(/(\d+)\s*sets?/i)?.[1] ?? 1);
       const reps = Number(line.match(/(\d+)\s*reps?/i)?.[1] ?? 12);
       // Honour the rest actually written on the line — heavy strength rests of
