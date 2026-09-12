@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Clock, Dumbbell, ListChecks, MapPin, Plus, Star, Trash2 } from "lucide-react";
+import { ArrowDownUp, CalendarClock, Clock, Dumbbell, ListChecks, MapPin, Plus, Star, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
-import { CompactFilters } from "@/components/CompactFilters";
 import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
 import { useToast } from "@/hooks/use-toast";
+import { useScheduledWorkouts } from "@/hooks/useScheduledWorkouts";
 
-type StatusFilter = "all" | "favorites" | "completed" | "viewed" | "rated";
+type StatusFilter = "all" | "favorites" | "completed" | "viewed" | "rated" | "scheduled";
 type SortOrder = "newest" | "oldest";
 
 export interface CustomWorkoutRow {
@@ -53,6 +53,7 @@ const MyOwnWorkouts = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const { scheduledWorkouts, refetch: refetchScheduled } = useScheduledWorkouts(userId);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -76,6 +77,32 @@ const MyOwnWorkouts = () => {
     },
   });
 
+  const scheduledByWorkoutId = new Map(
+    scheduledWorkouts
+      .filter((item) => item.content_type === "custom_workout")
+      .map((item) => [item.content_id, item.scheduled_date]),
+  );
+
+  const statusOptions: { value: StatusFilter; label: string }[] = [
+    { value: "all", label: "All" },
+    { value: "favorites", label: "Favorites" },
+    { value: "completed", label: "Completed" },
+    { value: "viewed", label: "Viewed" },
+    { value: "rated", label: "Rated" },
+    { value: "scheduled", label: "Scheduled" },
+  ];
+
+  const countForStatus = (status: StatusFilter) => workouts.filter((workout) => {
+    switch (status) {
+      case "favorites": return !!workout.is_favorite;
+      case "completed": return !!workout.completed_at;
+      case "viewed": return !!workout.has_viewed;
+      case "rated": return workout.rating != null && workout.rating > 0;
+      case "scheduled": return scheduledByWorkoutId.has(workout.id);
+      default: return true;
+    }
+  }).length;
+
   const filteredWorkouts = workouts
     .filter((w) => {
       switch (statusFilter) {
@@ -86,7 +113,9 @@ const MyOwnWorkouts = () => {
         case "viewed":
           return !!w.has_viewed;
         case "rated":
-          return w.rating != null;
+          return w.rating != null && w.rating > 0;
+        case "scheduled":
+          return scheduledByWorkoutId.has(w.id);
         default:
           return true;
       }
@@ -136,32 +165,33 @@ const MyOwnWorkouts = () => {
       </div>
 
       {!isLoading && workouts.length > 0 && (
-        <CompactFilters
-          compact
-          filters={[
-            {
-              name: "Status",
-              value: statusFilter,
-              onChange: (v) => setStatusFilter(v as StatusFilter),
-              options: [
-                { value: "all", label: "All" },
-                { value: "favorites", label: "Favorites" },
-                { value: "completed", label: "Completed" },
-                { value: "viewed", label: "Viewed" },
-                { value: "rated", label: "Rated" },
-              ],
-            },
-            {
-              name: "Sort",
-              value: sortOrder,
-              onChange: (v) => setSortOrder(v as SortOrder),
-              options: [
-                { value: "newest", label: "Newest first" },
-                { value: "oldest", label: "Oldest first" },
-              ],
-            },
-          ]}
-        />
+        <div className="mb-5 space-y-2 border-y py-3">
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {statusOptions.map((option) => (
+              <Button
+                key={option.value}
+                type="button"
+                size="sm"
+                variant={statusFilter === option.value ? "default" : "outline"}
+                className="h-8 shrink-0 rounded-full text-xs"
+                onClick={() => setStatusFilter(option.value)}
+              >
+                {option.label}
+                <span className="ml-1 opacity-70">{countForStatus(option.value)}</span>
+              </Button>
+            ))}
+          </div>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-8 gap-1 px-2 text-xs"
+            onClick={() => setSortOrder((current) => current === "newest" ? "oldest" : "newest")}
+          >
+            <ArrowDownUp className="h-3.5 w-3.5" />
+            {sortOrder === "newest" ? "Newest first" : "Oldest first"}
+          </Button>
+        </div>
       )}
 
       {isLoading ? (
@@ -237,9 +267,15 @@ const MyOwnWorkouts = () => {
                       </span>
                     ) : null}
                     <Stars count={w.difficulty_stars} />
+                     {scheduledByWorkoutId.has(w.id) ? (
+                       <span className="flex items-center gap-1 text-primary">
+                         <CalendarClock className="h-3.5 w-3.5" />
+                         {new Date(`${scheduledByWorkoutId.get(w.id)}T00:00:00`).toLocaleDateString()}
+                       </span>
+                     ) : null}
                   </div>
                   <div onClick={(e) => e.stopPropagation()} className="mt-3">
-                    <CustomWorkoutActions workout={w} compact />
+                     <CustomWorkoutActions workout={w} compact onScheduled={() => void refetchScheduled()} />
                   </div>
                 </div>
                 <Button
