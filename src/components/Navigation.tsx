@@ -286,6 +286,8 @@ export const Navigation = () => {
 
   const discoveryItems = [
     { label: "About SmartyGym", path: "/about", icon: Info, iconClass: "text-teal-500", track: undefined },
+    { label: "Create Your Own Workout", path: "/create-your-own-workout", icon: Sparkles, iconClass: "text-primary", track: undefined },
+    { label: "My Own Workouts", path: "/my-workouts", icon: ListChecks, iconClass: "text-primary", track: undefined },
     { label: "Smarty Workouts", path: "/workout", icon: Dumbbell, iconClass: "text-primary", track: undefined },
     { label: "Smarty Programs", path: "/trainingprogram", icon: ListChecks, iconClass: "text-blue-500", track: undefined },
     { label: "Smarty Ritual", path: "/daily-ritual", icon: Sparkles, iconClass: "text-purple-500", track: undefined },
@@ -301,6 +303,8 @@ export const Navigation = () => {
   type NavSection = { heading: string; items: { label: string; path: string; icon: any }[] };
 
   const exploreItems = [
+    { label: "Create Your Own Workout", path: "/create-your-own-workout", icon: Sparkles },
+    { label: "My Own Workouts", path: "/my-workouts", icon: ListChecks },
     { label: "Smarty Workouts", path: "/workout", icon: Dumbbell },
     { label: "Smarty Programs", path: "/trainingprogram", icon: ListChecks },
     { label: "Smarty Ritual", path: "/daily-ritual", icon: Sparkles },

@@ -142,6 +142,7 @@ const Index = () => {
 
   // First carousel: workout categories (matches WorkoutFlow)
   const heroCards = [
+    { id: "create-your-own-workout", title: "Create Your Own Workout", description: "Answer a few questions and build today's session", icon: Sparkles, route: "/create-your-own-workout", image: heroWorkoutsImage },
     { id: "wod", title: "Workout of the Day", description: "Today's expert-designed featured session", icon: CalendarCheck, route: "/workout/wod", image: heroWodImage },
     { id: "strength", title: "Strength", description: "Build muscle and power with resistance training", icon: Dumbbell, route: "/workout/strength", image: "/images/workouts/strength-card-mobile.jpg" },
     { id: "calorie-burning", title: "Calorie Burning", description: "High-intensity workouts to maximize calorie burn", icon: Flame, route: "/workout/calorie-burning", image: "/images/workouts/calorie-burning-card-mobile.jpg" },
