@@ -201,16 +201,17 @@ export default function UserDashboard() {
   // Scheduled sessions (workouts + programs) so every list can filter by "Scheduled"
   const { scheduledWorkouts } = useScheduledWorkouts(user?.id ?? null);
 
-  // Count of the athlete's own generated workouts
+  // The athlete's own generated workouts — counted and folded into the
+  // Favorites / Completed / Viewed / Rated / Scheduled activity lists.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      const { count } = await supabase
+      const { data } = await supabase
         .from('user_custom_workouts')
-        .select('id', { count: 'exact', head: true })
+        .select('id,name,category,is_favorite,completed_at,has_viewed,rating,created_at,updated_at')
         .eq('user_id', user.id);
-      if (!cancelled) setCustomWorkoutCount(count || 0);
+      if (!cancelled) setCustomWorkoutRows(data ?? []);
     })();
     return () => { cancelled = true; };
   }, [user]);
