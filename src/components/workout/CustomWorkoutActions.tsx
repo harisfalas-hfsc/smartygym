@@ -102,7 +102,13 @@ export const CustomWorkoutActions = ({ workout, compact = false, onScheduled }: 
           Schedule
         </Button>
 
-        <div className="flex items-center gap-1" aria-label="Your private rating">
+        <div
+          className={cn(
+            "inline-flex items-center gap-1 rounded-2xl border border-input bg-background",
+            compact ? "h-9 px-3" : "h-10 px-4",
+          )}
+          aria-label="Your private rating"
+        >
           {[1, 2, 3, 4, 5].map((value) => (
             <button
               key={value}
