@@ -1369,6 +1369,7 @@ export default function UserDashboard() {
                 { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedPrograms.length },
                 { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedPrograms.length },
                 { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedPrograms.length },
+                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledProgramItems.length },
               ]).map(s => (
                 <Card
                   key={s.bucket}
