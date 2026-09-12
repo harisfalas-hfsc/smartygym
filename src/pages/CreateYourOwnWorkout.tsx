@@ -167,6 +167,26 @@ const CreateYourOwnWorkout = () => {
     goal && mood && minutes && location && equipment.length > 0 && level && (!showFocus || focus),
   );
 
+  /** Polls the reserved session row until the background build finishes. */
+  async function waitForSession(id: string) {
+    const deadline = Date.now() + 4 * 60 * 1000;
+    while (Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 3000));
+      const { data } = await supabase
+        .from("user_custom_workouts")
+        .select("id,status,review_warnings")
+        .eq("id", id)
+        .maybeSingle();
+      if (!data) {
+        throw new Error(
+          "Smarty Coach couldn't build a session that meets the coaching standard this time. Please try again.",
+        );
+      }
+      if (data.status !== "generating") return data as { review_warnings?: string[] | null };
+    }
+    throw new Error("This is taking longer than usual. Check My own workouts in a moment.");
+  }
+
   async function generate(request: Record<string, unknown>) {
     if (busy) return;
     setBusy(true);
