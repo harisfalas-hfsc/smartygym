@@ -1,5 +1,3 @@
-import { streamText } from "ai";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { buildWorkoutPrompt, type AthleteContext } from "./prompt.server.ts";
 import { enforceWorkout, estimateWorkMinutes } from "./enforce.server.ts";
 import { validateWorkout } from "./validate.server.ts";
@@ -31,7 +29,7 @@ import {
   type StrengthFocus,
 } from "./spec.ts";
 
-const MODEL = "google/gemini-3.1-pro-preview";
+const MODEL = "google/gemini-2.5-pro";
 
 export type GenerateInput = {
   category: Category;
@@ -103,17 +101,35 @@ function extractJson(text: string): Record<string, unknown> {
   return JSON.parse(raw.slice(start, end + 1)) as Record<string, unknown>;
 }
 
+/**
+ * Lovable AI Gateway call. Kept deliberately simple (plain fetch) so the
+ * engine runs unchanged inside a Deno edge function.
+ */
 async function askModel(system: string, user: string): Promise<Record<string, unknown>> {
-  const apiKey = process.env["LOVABLE_API_KEY"];
+  const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey) throw new Error("AI is not configured.");
-  const gateway = createLovableAiGatewayProvider(apiKey);
-  const result = streamText({
-    model: gateway(MODEL),
-    system,
-    messages: [{ role: "user", content: user }],
-    temperature: 0.85,
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      temperature: 0.85,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    }),
   });
-  return extractJson(await result.text);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`AI gateway ${res.status}: ${body.slice(0, 300)}`);
+  }
+  const json = await res.json();
+  const text = String(json?.choices?.[0]?.message?.content ?? "");
+  return extractJson(text);
 }
 
 export async function generateWorkoutContent(
@@ -194,8 +210,8 @@ export async function generateWorkoutContent(
   const prepIds = [...activationPool.map((e) => e.id), ...cooldownPool.map((e) => e.id)];
   const seed = `${input.category}${input.minutes}${pool.length}`.length + Date.now() % 100000;
 
-  const { getWorkoutRules } = await import("@/lib/settings.server");
-  const extraRules = (await getWorkoutRules()).extraCoachRules.trim();
+  // Smarty Gym has no admin-editable extra coach rules; the doctrine is the rule book.
+  const extraRules = "";
 
   const enforceOpts = {
     category: input.category,
