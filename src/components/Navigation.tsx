@@ -286,6 +286,8 @@ export const Navigation = () => {
 
   const discoveryItems = [
     { label: "About SmartyGym", path: "/about", icon: Info, iconClass: "text-teal-500", track: undefined },
+    { label: "Create Your Own Workout", path: "/create-your-own-workout", icon: Sparkles, iconClass: "text-primary", track: undefined },
+    { label: "My Own Workouts", path: "/my-workouts", icon: ListChecks, iconClass: "text-primary", track: undefined },
     { label: "Smarty Workouts", path: "/workout", icon: Dumbbell, iconClass: "text-primary", track: undefined },
     { label: "Smarty Programs", path: "/trainingprogram", icon: ListChecks, iconClass: "text-blue-500", track: undefined },
     { label: "Smarty Ritual", path: "/daily-ritual", icon: Sparkles, iconClass: "text-purple-500", track: undefined },
@@ -301,6 +303,8 @@ export const Navigation = () => {
   type NavSection = { heading: string; items: { label: string; path: string; icon: any }[] };
 
   const exploreItems = [
+    { label: "Create Your Own Workout", path: "/create-your-own-workout", icon: Sparkles },
+    { label: "My Own Workouts", path: "/my-workouts", icon: ListChecks },
     { label: "Smarty Workouts", path: "/workout", icon: Dumbbell },
     { label: "Smarty Programs", path: "/trainingprogram", icon: ListChecks },
     { label: "Smarty Ritual", path: "/daily-ritual", icon: Sparkles },
@@ -472,6 +476,12 @@ export const Navigation = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => handleProfileNavigate("/userdashboard")}>
                   <LayoutDashboard className="mr-2 h-4 w-4" /><span>Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleProfileNavigate("/create-your-own-workout")}>
+                  <Sparkles className="mr-2 h-4 w-4" /><span>Create Your Own Workout</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleProfileNavigate("/my-workouts")}>
+                  <ListChecks className="mr-2 h-4 w-4" /><span>My Own Workouts</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => handleProfileNavigate("/userdashboard?tab=messages")}>
                   <div className="relative mr-2">
@@ -652,6 +662,12 @@ export const Navigation = () => {
                 )}
                 <DropdownMenuItem onSelect={() => handleProfileNavigate("/userdashboard")}>
                   <LayoutDashboard className="mr-2 h-4 w-4" /><span>Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleProfileNavigate("/create-your-own-workout")}>
+                  <Sparkles className="mr-2 h-4 w-4" /><span>Create Your Own Workout</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleProfileNavigate("/my-workouts")}>
+                  <ListChecks className="mr-2 h-4 w-4" /><span>My Own Workouts</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => handleProfileNavigate("/userdashboard?tab=messages")}>
                   <div className="relative mr-2">

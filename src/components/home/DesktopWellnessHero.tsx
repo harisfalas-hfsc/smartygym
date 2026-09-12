@@ -194,6 +194,13 @@ export const DesktopWellnessHero = ({
                 <span className="font-bold text-red-400">0% AI</span>.
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate("/create-your-own-workout")}
+                  className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground hover:opacity-95 transition-all"
+                >
+                  Create Your Workout <ArrowRight className="w-4 h-4" />
+                </button>
                 {!freeAccessMode && (
                   <button
                     type="button"

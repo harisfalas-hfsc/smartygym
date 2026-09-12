@@ -335,6 +335,14 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
             <div className="px-3 sm:px-4 md:px-6 pb-4 pt-2 sm:pb-4 md:pt-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 animate-in fade-in duration-300">
                 <MenuCard
+                  emoji="🪄"
+                  title="Create Your Own Workout"
+                  description="Answer a few questions and get a workout built for today"
+                  Icon={Wand2}
+                  accent="sky"
+                  onClick={() => handleNavigateTo('/create-your-own-workout')}
+                />
+                <MenuCard
                   emoji="🔥"
                   title="Workout of the Day"
                   description="Check today's bodyweight & equipment WOD"
@@ -349,14 +357,6 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
                   Icon={Activity}
                   accent="primary"
                   onClick={() => handleMenuSelect('workout')}
-                />
-                <MenuCard
-                  emoji="🪄"
-                  title="Create Your Own Workout"
-                  description="Answer a few questions and get a workout built for today"
-                  Icon={Wand2}
-                  accent="sky"
-                  onClick={() => handleNavigateTo('/create-your-own-workout')}
                 />
                 <MenuCard
                   emoji="🎯"
