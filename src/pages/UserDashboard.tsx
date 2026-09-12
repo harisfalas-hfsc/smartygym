@@ -772,6 +772,8 @@ export default function UserDashboard() {
   const viewedPrograms = visibleProgramInteractions.filter(p => p.has_viewed);
   const ratedPrograms = visibleProgramInteractions.filter(p => p.rating && p.rating > 0);
   const inProgressPrograms = visibleProgramInteractions.filter(p => p.is_ongoing);
+  const scheduledWorkoutItems = visibleWorkoutInteractions.filter(w => scheduledWorkoutDates.has(w.workout_id));
+  const scheduledProgramItems = visibleProgramInteractions.filter(p => scheduledProgramDates.has(p.program_id));
 
   // Tab-level access: allow non-premium users in if they have relevant purchases.
   const canAccessWorkoutsTab = isPremium || hasPurchasedWorkouts;
