@@ -163,15 +163,16 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
 
   return (
     <>
+      <ScheduledListPanel userId={userId} />
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-3 sm:p-6">
           {/* Calendar Header */}
-          <div className="flex items-center justify-between mb-6 gap-2">
-            <Button variant="outline" size="icon" onClick={previousMonth}>
+          <div className="flex items-center justify-between mb-6 gap-1 sm:gap-2">
+            <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={previousMonth}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 justify-center">
               {/* Month Selector */}
               <Select 
                 value={String(currentDate.getMonth())} 
@@ -179,7 +180,7 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
                   setCurrentDate(new Date(currentDate.getFullYear(), parseInt(value), 1));
                 }}
               >
-                <SelectTrigger className="w-[140px] h-9">
+                <SelectTrigger className="w-full max-w-[140px] min-w-0 h-9">
                   <SelectValue>{monthName}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
