@@ -7,6 +7,7 @@ import { useActivitiesByDate } from "@/hooks/useActivityLog";
 import { useCheckinScoresByDate } from "@/hooks/useCheckinScoresByDate";
 import { useScheduledWorkouts } from "@/hooks/useScheduledWorkouts";
 import { DailyActivityModal } from "./DailyActivityModal";
+import { ScheduledListPanel } from "./ScheduledListPanel";
 
 interface LogBookCalendarProps {
   userId: string;
