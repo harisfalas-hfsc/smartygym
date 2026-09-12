@@ -1,4 +1,3 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Category, DifficultyLevel, EquipmentMode, Format, StrengthFocus } from "./spec.ts";
 import {
   categoryExerciseViolation,
@@ -37,22 +36,54 @@ export type PoolExercise = {
   gif_path: string | null;
 };
 
-const SELECT =
-  "id,name,body_part,target_muscle,secondary_muscles,equipment,category,difficulty,movement_pattern,body_region,gif_path";
+/**
+ * Smarty Gym exercise library mapping. This project's `exercises` table uses
+ * `target` and `gif_url` and has no `movement_pattern`, `body_region` or
+ * `is_active` columns, so the rows are normalised into the doctrine shape.
+ */
+const SELECT = "id,name,body_part,target,secondary_muscles,equipment,category,difficulty,gif_url";
+
+type LibraryRow = {
+  id: string;
+  name: string;
+  body_part: string | null;
+  target: string | null;
+  secondary_muscles: string[] | null;
+  equipment: string | null;
+  category: string | null;
+  difficulty: string | null;
+  gif_url: string | null;
+};
+
+function toPoolExercise(row: LibraryRow): PoolExercise {
+  return {
+    id: row.id,
+    name: row.name,
+    body_part: row.body_part,
+    target_muscle: row.target,
+    secondary_muscles: row.secondary_muscles ?? [],
+    equipment: row.equipment,
+    category: row.category,
+    difficulty: row.difficulty,
+    movement_pattern: null,
+    body_region: null,
+    gif_path: row.gif_url,
+  };
+}
 
 /** Loads the whole exercises table, paginated 1000 rows at a time. */
-export async function loadAllExercises(supabase: SupabaseClient): Promise<PoolExercise[]> {
+// deno-lint-ignore no-explicit-any
+export async function loadAllExercises(supabase: any): Promise<PoolExercise[]> {
   const rows: PoolExercise[] = [];
   for (let page = 0; page < 10; page++) {
     const from = page * 1000;
     const { data, error } = await supabase
       .from("exercises")
       .select(SELECT)
-      .eq("is_active", true)
       .order("id", { ascending: true })
       .range(from, from + 999);
     if (error) throw new Error(error.message);
-    const batch = (data ?? []) as unknown as PoolExercise[];
+    const batch = ((data ?? []) as LibraryRow[]).map(toPoolExercise);
     rows.push(...batch);
     if (batch.length < 1000) break;
   }
