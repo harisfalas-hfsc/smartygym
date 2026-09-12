@@ -50,7 +50,7 @@ const MenuCard = ({ emoji, title, description, Icon, accent, onClick }: MenuCard
   <button
     onClick={onClick}
     className={cn(
-      "group relative w-full text-left rounded-xl border-2 border-border bg-card p-2.5 md:p-4",
+      "group relative w-full text-left rounded-xl border-2 border-border bg-card p-2 sm:p-2.5 md:p-4",
       "transition-all duration-200 hover:border-primary hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10",
       "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
     )}
@@ -292,10 +292,12 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
           "p-0 border-0 overflow-hidden",
           // Use small/dynamic viewport units for consistent mobile-browser chrome behavior.
           "w-[calc(100svw-2rem)] max-w-[22rem] sm:max-w-md md:max-w-3xl lg:max-w-4xl mx-auto",
-          "max-h-[calc(100svh-2rem)] supports-[height:100dvh]:max-h-[calc(100dvh-2rem)] sm:max-h-[85vh] overflow-y-auto overscroll-contain",
-          // Re-center vertically using small/dynamic viewport units so the modal
-          // is truly centered in the visible area on mobile (where vh != svh).
-          "!top-[50svh] supports-[height:100dvh]:!top-[50dvh]",
+          "max-h-[calc(100vh-2rem)] max-h-[calc(100dvh-2rem)] sm:max-h-[85vh] overflow-y-auto overscroll-contain",
+          // Mobile-only: lift and shorten the modal so it clears the fixed bottom nav.
+          "[@media(max-width:639px)]:max-h-[calc(100vh-7rem)] [@media(max-width:639px)]:max-h-[calc(100dvh-7rem)]",
+          // Re-center vertically using dynamic viewport units so the modal
+          // is truly centered in the visible area on mobile (where vh != dvh).
+          "!top-[50vh] !top-[50dvh] [@media(max-width:639px)]:!top-[46vh] [@media(max-width:639px)]:!top-[46dvh] sm:!top-[50dvh]",
           "rounded-2xl bg-card border-2 border-primary/30 shadow-2xl shadow-primary/20",
           activePath === 'menu' ? "[&>button]:hidden" : ""
         )}
@@ -303,7 +305,7 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
         {activePath === 'menu' ? (
           <>
             {/* Rich header band */}
-            <div className="relative px-3 sm:px-5 pt-4 pb-3 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent">
+            <div className="relative px-3 sm:px-5 pt-3 pb-2 sm:pt-4 sm:pb-3 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent">
               <button
                 onClick={handleDismiss}
                 aria-label="Close"
@@ -332,8 +334,8 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
             </div>
 
             {/* Menu options */}
-            <div className="px-3 sm:px-4 md:px-6 pb-4 pt-2 md:pt-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 animate-in fade-in duration-300">
+            <div className="px-3 sm:px-4 md:px-6 pb-3 pt-1.5 sm:pb-4 sm:pt-2 md:pt-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 sm:gap-2 md:gap-3 animate-in fade-in duration-300">
                 <MenuCard
                   emoji="🔥"
                   title="Workout of the Day"
@@ -583,7 +585,7 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
         </div>
         )}
         {/* Always-available footer */}
-        <div className="px-5 sm:px-7 py-3 bg-muted/40 border-t border-border text-center">
+        <div className="px-5 sm:px-7 py-2 sm:py-3 bg-muted/40 border-t border-border text-center">
           <p className="text-xs sm:text-sm text-muted-foreground inline-flex items-center justify-center gap-1.5 flex-wrap">
             <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
             I'm always here for you — tap the <span className="font-semibold text-foreground">Smarty Coach</span> button anytime to get help.
