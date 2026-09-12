@@ -76,6 +76,27 @@ const MyOwnWorkouts = () => {
     },
   });
 
+  const filteredWorkouts = workouts
+    .filter((w) => {
+      switch (statusFilter) {
+        case "favorites":
+          return !!w.is_favorite;
+        case "completed":
+          return !!w.completed_at;
+        case "viewed":
+          return !!w.has_viewed;
+        case "rated":
+          return w.rating != null;
+        default:
+          return true;
+      }
+    })
+    .sort((a, b) =>
+      sortOrder === "newest"
+        ? b.created_at.localeCompare(a.created_at)
+        : a.created_at.localeCompare(b.created_at),
+    );
+
   const remove = async (id: string) => {
     const { error } = await supabase.from("user_custom_workouts").delete().eq("id", id);
     if (error) {
