@@ -7,6 +7,7 @@ import { useActivitiesByDate } from "@/hooks/useActivityLog";
 import { useCheckinScoresByDate } from "@/hooks/useCheckinScoresByDate";
 import { useScheduledWorkouts } from "@/hooks/useScheduledWorkouts";
 import { DailyActivityModal } from "./DailyActivityModal";
+import { ScheduledListPanel } from "./ScheduledListPanel";
 
 interface LogBookCalendarProps {
   userId: string;
@@ -163,15 +164,16 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
 
   return (
     <>
+      <ScheduledListPanel userId={userId} />
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-3 sm:p-6">
           {/* Calendar Header */}
-          <div className="flex items-center justify-between mb-6 gap-2">
-            <Button variant="outline" size="icon" onClick={previousMonth}>
+          <div className="flex items-center justify-between mb-6 gap-1 sm:gap-2">
+            <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={previousMonth}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 justify-center">
               {/* Month Selector */}
               <Select 
                 value={String(currentDate.getMonth())} 
@@ -179,7 +181,7 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
                   setCurrentDate(new Date(currentDate.getFullYear(), parseInt(value), 1));
                 }}
               >
-                <SelectTrigger className="w-[140px] h-9">
+                <SelectTrigger className="w-full max-w-[140px] min-w-0 h-9">
                   <SelectValue>{monthName}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -198,7 +200,7 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
                   setCurrentDate(new Date(parseInt(value), currentDate.getMonth(), 1));
                 }}
               >
-                <SelectTrigger className="w-[100px] h-9">
+                <SelectTrigger className="w-full max-w-[100px] min-w-0 h-9">
                   <SelectValue>{year}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -214,25 +216,25 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
               </Select>
             </div>
 
-            <Button variant="outline" size="icon" onClick={nextMonth}>
+            <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={nextMonth}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Day Names */}
-          <div className="grid grid-cols-7 gap-2 mb-2">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} className="text-center text-sm font-medium text-muted-foreground p-2">
+              <div key={day} className="text-center text-xs sm:text-sm font-medium text-muted-foreground p-1 sm:p-2">
                 {day}
               </div>
             ))}
           </div>
 
           {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2">
             {/* Empty cells for days before month starts */}
             {[...Array(firstDay)].map((_, i) => (
-              <div key={`empty-${i}`} className="p-2" />
+              <div key={`empty-${i}`} className="p-1 sm:p-2" />
             ))}
 
             {/* Days of the month */}
@@ -253,7 +255,7 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
                   key={day}
                   onClick={() => handleDayClick(day)}
                   className={`
-                    relative p-2 rounded-lg text-center transition-all
+                    relative p-1 sm:p-2 rounded-lg text-center transition-all min-w-0
                     ${hasActivity ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted'}
                     ${isToday ? 'ring-2 ring-primary' : ''}
                     ${isFuture && scheduledItems.length > 0 ? 'bg-purple-500/10' : ''}

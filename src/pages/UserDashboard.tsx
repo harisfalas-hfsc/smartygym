@@ -17,7 +17,7 @@ import { useAccessControl } from "@/hooks/useAccessControl";
 import { openExternal } from "@/utils/native";
 
 import { useAdminRole } from "@/hooks/useAdminRole";
-import { Heart, CheckCircle, Clock, Star, Play, Dumbbell, Calendar, Crown, Calculator, ShoppingBag, MessageSquare, Loader2, RefreshCw, ExternalLink, ClipboardList, TrendingUp, BookOpen, Headphones, Sparkles, Quote, User as UserIcon, Scale, Building2, Users, ClipboardCheck, FileText, Trash2, Settings } from "lucide-react";
+import { Heart, CheckCircle, Clock, Star, Play, Dumbbell, Calendar, Crown, Calculator, ShoppingBag, MessageSquare, Loader2, RefreshCw, ExternalLink, ClipboardList, TrendingUp, BookOpen, Headphones, Sparkles, Quote, User as UserIcon, Scale, Building2, Users, ClipboardCheck, FileText, Trash2, Settings, CalendarClock } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +31,7 @@ import {
 import { MyRecordsReport } from "@/components/dashboard/MyRecordsReport";
 import { LogBookFilters } from "@/components/logbook/LogBookFilters";
 import { LogBookCalendar } from "@/components/logbook/LogBookCalendar";
+import { useScheduledWorkouts } from "@/hooks/useScheduledWorkouts";
 import { LogBookAdvancedCharts } from "@/components/logbook/LogBookAdvancedCharts";
 import { LogBookAdvancedExport } from "@/components/logbook/LogBookAdvancedExport";
 import { MeasurementDialog } from "@/components/logbook/MeasurementDialog";
@@ -159,11 +160,12 @@ export default function UserDashboard() {
   const [showNightForm, setShowNightForm] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; type: string; id: string } | null>(null);
 
-  // Activity drill-in sheet (Favorites / Completed / Viewed / Rated / In Progress)
+  // Activity drill-in sheet (Favorites / Completed / Viewed / Rated / Scheduled / In Progress)
   const [activitySheet, setActivitySheet] = useState<
-    | { kind: "workout" | "program"; bucket: "favorites" | "completed" | "viewed" | "rated" | "inprogress" }
+    | { kind: "workout" | "program"; bucket: "favorites" | "completed" | "viewed" | "rated" | "scheduled" | "inprogress" }
     | null
   >(null);
+  const [customWorkoutCount, setCustomWorkoutCount] = useState(0);
 
   // Check-in hooks
   const {
@@ -183,6 +185,23 @@ export default function UserDashboard() {
     morningWindowEnd,
     nightWindowEnd
   } = useCheckInWindow();
+
+  // Scheduled sessions (workouts + programs) so every list can filter by "Scheduled"
+  const { scheduledWorkouts } = useScheduledWorkouts(user?.id ?? null);
+
+  // Count of the athlete's own generated workouts
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from('user_custom_workouts')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      if (!cancelled) setCustomWorkoutCount(count || 0);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   // Get tab from URL or default to null (grid view)
   const tabParam = searchParams.get('tab');
@@ -615,6 +634,15 @@ export default function UserDashboard() {
     navigate(`/trainingprogram/${programType}/${programId}`);
   };
 
+  // Scheduled lookups by content id (earliest upcoming date wins)
+  const scheduledWorkoutDates = new Map<string, string>();
+  const scheduledProgramDates = new Map<string, string>();
+  scheduledWorkouts.forEach((s) => {
+    const target = s.content_type === 'program' ? scheduledProgramDates : scheduledWorkoutDates;
+    const existing = target.get(s.content_id);
+    if (!existing || s.scheduled_date < existing) target.set(s.content_id, s.scheduled_date);
+  });
+
   // Map a WorkoutInteraction / ProgramInteraction to a generic ActivityItem for the sheet
   const toWorkoutItem = (w: WorkoutInteraction): ActivityItem => ({
     id: w.id,
@@ -623,6 +651,10 @@ export default function UserDashboard() {
     rating: w.rating,
     is_completed: w.is_completed,
     is_favorite: w.is_favorite,
+    is_viewed: w.has_viewed,
+    is_scheduled: scheduledWorkoutDates.has(w.workout_id),
+    scheduled_date: scheduledWorkoutDates.get(w.workout_id) ?? null,
+    sort_date: w.updated_at || w.created_at,
   });
   const toProgramItem = (p: ProgramInteraction): ActivityItem => ({
     id: p.id,
@@ -631,6 +663,11 @@ export default function UserDashboard() {
     rating: p.rating,
     is_completed: p.is_completed,
     is_favorite: p.is_favorite,
+    is_viewed: p.has_viewed,
+    is_ongoing: p.is_ongoing,
+    is_scheduled: scheduledProgramDates.has(p.program_id),
+    scheduled_date: scheduledProgramDates.get(p.program_id) ?? null,
+    sort_date: (p as any).updated_at || (p as any).created_at,
   });
   const handleRefreshSubscription = async () => {
     if (!user) return;
@@ -735,6 +772,8 @@ export default function UserDashboard() {
   const viewedPrograms = visibleProgramInteractions.filter(p => p.has_viewed);
   const ratedPrograms = visibleProgramInteractions.filter(p => p.rating && p.rating > 0);
   const inProgressPrograms = visibleProgramInteractions.filter(p => p.is_ongoing);
+  const scheduledWorkoutItems = visibleWorkoutInteractions.filter(w => scheduledWorkoutDates.has(w.workout_id));
+  const scheduledProgramItems = visibleProgramInteractions.filter(p => scheduledProgramDates.has(p.program_id));
 
   // Tab-level access: allow non-premium users in if they have relevant purchases.
   const canAccessWorkoutsTab = isPremium || hasPurchasedWorkouts;
@@ -1249,29 +1288,31 @@ export default function UserDashboard() {
                     </Button>
                   </CardContent>
                 </Card>}
-                <Card
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => navigate("/my-workouts")}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/my-workouts"); } }}
-                  className="cursor-pointer border-2 border-primary/40 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                >
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" />My Own Workouts</span>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xs text-muted-foreground">The workouts you built yourself — favourite, complete, schedule and rate them privately.</p>
-                  </CardContent>
-                </Card>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              <Card
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate("/my-workouts")}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/my-workouts"); } }}
+                className="cursor-pointer transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" />My Own Workouts</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{customWorkoutCount}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Tap to view all</p>
+                </CardContent>
+              </Card>
               {([
                 { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length },
                 { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedWorkouts.length },
                 { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedWorkouts.length },
                 { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedWorkouts.length },
+                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledWorkoutItems.length },
               ]).map(s => (
                 <Card
                   key={s.bucket}
@@ -1328,6 +1369,7 @@ export default function UserDashboard() {
                 { bucket: "completed" as const, label: "Completed", icon: <CheckCircle className="h-4 w-4 text-green-500" />, count: completedPrograms.length },
                 { bucket: "viewed" as const, label: "Viewed", icon: <Clock className="h-4 w-4 text-blue-500" />, count: viewedPrograms.length },
                 { bucket: "rated" as const, label: "Rated", icon: <Star className="h-4 w-4 text-yellow-500" />, count: ratedPrograms.length },
+                { bucket: "scheduled" as const, label: "Scheduled", icon: <CalendarClock className="h-4 w-4 text-purple-500" />, count: scheduledProgramItems.length },
               ]).map(s => (
                 <Card
                   key={s.bucket}
@@ -1915,6 +1957,7 @@ export default function UserDashboard() {
           completed: isWorkout ? "Completed Workouts" : "Completed Programs",
           viewed: isWorkout ? "Viewed Workouts" : "Viewed Programs",
           rated: isWorkout ? "Rated Workouts" : "Rated Programs",
+          scheduled: isWorkout ? "Scheduled Workouts" : "Scheduled Programs",
           inprogress: "In-Progress Programs",
         };
         const iconMap: Record<string, ReactNode> = {
@@ -1922,12 +1965,15 @@ export default function UserDashboard() {
           completed: <CheckCircle className="h-4 w-4 text-green-500" />,
           viewed: <Clock className="h-4 w-4 text-blue-500" />,
           rated: <Star className="h-4 w-4 text-yellow-500" />,
+          scheduled: <CalendarClock className="h-4 w-4 text-purple-500" />,
           inprogress: <Play className="h-4 w-4 text-purple-500" />,
         };
+        // Every list shows the full set for that kind; the chips inside the sheet
+        // switch between All / Favorites / Completed / Viewed / Rated / Scheduled.
         const items: ActivityItem[] = s
           ? isWorkout
-            ? sourceWorkouts[s.bucket].map(toWorkoutItem)
-            : sourcePrograms[s.bucket].map(toProgramItem)
+            ? visibleWorkoutInteractions.map(toWorkoutItem)
+            : visibleProgramInteractions.map(toProgramItem)
           : [];
         return (
           <ActivityListSheet
@@ -1936,10 +1982,12 @@ export default function UserDashboard() {
             title={s ? titleMap[s.bucket] : ""}
             icon={s ? iconMap[s.bucket] : null}
             items={items}
+            initialFilter={s ? s.bucket : "all"}
+            showInProgress={!isWorkout}
             emptyText={isWorkout ? "No workouts in this list yet" : "No programs in this list yet"}
             onItemClick={(item) => {
-              if (isWorkout) handleNavigateToWorkout(item.type, (sourceWorkouts[s!.bucket].find(w => w.id === item.id))?.workout_id || item.id);
-              else handleNavigateToProgram(item.type, (sourcePrograms[s!.bucket].find(p => p.id === item.id))?.program_id || item.id);
+              if (isWorkout) handleNavigateToWorkout(item.type, (visibleWorkoutInteractions.find(w => w.id === item.id))?.workout_id || item.id);
+              else handleNavigateToProgram(item.type, (visibleProgramInteractions.find(p => p.id === item.id))?.program_id || item.id);
             }}
           />
         );

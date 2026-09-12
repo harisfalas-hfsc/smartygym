@@ -1,8 +1,17 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo, useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, Heart, Star } from "lucide-react";
+import { ArrowLeft, CheckCircle, Heart, Star, CalendarClock, ArrowDownUp } from "lucide-react";
+
+export type ActivityFilter =
+  | "all"
+  | "favorites"
+  | "completed"
+  | "viewed"
+  | "rated"
+  | "scheduled"
+  | "inprogress";
 
 export interface ActivityItem {
   id: string;
@@ -11,6 +20,11 @@ export interface ActivityItem {
   rating?: number | null;
   is_completed?: boolean;
   is_favorite?: boolean;
+  is_viewed?: boolean;
+  is_ongoing?: boolean;
+  is_scheduled?: boolean;
+  scheduled_date?: string | null;
+  sort_date?: string | null;
 }
 
 interface ActivityListSheetProps {
@@ -18,10 +32,27 @@ interface ActivityListSheetProps {
   onOpenChange: (open: boolean) => void;
   title: string;
   icon?: ReactNode;
+  /** Full list for this kind (workouts or programs) — filtering happens inside. */
   items: ActivityItem[];
   emptyText?: string;
   onItemClick: (item: ActivityItem) => void;
+  /** Which filter chip is active when the sheet opens. */
+  initialFilter?: ActivityFilter;
+  /** Set to false to hide the "In Progress" chip (workouts). */
+  showInProgress?: boolean;
 }
+
+const matchesFilter = (item: ActivityItem, filter: ActivityFilter) => {
+  switch (filter) {
+    case "favorites": return !!item.is_favorite;
+    case "completed": return !!item.is_completed;
+    case "viewed": return !!item.is_viewed;
+    case "rated": return !!item.rating && item.rating > 0;
+    case "scheduled": return !!item.is_scheduled;
+    case "inprogress": return !!item.is_ongoing;
+    default: return true;
+  }
+};
 
 export function ActivityListSheet({
   open,
@@ -31,26 +62,86 @@ export function ActivityListSheet({
   items,
   emptyText = "Nothing here yet",
   onItemClick,
+  initialFilter = "all",
+  showInProgress = false,
 }: ActivityListSheetProps) {
+  const [filter, setFilter] = useState<ActivityFilter>(initialFilter);
+  const [sort, setSort] = useState<"newest" | "oldest">("newest");
+
+  useEffect(() => {
+    if (open) setFilter(initialFilter);
+  }, [open, initialFilter]);
+
+  const chips: { key: ActivityFilter; label: string }[] = [
+    { key: "all", label: "All" },
+    { key: "favorites", label: "Favorites" },
+    { key: "completed", label: "Completed" },
+    { key: "viewed", label: "Viewed" },
+    { key: "rated", label: "Rated" },
+    { key: "scheduled", label: "Scheduled" },
+    ...(showInProgress ? [{ key: "inprogress" as const, label: "In Progress" }] : []),
+  ];
+
+  const visible = useMemo(() => {
+    const list = items.filter((i) => matchesFilter(i, filter));
+    const value = (i: ActivityItem) =>
+      new Date(
+        (filter === "scheduled" ? i.scheduled_date : null) || i.sort_date || i.scheduled_date || 0
+      ).getTime();
+    return [...list].sort((a, b) => (sort === "newest" ? value(b) - value(a) : value(a) - value(b)));
+  }, [items, filter, sort]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className={cnPanel}
-      >
-        <DialogHeader className="sticky top-0 z-10 bg-background border-b px-5 pt-5 pb-4 text-left space-y-0">
+      <DialogContent className={cnPanel}>
+        <DialogHeader className="sticky top-0 z-10 bg-background border-b px-5 pt-5 pb-3 text-left space-y-0">
           <DialogTitle className="flex items-center gap-2 text-base pr-10">
             {icon}
             <span>{title}</span>
-            <Badge variant="secondary" className="ml-1">{items.length}</Badge>
+            <Badge variant="secondary" className="ml-1">{visible.length}</Badge>
           </DialogTitle>
         </DialogHeader>
 
+        {/* Filters + sort */}
+        <div className="px-4 pt-3 pb-2 border-b space-y-2">
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {chips.map((c) => {
+              const count = items.filter((i) => matchesFilter(i, c.key)).length;
+              return (
+                <Button
+                  key={c.key}
+                  type="button"
+                  size="sm"
+                  variant={filter === c.key ? "default" : "outline"}
+                  className="h-8 shrink-0 rounded-full text-xs"
+                  onClick={() => setFilter(c.key)}
+                >
+                  {c.label}
+                  <span className="ml-1 opacity-70">{count}</span>
+                </Button>
+              );
+            })}
+          </div>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-8 px-2 text-xs gap-1"
+            onClick={() => setSort((s) => (s === "newest" ? "oldest" : "newest"))}
+          >
+            <ArrowDownUp className="h-3.5 w-3.5" />
+            {sort === "newest" ? "Newest first" : "Oldest first"}
+          </Button>
+        </div>
+
         <div className="flex-1 overflow-y-auto px-4 py-3">
-          {items.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">{emptyText}</p>
+          {visible.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              {items.length === 0 ? emptyText : "Nothing matches this filter"}
+            </p>
           ) : (
             <div className="space-y-2">
-              {items.map((item) => (
+              {visible.map((item) => (
                 <button
                   key={item.id}
                   type="button"
@@ -62,28 +153,26 @@ export function ActivityListSheet({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm line-clamp-2 break-words">
-                        {item.name}
-                      </p>
+                      <p className="font-medium text-sm line-clamp-2 break-words">{item.name}</p>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <Badge variant="outline" className="text-xs">
-                          {item.type}
-                        </Badge>
+                        <Badge variant="outline" className="text-xs">{item.type}</Badge>
                         {item.rating ? (
                           <span className="inline-flex items-center gap-1 text-xs">
                             <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
                             {item.rating}
                           </span>
                         ) : null}
+                        {item.is_scheduled && item.scheduled_date ? (
+                          <span className="inline-flex items-center gap-1 text-xs text-purple-500">
+                            <CalendarClock className="h-3 w-3" />
+                            {new Date(item.scheduled_date).toLocaleDateString()}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      {item.is_completed && (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      )}
-                      {item.is_favorite && (
-                        <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-                      )}
+                      {item.is_completed && <CheckCircle className="h-4 w-4 text-green-500" />}
+                      {item.is_favorite && <Heart className="h-4 w-4 fill-red-500 text-red-500" />}
                     </div>
                   </div>
                 </button>
