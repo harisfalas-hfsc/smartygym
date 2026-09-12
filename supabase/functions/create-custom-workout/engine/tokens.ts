@@ -5,8 +5,13 @@ export const EXERCISE_TOKEN_RE = /\{\{exercise:([A-Za-z0-9_-]+):([^}]*)\}\}/g;
 export type ExerciseToken = { id: string; name: string; raw: string; index: number };
 
 /** A real library id is short and alphanumeric (0043, 1160). Slugs are rejected. */
+/**
+ * Smarty Gym library ids are either numeric ("1353") or readable slugs
+ * ("cat-cow-stretch"), so the shape test accepts both. Membership in the real
+ * library is always checked separately by the validator.
+ */
 export function isLibraryId(id: string): boolean {
-  return /^[A-Za-z0-9]{2,8}$/.test(id) && /\d/.test(id);
+  return /^[A-Za-z0-9][A-Za-z0-9-]{0,62}[A-Za-z0-9]$/.test(id);
 }
 
 export function findTokens(html: string): ExerciseToken[] {
