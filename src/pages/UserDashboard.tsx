@@ -384,8 +384,10 @@ export default function UserDashboard() {
     const savedPosition = Number(sessionStorage.getItem(storageKey) || 0);
     let restoreTimer = 0;
     let restoreAttempts = 0;
+    let restorationFinished = savedPosition <= 0;
 
     const rememberPosition = () => {
+      if (!restorationFinished) return;
       dashboardScrollY.current = window.scrollY;
       sessionStorage.setItem(storageKey, String(window.scrollY));
     };
@@ -394,7 +396,9 @@ export default function UserDashboard() {
       if (savedPosition <= 0 || loading) return;
       window.scrollTo(0, savedPosition);
       restoreAttempts += 1;
-      if (Math.abs(window.scrollY - savedPosition) > 2 && restoreAttempts < 50) {
+      if (Math.abs(window.scrollY - savedPosition) <= 2 || restoreAttempts >= 50) {
+        restorationFinished = true;
+      } else {
         restoreTimer = window.setTimeout(restorePosition, 100);
       }
     };
@@ -405,7 +409,7 @@ export default function UserDashboard() {
     return () => {
       window.removeEventListener("scroll", rememberPosition);
       window.clearTimeout(restoreTimer);
-      sessionStorage.setItem(storageKey, String(dashboardScrollY.current));
+      if (restorationFinished) sessionStorage.setItem(storageKey, String(dashboardScrollY.current));
     };
   }, [location.pathname, location.search, loading]);
   const initDashboard = async () => {
