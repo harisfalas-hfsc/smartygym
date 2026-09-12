@@ -152,68 +152,96 @@ serve(async (req) => {
         ? requestedFormat
         : null;
 
-    // ── Build ────────────────────────────────────────────────────────────────
-    const built = await generateWorkoutContent(
-      db,
-      {
-        category,
-        format,
-        equipmentMode,
-        selectedEquipment: equipmentIds,
-        ...(equipmentOther ? { customEquipmentRaw: equipmentOther } : {}),
-        stars,
-        minutes,
-        focus,
-        ...(note ? { note } : {}),
-        recentIds,
-        location,
-        mood,
-        athlete: {
-          name: (profile?.full_name as string) ?? null,
-          fitness_level: experience,
-          primary_goal: (goals?.primary_goal as string) ?? null,
-          secondary_goal: (goals?.secondary_goal as string) ?? null,
-          location,
-          mood,
-        },
-      },
-      usedNames,
-    );
-
-    const { data: inserted, error: insertError } = await db
+    // ── Reserve the session row first ────────────────────────────────────────
+    // Building takes longer than the 150s edge request limit, so the row is
+    // created as "generating", the response returns immediately and the build
+    // finishes in the background. The client polls the row for the result.
+    const { data: reserved, error: reserveError } = await db
       .from("user_custom_workouts")
       .insert({
         user_id: user.id,
-        name: built.name,
+        name: "Building your workout…",
         category,
-        format: built.format,
+        format: format ?? CATEGORY_FORMATS[category][0],
         focus,
         difficulty_stars: stars,
         difficulty_label: difficultyLabel(stars),
         duration_min: minutes,
-        duration_label: built.duration,
+        duration_label: `${minutes} min`,
         equipment: equipmentIds,
         location,
         mood,
-        description_html: built.description_html,
-        instructions_html: built.instructions_html,
-        tips_html: built.tips_html,
-        main_workout: built.main_workout,
-        needs_review: built.needs_review,
-        review_warnings: built.warnings ?? [],
-        status: "created",
+        main_workout: "",
+        status: "generating",
       })
-      .select("id,name")
+      .select("id")
       .single();
 
-    if (insertError) throw new Error(insertError.message);
+    if (reserveError) throw new Error(reserveError.message);
+    const sessionId = reserved.id as string;
+
+    const build = async () => {
+      try {
+        const built = await generateWorkoutContent(
+          db,
+          {
+            category,
+            format,
+            equipmentMode,
+            selectedEquipment: equipmentIds,
+            ...(equipmentOther ? { customEquipmentRaw: equipmentOther } : {}),
+            stars,
+            minutes,
+            focus,
+            ...(note ? { note } : {}),
+            recentIds,
+            location,
+            mood,
+            athlete: {
+              name: (profile?.full_name as string) ?? null,
+              fitness_level: experience,
+              primary_goal: (goals?.primary_goal as string) ?? null,
+              secondary_goal: (goals?.secondary_goal as string) ?? null,
+              location,
+              mood,
+            },
+          },
+          usedNames,
+        );
+
+        await db
+          .from("user_custom_workouts")
+          .update({
+            name: built.name,
+            format: built.format,
+            duration_label: built.duration,
+            description_html: built.description_html,
+            instructions_html: built.instructions_html,
+            tips_html: built.tips_html,
+            main_workout: built.main_workout,
+            needs_review: built.needs_review,
+            review_warnings: built.warnings ?? [],
+            status: "created",
+          })
+          .eq("id", sessionId);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        console.error("[create-custom-workout] build failed", message);
+        // A failed build never costs the athlete one of their daily sessions.
+        await db.from("user_custom_workouts").delete().eq("id", sessionId);
+      }
+    };
+
+    // deno-lint-ignore no-explicit-any
+    const runtime = (globalThis as any).EdgeRuntime;
+    if (runtime?.waitUntil) runtime.waitUntil(build());
+    else void build();
 
     return json({
-      id: inserted.id,
-      name: inserted.name,
+      id: sessionId,
+      status: "generating",
       category,
       remainingToday: Math.max(0, DAILY_LIMIT - ((todayCount ?? 0) + 1)),
-      notes: built.warnings?.slice(0, 1) ?? [],
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
