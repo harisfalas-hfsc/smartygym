@@ -185,6 +185,23 @@ export default function UserDashboard() {
     nightWindowEnd
   } = useCheckInWindow();
 
+  // Scheduled sessions (workouts + programs) so every list can filter by "Scheduled"
+  const { scheduledWorkouts } = useScheduledWorkouts(user?.id ?? null);
+
+  // Count of the athlete's own generated workouts
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from('user_custom_workouts')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      if (!cancelled) setCustomWorkoutCount(count || 0);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
   // Get tab from URL or default to null (grid view)
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState<string | null>(tabParam || null);
