@@ -1249,6 +1249,23 @@ export default function UserDashboard() {
                     </Button>
                   </CardContent>
                 </Card>}
+                <Card
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate("/my-workouts")}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/my-workouts"); } }}
+                  className="cursor-pointer border-2 border-primary/40 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" />My Own Workouts</span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-muted-foreground">The workouts you built yourself — favourite, complete, schedule and rate them privately.</p>
+                  </CardContent>
+                </Card>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               {([
                 { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length },
@@ -1496,6 +1513,23 @@ export default function UserDashboard() {
                 {/* Workout Activity Stats */}
                 <div>
             <h3 className="text-lg font-semibold mb-2">Workout Activity</h3>
+            <Card
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate("/my-workouts")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/my-workouts"); } }}
+              className="mb-3 cursor-pointer border-2 border-primary/40 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <CardHeader className="pb-0 pt-3">
+                <CardTitle className="text-sm font-medium flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" />My Own Workouts</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-2 px-4">
+                <p className="text-xs text-muted-foreground">Your self-built sessions — private to you.</p>
+              </CardContent>
+            </Card>
             <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-4 mb-3">
               {([
                 { bucket: "favorites" as const, label: "Favorites", icon: <Heart className="h-4 w-4 text-red-500" />, count: favoriteWorkouts.length },

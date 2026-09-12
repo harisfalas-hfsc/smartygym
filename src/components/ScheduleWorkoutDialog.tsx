@@ -17,7 +17,7 @@ interface ScheduleWorkoutDialogProps {
   onClose: () => void;
   contentId: string;
   contentName: string;
-  contentType: "workout" | "program";
+  contentType: "workout" | "program" | "custom_workout";
   contentRouteType: string;
   onScheduled?: () => void;
   onScheduleSuccess?: (details: {
@@ -26,7 +26,7 @@ interface ScheduleWorkoutDialogProps {
     time?: string;
     reminderMinutes: number;
     notes?: string;
-    contentType: "workout" | "program";
+    contentType: "workout" | "program" | "custom_workout";
     contentRouteType: string;
     contentId: string;
   }) => void;

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import { WorkoutPlayerDialog } from "@/components/WorkoutPlayerDialog";
 import { WorkoutToolsCards } from "@/components/WorkoutToolsCards";
 import { normalizeWorkoutHtml } from "@/utils/htmlNormalizer";
 import { parseWorkoutSteps } from "@/utils/parseWorkoutSteps";
+import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
 
 interface CustomWorkoutDetail {
   id: string;
@@ -32,6 +33,10 @@ interface CustomWorkoutDetail {
   instructions_html: string | null;
   tips_html: string | null;
   main_workout: string | null;
+  is_favorite: boolean | null;
+  completed_at: string | null;
+  has_viewed: boolean | null;
+  rating: number | null;
   needs_review: boolean;
   review_warnings: string[] | null;
   created_at: string;
@@ -56,6 +61,15 @@ const MyOwnWorkoutDetail = () => {
       return (data as CustomWorkoutDetail) ?? null;
     },
   });
+
+  // Opening a session counts as viewing it (private tracking only).
+  useEffect(() => {
+    if (!workout || workout.has_viewed) return;
+    void supabase
+      .from("user_custom_workouts")
+      .update({ has_viewed: true, viewed_at: new Date().toISOString() })
+      .eq("id", workout.id);
+  }, [workout]);
 
   const bodyHtml = useMemo(
     () => (workout?.main_workout ? normalizeWorkoutHtml(workout.main_workout) : ""),
@@ -149,6 +163,12 @@ const MyOwnWorkoutDetail = () => {
           </CardContent>
         </Card>
       ) : null}
+
+      <Card className="mb-5 rounded-2xl border-2 border-primary/20">
+        <CardContent className="p-4 sm:p-5">
+          <CustomWorkoutActions workout={workout} />
+        </CardContent>
+      </Card>
 
       <div className="mb-5 flex flex-wrap gap-2">
         <Button variant="outline" className="rounded-2xl" onClick={() => setReaderOpen(true)}>

@@ -343,6 +343,29 @@ const WorkoutFlow = () => {
             </div>
           </Card>
 
+          {/* Create Your Own Workout */}
+          <Card className="mb-8 border-2 border-primary/40 bg-card">
+            <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+              <div>
+                <h2 className="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-primary">
+                  Create Your Own Workout
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                  Answer a few quick questions and build a session around your goal, your time and the
+                  equipment you have today. Your own sessions stay private in your dashboard.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={() => navigate("/create-your-own-workout")} className="cta-button">
+                  Build a workout
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/my-workouts")}>
+                  My own workouts
+                </Button>
+              </div>
+            </div>
+          </Card>
+
           {/* Desktop: Grid Layout - Stacked blog-card style */}
           <div className="hidden lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
             {workoutTypes.map(workout => {

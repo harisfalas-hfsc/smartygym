@@ -2895,18 +2895,23 @@ export type Database = {
           equipment: string[]
           focus: string | null
           format: string | null
+          has_viewed: boolean
           id: string
           instructions_html: string | null
+          is_favorite: boolean
           location: string | null
           main_workout: string | null
           mood: string | null
           name: string
           needs_review: boolean
+          rated_at: string | null
+          rating: number | null
           review_warnings: string[]
           status: string
           tips_html: string | null
           updated_at: string
           user_id: string
+          viewed_at: string | null
         }
         Insert: {
           category: string
@@ -2920,18 +2925,23 @@ export type Database = {
           equipment?: string[]
           focus?: string | null
           format?: string | null
+          has_viewed?: boolean
           id?: string
           instructions_html?: string | null
+          is_favorite?: boolean
           location?: string | null
           main_workout?: string | null
           mood?: string | null
           name: string
           needs_review?: boolean
+          rated_at?: string | null
+          rating?: number | null
           review_warnings?: string[]
           status?: string
           tips_html?: string | null
           updated_at?: string
           user_id: string
+          viewed_at?: string | null
         }
         Update: {
           category?: string
@@ -2945,18 +2955,23 @@ export type Database = {
           equipment?: string[]
           focus?: string | null
           format?: string | null
+          has_viewed?: boolean
           id?: string
           instructions_html?: string | null
+          is_favorite?: boolean
           location?: string | null
           main_workout?: string | null
           mood?: string | null
           name?: string
           needs_review?: boolean
+          rated_at?: string | null
+          rating?: number | null
           review_warnings?: string[]
           status?: string
           tips_html?: string | null
           updated_at?: string
           user_id?: string
+          viewed_at?: string | null
         }
         Relationships: []
       }

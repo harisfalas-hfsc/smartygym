@@ -64,7 +64,7 @@ export const DailyActivityModal = ({ date, isOpen, onClose, userId }: DailyActiv
     }
   }, [userId, dateStr, isOpen]);
 
-  const workouts = dayActivities.filter(a => a.content_type === 'workout');
+  const workouts = dayActivities.filter(a => a.content_type === 'workout' || (a.content_type as string) === 'custom_workout');
   const programs = dayActivities.filter(a => a.content_type === 'program');
   const personalTraining = dayActivities.filter(a => a.content_type === 'personal_training');
   const tools = dayActivities.filter(a => a.content_type === 'tool');
@@ -117,9 +117,11 @@ export const DailyActivityModal = ({ date, isOpen, onClose, userId }: DailyActiv
   };
 
   const handleStartWorkout = (item: ScheduledWorkout) => {
-    const route = item.content_type === 'workout' 
-      ? `/workout/${item.content_id}`
-      : `/training-programs/${item.content_id}`;
+    const route = item.content_type === 'custom_workout'
+      ? `/my-workouts/${item.content_id}`
+      : item.content_type === 'workout'
+        ? `/workout/${item.content_id}`
+        : `/training-programs/${item.content_id}`;
     navigate(route);
     onClose();
   };
