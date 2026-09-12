@@ -1957,6 +1957,7 @@ export default function UserDashboard() {
           completed: isWorkout ? "Completed Workouts" : "Completed Programs",
           viewed: isWorkout ? "Viewed Workouts" : "Viewed Programs",
           rated: isWorkout ? "Rated Workouts" : "Rated Programs",
+          scheduled: isWorkout ? "Scheduled Workouts" : "Scheduled Programs",
           inprogress: "In-Progress Programs",
         };
         const iconMap: Record<string, ReactNode> = {
