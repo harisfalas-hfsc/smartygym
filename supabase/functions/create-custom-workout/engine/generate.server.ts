@@ -29,7 +29,7 @@ import {
   type StrengthFocus,
 } from "./spec.ts";
 
-const MODEL = "google/gemini-2.5-pro";
+const MODELS = ["google/gemini-3-pro-preview", "google/gemini-3-flash-preview"];
 
 export type GenerateInput = {
   category: Category;
@@ -108,24 +108,29 @@ function extractJson(text: string): Record<string, unknown> {
 async function askModel(system: string, user: string): Promise<Record<string, unknown>> {
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey) throw new Error("AI is not configured.");
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  let res: Response | null = null;
+  for (const model of MODELS) {
+    res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: MODEL,
+      model,
       temperature: 0.85,
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
       ],
     }),
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`AI gateway ${res.status}: ${body.slice(0, 300)}`);
+    });
+    // Only an unknown/unavailable model justifies trying the next one.
+    if (res.ok || (res.status !== 400 && res.status !== 404)) break;
+  }
+  if (!res || !res.ok) {
+    const body = res ? await res.text() : "no response";
+    throw new Error(`AI gateway ${res?.status ?? 0}: ${body.slice(0, 300)}`);
   }
   const json = await res.json();
   const text = String(json?.choices?.[0]?.message?.content ?? "");
