@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,6 +166,7 @@ export default function UserDashboard() {
     | null
   >(null);
   const [customWorkoutCount, setCustomWorkoutCount] = useState(0);
+  const dashboardScrollY = useRef(0);
 
   // Check-in hooks
   const {
@@ -375,6 +376,42 @@ export default function UserDashboard() {
       }, 100);
     }
   }, [searchParams, loading]);
+
+  // Keep the athlete at the exact dashboard position they left when browser
+  // Back, the header Back button, or a swipe-back gesture returns here.
+  useEffect(() => {
+    const storageKey = `smartygym-dashboard-scroll:${location.pathname}${location.search}`;
+    const savedPosition = Number(sessionStorage.getItem(storageKey) || 0);
+    let restoreTimer = 0;
+    let restoreAttempts = 0;
+    let restorationFinished = savedPosition <= 0;
+
+    const rememberPosition = () => {
+      if (!restorationFinished) return;
+      dashboardScrollY.current = window.scrollY;
+      sessionStorage.setItem(storageKey, String(window.scrollY));
+    };
+
+    const restorePosition = () => {
+      if (savedPosition <= 0 || loading) return;
+      window.scrollTo(0, savedPosition);
+      restoreAttempts += 1;
+      if (Math.abs(window.scrollY - savedPosition) <= 2 || restoreAttempts >= 50) {
+        restorationFinished = true;
+      } else {
+        restoreTimer = window.setTimeout(restorePosition, 100);
+      }
+    };
+
+    window.addEventListener("scroll", rememberPosition, { passive: true });
+    if (!loading) restoreTimer = window.setTimeout(restorePosition, 0);
+
+    return () => {
+      window.removeEventListener("scroll", rememberPosition);
+      window.clearTimeout(restoreTimer);
+      if (restorationFinished) sessionStorage.setItem(storageKey, String(dashboardScrollY.current));
+    };
+  }, [location.pathname, location.search, loading]);
   const initDashboard = async () => {
     try {
       let {

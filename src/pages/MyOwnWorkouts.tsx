@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDownUp, CalendarClock, Clock, Dumbbell, ListChecks, MapPin, Plus, Star, Trash2 } from "lucide-react";
+import { ArrowLeft, CalendarClock, Clock, Dumbbell, ListChecks, MapPin, Plus, Star, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
 import { useToast } from "@/hooks/use-toast";
 import { useScheduledWorkouts } from "@/hooks/useScheduledWorkouts";
+import { CompactFilters } from "@/components/CompactFilters";
 
 type StatusFilter = "all" | "favorites" | "completed" | "viewed" | "rated" | "scheduled";
 type SortOrder = "newest" | "oldest";
@@ -165,33 +166,29 @@ const MyOwnWorkouts = () => {
       </div>
 
       {!isLoading && workouts.length > 0 && (
-        <div className="mb-5 space-y-2 border-y py-3">
-          <div className="flex gap-1.5 overflow-x-auto pb-1">
-            {statusOptions.map((option) => (
-              <Button
-                key={option.value}
-                type="button"
-                size="sm"
-                variant={statusFilter === option.value ? "default" : "outline"}
-                className="h-8 shrink-0 rounded-full text-xs"
-                onClick={() => setStatusFilter(option.value)}
-              >
-                {option.label}
-                <span className="ml-1 opacity-70">{countForStatus(option.value)}</span>
-              </Button>
-            ))}
-          </div>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="h-8 gap-1 px-2 text-xs"
-            onClick={() => setSortOrder((current) => current === "newest" ? "oldest" : "newest")}
-          >
-            <ArrowDownUp className="h-3.5 w-3.5" />
-            {sortOrder === "newest" ? "Newest first" : "Oldest first"}
-          </Button>
-        </div>
+        <CompactFilters
+          compact
+          filters={[
+            {
+              name: "Status",
+              value: statusFilter,
+              onChange: (value) => setStatusFilter(value as StatusFilter),
+              options: statusOptions.map((option) => ({
+                value: option.value,
+                label: `${option.label} (${countForStatus(option.value)})`,
+              })),
+            },
+            {
+              name: "Sort",
+              value: sortOrder,
+              onChange: (value) => setSortOrder(value as SortOrder),
+              options: [
+                { value: "newest", label: "Newest first" },
+                { value: "oldest", label: "Oldest first" },
+              ],
+            },
+          ]}
+        />
       )}
 
       {isLoading ? (
@@ -294,6 +291,16 @@ const MyOwnWorkouts = () => {
           ))}
         </div>
       )}
+
+      <Button
+        type="button"
+        variant="outline"
+        className="mt-6 min-h-11 w-full gap-2"
+        onClick={() => navigate(-1)}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </Button>
     </div>
   );
 };
