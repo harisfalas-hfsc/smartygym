@@ -73,7 +73,7 @@ export function ActivityListSheet({
     if (open) setFilter(initialFilter);
   }, [open, initialFilter]);
 
-  const filterOptions: { value: ActivityFilter; label: string }[] = [
+  const filters: { key: ActivityFilter; label: string }[] = [
     { key: "all", label: "All" },
     { key: "favorites", label: "Favorites" },
     { key: "completed", label: "Completed" },
@@ -81,7 +81,9 @@ export function ActivityListSheet({
     { key: "rated", label: "Rated" },
     { key: "scheduled", label: "Scheduled" },
     ...(showInProgress ? [{ key: "inprogress" as const, label: "In Progress" }] : []),
-  ].map(({ key, label }) => ({
+  ];
+
+  const filterOptions: { value: ActivityFilter; label: string }[] = filters.map(({ key, label }) => ({
     value: key,
     label: `${label} (${items.filter((item) => matchesFilter(item, key)).length})`,
   }));

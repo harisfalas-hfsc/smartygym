@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 
 const positions = new Map<string, number>();
@@ -6,7 +6,6 @@ const positions = new Map<string, number>();
 export const ScrollToTop = () => {
   const location = useLocation();
   const navigationType = useNavigationType();
-  const previousKey = useRef(location.key);
 
   useEffect(() => {
     const currentKey = location.key;
@@ -23,8 +22,6 @@ export const ScrollToTop = () => {
     };
 
     frame = window.requestAnimationFrame(restore);
-    previousKey.current = currentKey;
-
     return () => {
       positions.set(currentKey, window.scrollY);
       window.cancelAnimationFrame(frame);
