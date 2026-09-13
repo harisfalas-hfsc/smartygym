@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { InfoRibbon } from "@/components/InfoRibbon";
-import { Dumbbell, Flame, Zap, Heart, Move, Activity, CalendarCheck, Flower2, RefreshCw, Timer } from "lucide-react";
+import { Dumbbell, Flame, Zap, Heart, Move, Activity, CalendarCheck, Flower2, RefreshCw, Timer, Wand2 } from "lucide-react";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { generateBreadcrumbSchema } from "@/utils/seoHelpers";
 import { useAccessControl } from "@/hooks/useAccessControl";
@@ -134,6 +134,7 @@ const WorkoutFlow = () => {
 
   // Extended descriptions for mobile carousel
   const workoutDescriptions: Record<string, string> = {
+    "create-your-own": "Answer a few questions and get a session built for today — your goal, your time, your equipment.",
     "wod": "Your daily dose of expertly programmed fitness, following science-based periodization.",
     "strength": "Single-session workouts to build foundational strength, power, and muscular endurance.",
     "calorie-burning": "High-intensity sessions designed to maximize calorie burn and fat loss.",
@@ -145,6 +146,12 @@ const WorkoutFlow = () => {
     "recovery": "Active recovery sessions to help your body repair, rebuild, and prevent injuries.",
     "micro-workouts": "Quick 5-minute bodyweight exercises you can do anywhere — desk, sofa, or on the go.",
   };
+
+  const CREATE_OWN_IMAGE = "/images/workouts/create-your-own-card.jpg";
+  const CREATE_OWN_TITLE = "Create Your Own Workout";
+  const CREATE_OWN_DESC = "Answer a few questions and get a coach-grade session built around your goal, your time and your equipment.";
+  /** Slide ids in carousel order — Create Your Own Workout first, then the categories. */
+  const carouselSlideIds = ["create-your-own", ...workoutTypes.map((w) => w.id)];
 
   const workoutTypes = [{
     id: "wod",
