@@ -293,6 +293,55 @@ const CreateYourOwnWorkout = () => {
     void generate(surprise);
   }
 
+  // Premium gate: building workouts is a Premium feature. When Free Access
+  // Mode is on, every signed-in member already resolves to "premium" via the
+  // access-control context, so this gate disappears automatically.
+  if (!accessLoading && !isPremium) {
+    return (
+      <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-12 lg:max-w-6xl lg:px-8 lg:py-12">
+        <Helmet>
+          <title>Create Your Own Workout | Smarty Gym</title>
+          <meta
+            name="description"
+            content="Answer a few questions and Smarty Gym builds you a coach-grade workout from its human-designed exercise library."
+          />
+          <meta name="robots" content="noindex" />
+        </Helmet>
+
+        <DesktopPageIntro icon={Sparkles} title="Create Your Own Workout">
+          <p>{PAGE_DESCRIPTION}</p>
+        </DesktopPageIntro>
+
+        <div className="mb-6 lg:hidden">
+          <h1 className="text-2xl font-extrabold uppercase tracking-tight text-primary">
+            Create Your Own Workout
+          </h1>
+          <div className="mt-3 rounded-3xl border-2 border-primary bg-card p-5 shadow-sm">
+            <p className="text-sm leading-relaxed text-muted-foreground">{PAGE_DESCRIPTION}</p>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border-2 border-primary bg-card p-6 text-center shadow-sm sm:p-8">
+          <Crown className="mx-auto h-10 w-10 text-primary" aria-hidden="true" />
+          <h2 className="mt-3 text-xl font-extrabold">A Premium feature</h2>
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+            Create Your Own Workout is included with Smarty Gym Premium. Premium members can build
+            up to {DAILY_LIMIT} personalised workouts every day — and every workout you build stays
+            yours forever, even if your subscription ends.
+          </p>
+          <Button
+            size="lg"
+            className="mt-5 h-12 rounded-2xl px-8 font-extrabold"
+            onClick={() => navigate("/smarty-premium")}
+          >
+            <Crown className="mr-2 h-5 w-5" />
+            Join Premium
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-12 lg:max-w-6xl lg:px-8 lg:py-12">
       <Helmet>
