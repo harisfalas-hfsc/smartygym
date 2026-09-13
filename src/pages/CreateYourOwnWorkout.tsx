@@ -139,6 +139,7 @@ const CreateYourOwnWorkout = () => {
   const [confirmHard, setConfirmHard] = useState(false);
   const [name, setName] = useState<string>("");
   const [builtToday, setBuiltToday] = useState<number | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   const remaining = builtToday === null ? null : Math.max(0, DAILY_LIMIT - builtToday);
   const limitReached = remaining === 0;
@@ -148,7 +149,8 @@ const CreateYourOwnWorkout = () => {
     (async () => {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) {
-        navigate("/auth", { replace: true });
+        // Visitors can view the page; only creating a session needs an account.
+        if (!cancelled) setIsLoggedIn(false);
         return;
       }
       const { data: profile } = await supabase
@@ -166,6 +168,7 @@ const CreateYourOwnWorkout = () => {
       if (cancelled) return;
       setName((profile?.full_name as string) ?? "");
       setBuiltToday(count ?? 0);
+      setIsLoggedIn(true);
     })();
     return () => {
       cancelled = true;
@@ -246,6 +249,14 @@ const CreateYourOwnWorkout = () => {
   }
 
   function requestGenerate() {
+    if (isLoggedIn === false) {
+      toast({
+        title: "Create a free account to continue",
+        description: "You can browse everything here — you just need to be signed in to build your workout.",
+      });
+      navigate("/auth");
+      return;
+    }
     if (limitReached) {
       toast({
         title: "Daily limit reached",
@@ -271,6 +282,14 @@ const CreateYourOwnWorkout = () => {
 
   /** Surprise me: a legal random brief, still built by the same rule book. */
   function surpriseMe() {
+    if (isLoggedIn === false) {
+      toast({
+        title: "Create a free account to continue",
+        description: "You can browse everything here — you just need to be signed in to build your workout.",
+      });
+      navigate("/auth");
+      return;
+    }
     if (limitReached) {
       toast({
         title: "Daily limit reached",
@@ -295,10 +314,11 @@ const CreateYourOwnWorkout = () => {
     void generate(surprise);
   }
 
-  // Premium gate: building workouts is a Premium feature. When Free Access
-  // Mode is on, every signed-in member already resolves to "premium" via the
-  // access-control context, so this gate disappears automatically.
-  if (!accessLoading && !isPremium) {
+  // Premium gate: building workouts is a Premium feature. Visitors (not signed
+  // in) still get to view the whole page — only the build action asks them to
+  // log in. When Free Access Mode is on, every signed-in member already
+  // resolves to "premium" via the access-control context.
+  if (!accessLoading && !isPremium && isLoggedIn === true) {
     return (
       <div className="container mx-auto min-h-screen max-w-6xl px-4 pb-8 md:max-w-[1500px] md:px-6">
         <Helmet>
@@ -428,11 +448,13 @@ const CreateYourOwnWorkout = () => {
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 p-4">
         <p className="text-sm text-muted-foreground">
-          {remaining === null
-            ? "Checking today's allowance…"
-            : limitReached
-              ? `You've built your ${DAILY_LIMIT} workouts for today. The next one unlocks tomorrow.`
-              : `You can build ${remaining} more ${remaining === 1 ? "workout" : "workouts"} today.`}
+          {isLoggedIn === false
+            ? "Take a look around — sign in when you're ready to build your first workout."
+            : remaining === null
+              ? "Checking today's allowance…"
+              : limitReached
+                ? `You've built your ${DAILY_LIMIT} workouts for today. The next one unlocks tomorrow.`
+                : `You can build ${remaining} more ${remaining === 1 ? "workout" : "workouts"} today.`}
         </p>
         <Button variant="outline" className="rounded-2xl" onClick={() => navigate("/my-workouts")}>
           <ListChecks className="mr-2 h-4 w-4" />
