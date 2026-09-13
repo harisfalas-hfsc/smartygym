@@ -12,6 +12,8 @@ const APP_CACHE_NAMES = [
   "supabase-storage",
 ];
 
+const LEGACY_DATABASES = ["smartygym-query-cache", "smartygym-offline"];
+
 /** Unregister every app service worker and drop its caches. Safe to call always. */
 export const purgeAppServiceWorkers = async (): Promise<void> => {
   if (typeof window === "undefined") return;
@@ -50,12 +52,23 @@ export const purgeAppServiceWorkers = async (): Promise<void> => {
     // ignore
   }
 
-  // Drop the old persisted react-query cache so no page renders stale data.
-  try {
-    indexedDB.deleteDatabase("smartygym-query-cache");
-  } catch {
-    // ignore
-  }
+  // Drop every database created by the retired offline implementation. These
+  // stores contain only obsolete device copies and must never affect live data.
+  await Promise.allSettled(
+    LEGACY_DATABASES.map(
+      (name) =>
+        new Promise<void>((resolve) => {
+          try {
+            const request = indexedDB.deleteDatabase(name);
+            request.onsuccess = () => resolve();
+            request.onerror = () => resolve();
+            request.onblocked = () => resolve();
+          } catch {
+            resolve();
+          }
+        }),
+    ),
+  );
 };
 
 const getLoadedAppBundle = (): string | null => {
@@ -83,7 +96,7 @@ export const startDeploymentUpdateWatcher = (): (() => void) => {
     checking = true;
 
     try {
-      const response = await fetch(`/?__smarty_version=${Date.now()}`, {
+      const response = await fetch(`${window.location.pathname}?__smarty_version=${Date.now()}`, {
         cache: "no-store",
         headers: { "Cache-Control": "no-cache" },
       });
@@ -100,7 +113,7 @@ export const startDeploymentUpdateWatcher = (): (() => void) => {
     }
   };
 
-  const interval = window.setInterval(() => void checkForUpdate(), 30_000);
+  const interval = window.setInterval(() => void checkForUpdate(), 10_000);
   const onVisibilityChange = () => {
     if (document.visibilityState === "visible") void checkForUpdate();
   };

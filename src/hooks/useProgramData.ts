@@ -43,15 +43,17 @@ export const useProgramData = (programId: string | undefined) => {
 
 export const useAllPrograms = () => {
   return useQuery({
-    // Keep the catalogue live across browser, PWA and native WebView shells.
-    // A new visit must never reuse an older in-memory programme list.
-    queryKey: ["all-programs", "live-v2"],
+    // This catalogue is deliberately network-only. Published programs must
+    // appear on the next page open in browsers, installed web apps and native
+    // shells without waiting for a stale window or a persisted device copy.
+    queryKey: ["all-programs", "live-v3"],
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: "always",
     refetchOnWindowFocus: "always",
     refetchOnReconnect: "always",
-    refetchInterval: 30 * 1000,
+    refetchInterval: 10 * 1000,
+    refetchIntervalInBackground: true,
     retry: 3,
     queryFn: offlineQueryFn("programs:list:all", async () => {
       const { data, error } = await supabase
@@ -69,7 +71,9 @@ export const useAllPrograms = () => {
         throw error;
       }
 
-      return (data || []).sort((a: any, b: any) => a.name.localeCompare(b.name));
+      return (data || [])
+        .filter((program: any) => program.is_visible !== false)
+        .sort((a: any, b: any) => a.name.localeCompare(b.name));
     }),
   });
 };

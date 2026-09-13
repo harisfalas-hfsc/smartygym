@@ -2,8 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchVisibleWorkoutMetadata } from "@/hooks/useTodayWods";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
-import { offlineQueryFn, peekOffline } from "@/lib/offline";
-import { getCurrentUserId } from "@/lib/offline/session";
+import { offlineQueryFn } from "@/lib/offline";
 
 export interface WorkoutData {
   id: string;
@@ -43,20 +42,6 @@ export const useWorkoutData = (workoutId: string | undefined) => {
     queryKey: ["workout", workoutId],
     queryFn: offlineQueryFn(`detail:workout:${workoutId}`, async () => {
       if (!workoutId) throw new Error("Workout ID is required");
-      // The background sync stores the entitled catalog as one efficient
-      // record. Resolve from it first so opening a workout is immediate and
-      // does not download the full public catalog before its detail request.
-      const cachedCatalog = await peekOffline<WorkoutData[]>("workouts:list:all", getCurrentUserId());
-      const cachedSlugs = cachedCatalog ? buildUniqueContentSlugs(cachedCatalog) : new Map<string, string>();
-      const cachedMatch = cachedCatalog?.find((workout) =>
-        workout.id === workoutId ||
-        workout.canonical_slug === workoutId ||
-        cachedSlugs.get(workout.id) === workoutId ||
-        slugifyContentName(workout.name || workout.id) === workoutId
-      );
-      if (cachedMatch && (cachedMatch.main_workout || cachedMatch.warm_up || cachedMatch.activation)) {
-        return cachedMatch;
-      }
       const resolveFromMetadata = async () => {
         const metadata = await fetchVisibleWorkoutMetadata(null);
         const uniqueSlugs = buildUniqueContentSlugs(metadata);
@@ -103,19 +88,24 @@ export const useWorkoutData = (workoutId: string | undefined) => {
       } as WorkoutData;
     }),
     enabled: !!workoutId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
   });
 };
 
 export const useAllWorkouts = () => {
   return useQuery({
-    queryKey: ["all-workouts"],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    queryKey: ["all-workouts", "live-v3"],
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
+    refetchInterval: 10 * 1000,
+    refetchIntervalInBackground: true,
     queryFn: offlineQueryFn("workouts:list:all", async () => {
       const data = await fetchVisibleWorkoutMetadata(null);
       return (data || []) as WorkoutData[];
