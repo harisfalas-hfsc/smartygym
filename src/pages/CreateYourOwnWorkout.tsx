@@ -249,6 +249,14 @@ const CreateYourOwnWorkout = () => {
   }
 
   function requestGenerate() {
+    if (isLoggedIn === false) {
+      toast({
+        title: "Create a free account to continue",
+        description: "You can browse everything here — you just need to be signed in to build your workout.",
+      });
+      navigate("/auth");
+      return;
+    }
     if (limitReached) {
       toast({
         title: "Daily limit reached",
