@@ -282,6 +282,14 @@ const CreateYourOwnWorkout = () => {
 
   /** Surprise me: a legal random brief, still built by the same rule book. */
   function surpriseMe() {
+    if (isLoggedIn === false) {
+      toast({
+        title: "Create a free account to continue",
+        description: "You can browse everything here — you just need to be signed in to build your workout.",
+      });
+      navigate("/auth");
+      return;
+    }
     if (limitReached) {
       toast({
         title: "Daily limit reached",
