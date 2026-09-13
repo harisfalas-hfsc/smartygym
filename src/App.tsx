@@ -102,7 +102,7 @@ import { AnnouncementManager } from "./components/announcements/AnnouncementMana
 // FreeTrialPopup intentionally disabled — replaced by SmartyCoachWelcomePopup.
 // Kept dormant for easy re-enable later.
 // import { FreeTrialPopup } from "./components/growth/FreeTrialPopup";
-import { SmartyCoachWelcomePopup } from "./components/smarty-coach/SmartyCoachWelcomePopup";
+
 import { SisterAppsPopup } from "./components/growth/SisterAppsPopup";
 
 
@@ -211,7 +211,7 @@ const AppContent = () => {
       <AccessControlProvider>
         <AnnouncementManager />
         {/* <FreeTrialPopup /> */}
-        <SmartyCoachWelcomePopup />
+        
         <SisterAppsPopup />
         <ScrollToTop />
         <AnalyticsTracker />
