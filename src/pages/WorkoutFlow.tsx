@@ -541,7 +541,7 @@ const WorkoutFlow = () => {
             <Card className="bg-card border border-primary/20">
               <div className="p-4 text-center">
                 <p className="text-sm text-muted-foreground transition-opacity duration-300">
-                  {workoutDescriptions[workoutTypes[currentSlide]?.id] || ""}
+                  {workoutDescriptions[carouselSlideIds[currentSlide] ?? ""] || ""}
                 </p>
               </div>
             </Card>
