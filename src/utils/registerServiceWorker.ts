@@ -63,3 +63,52 @@ export const purgeAppServiceWorkers = async (): Promise<void> => {
   );
 };
 
+const getAppBundle = (documentRoot: Document): string | null => {
+  const source = Array.from(documentRoot.querySelectorAll<HTMLScriptElement>('script[type="module"][src]'))
+    .map((script) => script.getAttribute("src"))
+    .find((src) => src?.includes("/assets/index-"));
+  return source ? new URL(source, window.location.origin).href : null;
+};
+
+/** Refresh already-open clients when the live deployment changes. */
+export const startDeploymentUpdateWatcher = (): (() => void) => {
+  if (typeof window === "undefined" || window.location.hostname === "localhost") return () => undefined;
+  const loadedBundle = getAppBundle(document);
+  if (!loadedBundle) return () => undefined;
+
+  let checking = false;
+  const check = async () => {
+    if (checking || !navigator.onLine) return;
+    checking = true;
+    try {
+      // Always inspect the root document, avoiding route-specific prerender or CDN variance.
+      const response = await fetch(`/?__smarty_version=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
+      });
+      if (!response.ok) return;
+      const publishedDocument = new DOMParser().parseFromString(await response.text(), "text/html");
+      const publishedBundle = getAppBundle(publishedDocument);
+      if (publishedBundle && publishedBundle !== loadedBundle) {
+        window.location.reload();
+      }
+    } catch {
+      // Keep the current screen usable during temporary connectivity failures.
+    } finally {
+      checking = false;
+    }
+  };
+
+  const interval = window.setInterval(() => void check(), 10_000);
+  const onVisible = () => document.visibilityState === "visible" && void check();
+  window.addEventListener("online", check);
+  document.addEventListener("visibilitychange", onVisible);
+  void check();
+
+  return () => {
+    window.clearInterval(interval);
+    window.removeEventListener("online", check);
+    document.removeEventListener("visibilitychange", onVisible);
+  };
+};
+

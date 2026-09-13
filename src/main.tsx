@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { configureStatusBar } from "./utils/native";
-import { purgeAppServiceWorkers } from "./utils/registerServiceWorker";
+import { purgeAppServiceWorkers, startDeploymentUpdateWatcher } from "./utils/registerServiceWorker";
 import { Capacitor } from "@capacitor/core";
 
 // Configure native status bar on app launch
@@ -44,6 +44,9 @@ clearLovableDeploymentPinCookie();
 // No offline app-shell caching anywhere: browser, installed PWA, WebView
 // wrapper or native shell. Every launch loads the current deployment.
 void purgeAppServiceWorkers();
+
+// Refresh an open browser or installed web app when a new deployment lands.
+startDeploymentUpdateWatcher();
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Application root element is missing");
