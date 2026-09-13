@@ -51,3 +51,13 @@ startDeploymentUpdateWatcher();
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Application root element is missing");
 createRoot(rootElement).render(<App />);
+
+// Fade out the boot splash once the first frame of the app is painted.
+const hideBootSplash = () => {
+  const splash = document.getElementById("boot-splash");
+  if (!splash) return;
+  splash.classList.add("is-hidden");
+  window.setTimeout(() => splash.remove(), 400);
+};
+requestAnimationFrame(() => requestAnimationFrame(hideBootSplash));
+window.setTimeout(hideBootSplash, 8000);
