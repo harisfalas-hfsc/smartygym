@@ -5,6 +5,7 @@ import { WorkoutDisplay } from "@/components/WorkoutDisplay";
 import { AccessGate } from "@/components/AccessGate";
 import { useTrainingProgramData, type TrainingProgramData } from "@/hooks/useTrainingProgramData";
 import { useAccessControl } from "@/hooks/useAccessControl";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { ContentNotFound } from "@/components/ContentNotFound";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { getProgramCategorySlug, slugifyContentName } from "@/lib/seo-slugs";
@@ -28,6 +29,7 @@ const IndividualTrainingProgram = () => {
   const { type, id } = useParams();
   const lookupId = id || type;
   const { userTier, hasPurchased } = useAccessControl();
+  const { freeAccessMode } = useFreeAccessMode();
   
   // Helper function to format focus label
   const getFocusLabel = (type: string | undefined): string => {
@@ -73,7 +75,7 @@ const IndividualTrainingProgram = () => {
     const isPremium = dbProgram.is_premium;
     const canPurchase = dbProgram.is_standalone_purchase && dbProgram.price && isPremium;
     const alreadyPurchased = hasPurchased(dbProgram.id, "program");
-    const hasAccess = userTier === "premium" || alreadyPurchased || !isPremium;
+    const hasAccess = freeAccessMode || userTier === "premium" || alreadyPurchased || !isPremium;
     
     const programCategorySlug = getProgramCategorySlug(dbProgram.category, type || "functional-strength");
     const programUrl = `https://smartygym.com/trainingprogram/${programCategorySlug}/${dbProgram.canonical_slug || slugifyContentName(dbProgram.name || dbProgram.id)}.html`;
@@ -227,7 +229,7 @@ const IndividualTrainingProgram = () => {
 
             <AccessGate 
               requireAuth={true} 
-              requirePremium={isPremium && !hasAccess} 
+              requirePremium={!freeAccessMode && isPremium && !hasAccess} 
               contentType="program"
               contentId={dbProgram.id}
               contentName={dbProgram.name}

@@ -271,6 +271,14 @@ const AppContent = () => {
                 <Route path="/wod-archive" element={<WODArchive />} />
                 <Route path="/daily-ritual" element={<DailySmartyRitual />} />
                 <Route path="/trainingprogram" element={<TrainingProgramFlow />} />
+                {/* Keep category links shipped in older Android/iOS wrappers working. */}
+                <Route path="/trainingprogram/cardio" element={<Navigate to="/trainingprogram/cardio-endurance" replace />} />
+                <Route path="/trainingprogram/functional" element={<Navigate to="/trainingprogram/functional-strength" replace />} />
+                <Route path="/trainingprogram/hypertrophy" element={<Navigate to="/trainingprogram/muscle-hypertrophy" replace />} />
+                <Route path="/trainingprogram/weightloss" element={<Navigate to="/trainingprogram/weight-loss" replace />} />
+                <Route path="/trainingprogram/backcare" element={<Navigate to="/trainingprogram/low-back-pain" replace />} />
+                <Route path="/trainingprogram/back-care" element={<Navigate to="/trainingprogram/low-back-pain" replace />} />
+                <Route path="/trainingprogram/mobility" element={<Navigate to="/trainingprogram/mobility-stability" replace />} />
                 <Route path="/trainingprogram/:type" element={<TrainingProgramDetail />} />
                 <Route path="/trainingprogram/:type/:id" element={<IndividualTrainingProgram />} />
                 

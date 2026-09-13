@@ -43,10 +43,16 @@ export const useProgramData = (programId: string | undefined) => {
 
 export const useAllPrograms = () => {
   return useQuery({
-    queryKey: ["all-programs"],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    // Keep the catalogue live across browser, PWA and native WebView shells.
+    // A new visit must never reuse an older in-memory programme list.
+    queryKey: ["all-programs", "live-v2"],
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
+    refetchInterval: 30 * 1000,
+    retry: 3,
     queryFn: offlineQueryFn("programs:list:all", async () => {
       const { data, error } = await supabase
         .rpc("get_visible_program_metadata" as never, { _program_id: null } as never);
@@ -60,7 +66,7 @@ export const useAllPrograms = () => {
         if (import.meta.env.DEV) {
           console.error("Error fetching programs:", error);
         }
-        return [];
+        throw error;
       }
 
       return (data || []).sort((a: any, b: any) => a.name.localeCompare(b.name));
