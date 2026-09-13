@@ -16,6 +16,7 @@ import {
   Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccessControl } from "@/hooks/useAccessControl";
@@ -309,17 +310,17 @@ const CreateYourOwnWorkout = () => {
         </Helmet>
 
         <DesktopPageIntro icon={Sparkles} title="Create Your Own Workout">
-          <p>{PAGE_DESCRIPTION}</p>
+          <p className="font-bold text-foreground">{PAGE_DESCRIPTION}</p>
         </DesktopPageIntro>
 
-        <div className="mb-6 lg:hidden">
-          <h1 className="text-2xl font-extrabold uppercase tracking-tight text-primary">
-            Create Your Own Workout
-          </h1>
-          <div className="mt-3 rounded-3xl border-2 border-primary bg-card p-5 shadow-sm">
-            <p className="text-sm leading-relaxed text-muted-foreground">{PAGE_DESCRIPTION}</p>
+        <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+          <div className="p-4 sm:p-5">
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">
+              Create Your Own Workout
+            </h1>
+            <p className="text-sm text-center text-muted-foreground">{PAGE_DESCRIPTION}</p>
           </div>
-        </div>
+        </Card>
 
         <div className="rounded-3xl border-2 border-primary bg-card p-6 text-center shadow-sm sm:p-8">
           <Crown className="mx-auto h-10 w-10 text-primary" aria-hidden="true" />
