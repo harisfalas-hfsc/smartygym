@@ -234,6 +234,26 @@ const FAQ = () => {
                     </AccordionContent>
                   </AccordionItem>
 
+                  <AccordionItem value="item-3b">
+                    <AccordionTrigger className="text-left">What is Create Your Own Workout?</AccordionTrigger>
+                    <AccordionContent className="py-2 leading-relaxed">
+                      <strong>Create Your Own Workout</strong> is a guided builder that asks about your goal, available time, equipment, location, and energy level, 
+                      then assembles a session from the Smarty Gym exercise library using <a href="/coach-profile" className="text-primary hover:underline font-medium">Haris Falas</a>'s 
+                      coaching rules, training philosophy, and 20+ years of expertise. It is <strong>not an AI workout generator</strong> — every exercise, rep scheme, and structure 
+                      is drawn from the same human-designed system that powers all SmartyGym content.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3c">
+                    <AccordionTrigger className="text-left">Can I create my own workout?</AccordionTrigger>
+                    <AccordionContent className="py-2 leading-relaxed">
+                      Yes. After signing in, go to the <a href="/workouts" className="text-primary hover:underline font-medium">Smarty Workouts</a> page and tap 
+                      <strong>Create Your Own Workout</strong>. Answer a few quick questions and the builder will produce a personalised session that matches your goal, time, and equipment. 
+                      Each session is built from the Smarty Gym exercise library and follows <a href="/coach-profile" className="text-primary hover:underline font-medium">Haris Falas</a>'s 
+                      coaching methodology, so it stays true to the same philosophy behind every workout and program on the platform.
+                    </AccordionContent>
+                  </AccordionItem>
+
                   <AccordionItem value="item-3a">
                     <AccordionTrigger className="text-left">What's the difference between a workout and training program?</AccordionTrigger>
                     <AccordionContent className="py-2 leading-relaxed">
