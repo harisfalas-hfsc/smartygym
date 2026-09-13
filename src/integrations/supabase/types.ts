@@ -3948,6 +3948,7 @@ export type Database = {
       }
       ensure_cron_jobs: { Args: never; Returns: Json }
       exec_sql: { Args: { sql: string }; Returns: undefined }
+      free_access_mode_enabled: { Args: never; Returns: boolean }
       get_checkin_leaderboard: {
         Args: never
         Returns: {
