@@ -500,9 +500,9 @@ const WorkoutFlow = () => {
                       <div className="absolute inset-0 rounded-full bg-primary/10 pointer-events-none" aria-hidden="true" />
                       <Star className="relative w-7 h-7 text-primary" />
                     </div>
-                    <div className="w-full">
+                    <div className="w-full flex-1 flex flex-col">
                       <h3 className="font-semibold text-lg mb-3 text-foreground">Featured Workouts</h3>
-                      <div className="flex flex-col gap-2 w-full">
+                      <div className="flex flex-col gap-2 w-full flex-1">
                         {latestWorkouts.map((w) => {
                           const slug = workoutCategoryToSlug(w.category);
                           const image = w.image_url || categoryMobileImages[slug] || "/images/workouts/wod-card-mobile.jpg";

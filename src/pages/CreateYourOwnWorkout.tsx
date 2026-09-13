@@ -355,22 +355,24 @@ const CreateYourOwnWorkout = () => {
       </Helmet>
 
       <DesktopPageIntro icon={Sparkles} title="Create Your Own Workout">
-        <p>{PAGE_DESCRIPTION}</p>
+        <p className="font-bold text-foreground">{PAGE_DESCRIPTION}</p>
       </DesktopPageIntro>
 
-      <div className="mb-6 lg:hidden">
-        <h1 className="text-2xl font-extrabold uppercase tracking-tight text-primary">
-          Create Your Own Workout
-        </h1>
-        <div className="mt-3 rounded-3xl border-2 border-primary bg-card p-5 shadow-sm">
-          {name ? (
-            <p className="mb-2 text-sm font-bold text-foreground">
-              {name}, what's your workout today?
-            </p>
-          ) : null}
-          <p className="text-sm leading-relaxed text-muted-foreground">{PAGE_DESCRIPTION}</p>
+      <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+        <div className="p-4 sm:p-5">
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">
+            Create Your Own Workout
+          </h1>
+          <div className="space-y-2 text-muted-foreground max-w-3xl mx-auto">
+            {name ? (
+              <p className="text-sm text-center font-bold text-foreground">
+                {name}, what's your workout today?
+              </p>
+            ) : null}
+            <p className="text-sm text-center">{PAGE_DESCRIPTION}</p>
+          </div>
         </div>
-      </div>
+      </Card>
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 p-4">
         <p className="text-sm text-muted-foreground">
