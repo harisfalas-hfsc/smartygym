@@ -560,6 +560,37 @@ const WorkoutFlow = () => {
               setApi={setCarouselApi}
             >
               <CarouselContent className="-ml-2">
+                {/* Create Your Own Workout — first slide */}
+                <CarouselItem className="pl-2 basis-[75%] sm:basis-[60%]">
+                  <div
+                    onClick={() => navigate("/create-your-own-workout")}
+                    className="smarty-carousel-card-portrait-tablet flex flex-col h-[300px] min-[540px]:h-[600px] bg-card border-2 border-primary/60 rounded-xl overflow-hidden cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-xl transition-all duration-300"
+                    role="button"
+                    aria-label="Create Your Own Workout"
+                  >
+                    <div className="smarty-carousel-image-portrait-tablet relative h-[58%] min-[540px]:h-[72%] min-[540px]:aspect-auto overflow-hidden flex-shrink-0 bg-muted">
+                      <img
+                        src={CREATE_OWN_IMAGE}
+                        alt="Athlete building a personalised workout on his phone in a dark gym"
+                        loading="lazy"
+                        className="w-full h-full object-cover object-[center_top] min-[540px]:object-contain"
+                      />
+                    </div>
+                    <div className="smarty-carousel-content-portrait-tablet flex flex-col justify-center flex-1 px-3 py-3 min-[540px]:p-4 text-center">
+                      <div className="smarty-carousel-title-row-portrait-tablet flex items-center justify-center gap-2 mb-1 min-[540px]:mb-2">
+                        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Wand2 className="w-4 h-4 text-primary" />
+                        </div>
+                        <h3 className="smarty-carousel-card-title m-0 min-h-0 min-w-0 text-sm min-[540px]:text-base font-bold text-foreground leading-tight line-clamp-2">
+                          {CREATE_OWN_TITLE}
+                        </h3>
+                      </div>
+                      <p className="smarty-carousel-card-copy text-xs min-[540px]:text-sm text-muted-foreground leading-snug line-clamp-2 h-[2rem] min-h-0 min-[540px]:h-auto">
+                        {workoutDescriptions["create-your-own"]}
+                      </p>
+                    </div>
+                  </div>
+                </CarouselItem>
                 {workoutTypes.map((workout) => {
                   const Icon = workout.icon;
                   const mobileImage = categoryMobileImages[workout.id];
@@ -627,7 +658,7 @@ const WorkoutFlow = () => {
             
             {/* Navigation Dots */}
             <div className="flex justify-center gap-2 mt-4">
-              {workoutTypes.map((_, index) => (
+              {carouselSlideIds.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => carouselApi?.scrollTo(index)}
