@@ -448,11 +448,13 @@ const CreateYourOwnWorkout = () => {
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 p-4">
         <p className="text-sm text-muted-foreground">
-          {remaining === null
-            ? "Checking today's allowance…"
-            : limitReached
-              ? `You've built your ${DAILY_LIMIT} workouts for today. The next one unlocks tomorrow.`
-              : `You can build ${remaining} more ${remaining === 1 ? "workout" : "workouts"} today.`}
+          {isLoggedIn === false
+            ? "Take a look around — sign in when you're ready to build your first workout."
+            : remaining === null
+              ? "Checking today's allowance…"
+              : limitReached
+                ? `You've built your ${DAILY_LIMIT} workouts for today. The next one unlocks tomorrow.`
+                : `You can build ${remaining} more ${remaining === 1 ? "workout" : "workouts"} today.`}
         </p>
         <Button variant="outline" className="rounded-2xl" onClick={() => navigate("/my-workouts")}>
           <ListChecks className="mr-2 h-4 w-4" />
