@@ -223,6 +223,9 @@ const WorkoutFlow = () => {
     equipment: "Bodyweight/Minimal"
   }];
 
+  /** Slide ids in carousel order — Create Your Own Workout first, then the categories. */
+  const carouselSlideIds = ["create-your-own", ...workoutTypes.map((w) => w.id)];
+
   const handleWorkoutSelect = (workoutId: string) => {
     navigate(`/workout/${workoutId}`);
   };
