@@ -22,7 +22,7 @@ const FAQ = () => {
     <>
       <Helmet>
         <title>FAQ | SmartyGym Online Fitness</title>
-        <meta name="description" content="Answers to common SmartyGym questions: online workouts, training programs, pricing, equipment needs and how to get started." />
+        <meta name="description" content="Answers to common SmartyGym questions: online workouts, training programs, Create Your Own Workout, pricing, equipment needs and how to get started." />
         <meta name="keywords" content="smartygym faq, online fitness questions, home workout help, training program questions, fitness coaching faq, online gym help" />
         
         {/* Open Graph */}
