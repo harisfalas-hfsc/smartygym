@@ -511,7 +511,7 @@ const WorkoutFlow = () => {
                               key={w.id}
                               type="button"
                               onClick={() => navigate(`/workout/${slug}/${w.id}`)}
-                              className="flex items-stretch bg-card border border-border rounded-xl overflow-hidden hover:border-primary hover:shadow-lg transition-all duration-300 text-left w-full"
+                              className="flex flex-1 items-stretch bg-card border border-border rounded-xl overflow-hidden hover:border-primary hover:shadow-lg transition-all duration-300 text-left w-full"
                             >
                               <div className="relative w-16 flex-shrink-0 bg-muted">
                                 <img
