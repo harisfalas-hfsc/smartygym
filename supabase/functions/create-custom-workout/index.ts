@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
-import { generateWorkoutContent } from "./engine/generate.server.ts";
-import { microMinutes, resolveDifficulty } from "./engine/programming.ts";
+import { generateWorkoutContent } from "../_shared/workout-engine/generate.server.ts";
+import { microMinutes, resolveDifficulty } from "../_shared/workout-engine/programming.ts";
 import {
   CATEGORY_FORMATS,
   difficultyLabel,
@@ -10,7 +10,7 @@ import {
   type EquipmentMode,
   type Format,
   type StrengthFocus,
-} from "./engine/spec.ts";
+} from "../_shared/workout-engine/spec.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
