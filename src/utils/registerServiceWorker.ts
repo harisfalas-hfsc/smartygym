@@ -38,15 +38,7 @@ export const purgeAppServiceWorkers = async (): Promise<void> => {
   try {
     if ("caches" in window) {
       const names = await caches.keys();
-      await Promise.all(
-        names
-          .filter(
-            (name) =>
-              APP_CACHE_NAMES.includes(name) ||
-              /(^|-)precache-v\d+-|(^|-)workbox-/.test(name)
-          )
-          .map((name) => caches.delete(name))
-      );
+      await Promise.all(names.map((name) => caches.delete(name)));
     }
   } catch {
     // ignore
@@ -104,7 +96,9 @@ export const startDeploymentUpdateWatcher = (): (() => void) => {
 
       const publishedBundle = getPublishedAppBundle(await response.text());
       if (publishedBundle && publishedBundle !== loadedBundle) {
-        window.location.reload();
+        const nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.set("__smarty_refresh", Date.now().toString());
+        window.location.replace(nextUrl.href);
       }
     } catch {
       // A temporary network failure should never interrupt the current screen.

@@ -1,17 +1,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { isReachable } from "@/lib/offline/connectivity";
 import { User } from "@supabase/supabase-js";
 import { fetchFreeAccessMode } from "@/hooks/useFreeAccessMode";
-import { readOffline, saveOffline, setCurrentUserId } from "@/lib/offline";
-
-const ENTITLEMENT_KEY = "entitlements:snapshot";
-
-interface EntitlementSnapshot {
-  userTier: UserTier;
-  productId: string | null;
-  purchasedContent: string[];
-}
+import { setCurrentUserId } from "@/lib/offline";
 
 export type UserTier = "guest" | "subscriber" | "premium";
 
@@ -105,16 +96,6 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.user) {
-        // Offline with a cached session? keep the member signed in read-only.
-        if (!isReachable()) {
-          const { restoreCachedSessionOffline } = await import("@/lib/offline");
-          const restored = await restoreCachedSessionOffline();
-          if (restored?.user) {
-            setCurrentUserId(restored.user.id);
-            await checkSubscription(restored.user);
-            return;
-          }
-        }
         setState({
           user: null,
           userTier: "guest",
@@ -141,36 +122,8 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
   const checkSubscription = async (user: User) => {
     setCurrentUserId(user.id);
 
-    // Render from the last verified entitlement immediately. The online
-    // refresh below must never hold the whole application behind billing and
-    // database round trips.
-    const cachedSnapshot = await readOffline<EntitlementSnapshot>(ENTITLEMENT_KEY, user.id);
-    if (cachedSnapshot) {
-      setState({
-        user,
-        userTier: cachedSnapshot.data.userTier,
-        isLoading: false,
-        productId: cachedSnapshot.data.productId,
-        purchasedContent: new Set(cachedSnapshot.data.purchasedContent),
-      });
-    }
-
-    // OFFLINE: reuse the exact entitlement level captured on this device the
-    // last time we were online. Never elevate, never downgrade.
-    if (!isReachable()) {
-      const snap = await readOffline<EntitlementSnapshot>(ENTITLEMENT_KEY, user.id);
-      setState({
-        user,
-        userTier: snap?.data.userTier ?? "guest",
-        isLoading: false,
-        productId: snap?.data.productId ?? null,
-        purchasedContent: new Set(snap?.data.purchasedContent ?? []),
-      });
-      return;
-    }
-
     try {
-      if (!cachedSnapshot) setState(prev => ({ ...prev, isLoading: true }));
+      setState(prev => ({ ...prev, isLoading: true }));
 
       const [subscriptionResult, purchasesResult, adminResult, corpAdminResult, corpMemberResult, freeAccessMode] = await Promise.all([
         supabase.from('user_subscriptions').select('plan_type, status, current_period_end, stripe_subscription_id').eq('user_id', user.id).maybeSingle(),
@@ -240,12 +193,6 @@ export const AccessControlProvider = ({ children }: { children: ReactNode }) => 
 
       setState({ user, userTier, isLoading: false, productId, purchasedContent });
 
-      // Persist the resolved entitlement for offline sessions.
-      void saveOffline<EntitlementSnapshot>(
-        ENTITLEMENT_KEY,
-        { userTier, productId, purchasedContent: [...purchasedContent] },
-        user.id,
-      );
     } catch (error) {
       console.error("Error checking subscription:", error);
       setState({
