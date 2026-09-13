@@ -1,5 +1,4 @@
-import { readOffline, saveOffline } from "./db";
-import { isReachable, reportRequestFailure, reportRequestSuccess } from "./connectivity";
+import { reportRequestFailure, reportRequestSuccess } from "./connectivity";
 
 export class OfflineUnavailableError extends Error {
   constructor(message = "You're offline and this device has no saved copy yet.") {
@@ -8,65 +7,28 @@ export class OfflineUnavailableError extends Error {
   }
 }
 
-const isOnline = () => isReachable();
-const FOREGROUND_TIMEOUT_MS = 8_000;
-
-const withForegroundTimeout = <T>(promise: Promise<T>): Promise<T> =>
-  new Promise<T>((resolve, reject) => {
-    const timer = window.setTimeout(
-      () => reject(new Error("Network request timed out")),
-      FOREGROUND_TIMEOUT_MS,
-    );
-    promise.then(
-      (value) => {
-        window.clearTimeout(timer);
-        resolve(value);
-      },
-      (error) => {
-        window.clearTimeout(timer);
-        reject(error);
-      },
-    );
-  });
-
 /**
- * Single read path for the whole app: try the network, persist the fresh result
- * locally, and fall back to the last saved copy on any failure.
+ * SmartyGym no longer serves content from a local cache. Every read — web,
+ * installed PWA, or the native Android/iOS WebView — goes straight to the
+ * database, so newly published workouts and programs appear immediately on
+ * every device. The helper name is kept so existing call sites stay unchanged.
  */
 export async function offlineFirst<T>(
-  key: string,
+  _key: string,
   loader: () => Promise<T>,
-  userId?: string | null,
+  _userId?: string | null,
 ): Promise<T> {
-  if (isOnline()) {
-    try {
-      const fresh = await withForegroundTimeout(loader());
-      reportRequestSuccess();
-      void saveOffline(key, fresh, userId);
-      return fresh;
-    } catch (error) {
-      reportRequestFailure();
-      const cached = await readOffline<T>(key, userId);
-      if (cached) return cached.data;
-      throw error;
-    }
-  }
-
-  const cached = await readOffline<T>(key, userId);
-  if (cached) return cached.data;
-
-  // Offline with nothing saved — still try (captive portals / flaky flags).
   try {
-    const fresh = await withForegroundTimeout(loader());
-    void saveOffline(key, fresh, userId);
+    const fresh = await loader();
+    reportRequestSuccess();
     return fresh;
-  } catch {
-    throw new OfflineUnavailableError();
+  } catch (error) {
+    reportRequestFailure();
+    throw error;
   }
 }
 
-/** Read the cached copy without touching the network. */
-export async function peekOffline<T>(key: string, userId?: string | null): Promise<T | null> {
-  const cached = await readOffline<T>(key, userId);
-  return cached ? cached.data : null;
+/** Retained for compatibility — there is no local copy to peek at any more. */
+export async function peekOffline<T>(_key: string, _userId?: string | null): Promise<T | null> {
+  return null;
 }
