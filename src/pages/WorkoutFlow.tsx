@@ -351,31 +351,61 @@ const WorkoutFlow = () => {
             </div>
           </Card>
 
-          {/* Create Your Own Workout */}
-          <Card className="mb-8 border-2 border-primary/40 bg-card">
-            <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-              <div>
-                <h2 className="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-primary">
-                  Create Your Own Workout
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-                  Answer a few quick questions and build a session around your goal, your time and the
-                  equipment you have today. Your own sessions stay private in your dashboard.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button onClick={() => navigate("/create-your-own-workout")} className="cta-button">
-                  Build a workout
-                </Button>
-                <Button variant="outline" onClick={() => navigate("/my-workouts")}>
-                  My own workouts
-                </Button>
-              </div>
-            </div>
-          </Card>
-
           {/* Desktop: Grid Layout - Stacked blog-card style */}
           <div className="hidden lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* Create Your Own Workout — first card in the row */}
+            <ScrollReveal>
+              <Card
+                onClick={() => navigate("/create-your-own-workout")}
+                className="group cursor-pointer transition-all duration-500 ease-out transform-gpu hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/40 hover:border-primary/60 border-2 border-primary/60 overflow-hidden bg-card"
+                role="button"
+                aria-label="Create Your Own Workout - build a session around your goal, time and equipment"
+              >
+                <div className="relative h-48 lg:h-52 overflow-hidden">
+                  <img
+                    src={CREATE_OWN_IMAGE}
+                    alt="Athlete building a personalised workout on his phone in a dark gym"
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
+                <div className="p-5 flex flex-col items-center text-center space-y-3">
+                  <div
+                    className="relative w-14 h-14 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                    aria-hidden="true"
+                  >
+                    <div className="absolute inset-0 rounded-full bg-primary/10 pointer-events-none" aria-hidden="true" />
+                    <Wand2 className="relative w-7 h-7 transition-transform duration-300 group-hover:rotate-3 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2 text-foreground">
+                      {CREATE_OWN_TITLE}
+                    </h3>
+                    <p className="text-sm mb-3 text-muted-foreground">
+                      {CREATE_OWN_DESC}
+                    </p>
+                    <p className="text-xs italic text-muted-foreground">
+                      Crafted by{" "}
+                      <a href="/coach-profile" className="hover:underline font-medium whitespace-nowrap text-primary" onClick={e => e.stopPropagation()}>
+                        Haris Falas
+                      </a>
+                      {" "}BSc Sports Science, EXOS Specialist, CSCS
+                    </p>
+                    <div className="flex gap-1 text-[10px] mt-2 justify-center">
+                      <span className="px-1.5 py-0.5 rounded-full whitespace-nowrap bg-primary/20 text-primary border border-primary/40">
+                        Personalised
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded-full whitespace-nowrap bg-green-500/20 text-green-700 dark:text-green-400 border border-green-500/40">
+                        All Levels
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded-full whitespace-nowrap bg-orange-500/20 text-orange-700 dark:text-orange-400 border border-orange-500/40">
+                        Any Equipment
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </ScrollReveal>
             {workoutTypes.map(workout => {
               const Icon = workout.icon;
               const isWodCard = workout.id === "wod";
