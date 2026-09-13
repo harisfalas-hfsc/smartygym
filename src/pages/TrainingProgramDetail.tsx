@@ -42,6 +42,7 @@ import { useAccessControl } from "@/hooks/useAccessControl";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { stripHtmlTags } from "@/lib/text";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
+import { PROGRAM_CATEGORY_BY_SLUG, programMatchesCategorySlug } from "@/constants/workoutCategories";
 
 type EquipmentFilter = "all" | "bodyweight" | "equipment";
 type LevelFilter = "all" | "beginner" | "intermediate" | "advanced";
@@ -117,14 +118,7 @@ const TrainingProgramDetail = () => {
     durationFilter !== "all" || statusFilter !== "all" || sortBy !== "newest" || accessFilter !== "all";
   
   // Map URL type to database category
-  const categoryMap: { [key: string]: string } = {
-    "cardio-endurance": "CARDIO ENDURANCE",
-    "functional-strength": "FUNCTIONAL STRENGTH",
-    "muscle-hypertrophy": "MUSCLE HYPERTROPHY",
-    "weight-loss": "WEIGHT LOSS",
-    "low-back-pain": "LOW BACK PAIN",
-    "mobility-stability": "MOBILITY & STABILITY"
-  };
+  const categoryMap = PROGRAM_CATEGORY_BY_SLUG;
 
   const programTitles: { [key: string]: string } = {
     "cardio-endurance": "Cardio Endurance Programs",
@@ -203,7 +197,7 @@ const TrainingProgramDetail = () => {
   const fallbackProgramImage = programFallbackByType[type || ""] || "/images/programs/cardio-endurance-bg.jpg";
   // First filter by category from URL
   const currentTypePrograms = allPrograms.filter(program => {
-    return program.category?.toUpperCase().includes(mappedCategory);
+    return programMatchesCategorySlug(program.category, type);
   });
   
   if (import.meta.env.DEV) {

@@ -13,6 +13,58 @@ export const WORKOUT_CATEGORIES = [
 
 export type WorkoutCategory = typeof WORKOUT_CATEGORIES[number];
 
+export const WORKOUT_CATEGORY_BY_SLUG: Record<string, WorkoutCategory> = {
+  "strength": "STRENGTH",
+  "calorie-burning": "CALORIE BURNING",
+  "metabolic": "METABOLIC",
+  "cardio": "CARDIO",
+  "mobility": "MOBILITY & STABILITY",
+  "challenge": "CHALLENGE",
+  "pilates": "PILATES",
+  "recovery": "RECOVERY",
+  "micro-workouts": "MICRO-WORKOUTS",
+};
+
+const normalizeCategoryText = (category: string) =>
+  category.trim().toUpperCase().replace(/\s*&\s*/g, " & ").replace(/[\s_-]+/g, " ");
+
+export const workoutCategoryToSlug = (category: string | null | undefined): string => {
+  if (!category) return "";
+  const normalized = normalizeCategoryText(category);
+  const match = Object.entries(WORKOUT_CATEGORY_BY_SLUG).find(
+    ([, value]) => normalizeCategoryText(value) === normalized,
+  );
+  return match?.[0] || normalized.toLowerCase().replace(/\s+/g, "-");
+};
+
+export const workoutMatchesCategorySlug = (
+  category: string | null | undefined,
+  slug: string | null | undefined,
+) => !!category && !!slug && workoutCategoryToSlug(category) === slug;
+
+export const PROGRAM_CATEGORY_BY_SLUG = {
+  "cardio-endurance": "CARDIO ENDURANCE",
+  "functional-strength": "FUNCTIONAL STRENGTH",
+  "muscle-hypertrophy": "MUSCLE HYPERTROPHY",
+  "weight-loss": "WEIGHT LOSS",
+  "low-back-pain": "LOW BACK PAIN",
+  "mobility-stability": "MOBILITY & STABILITY",
+} as const;
+
+export const programCategoryToSlug = (category: string | null | undefined): string => {
+  if (!category) return "";
+  const normalized = normalizeCategoryText(category);
+  const match = Object.entries(PROGRAM_CATEGORY_BY_SLUG).find(
+    ([, value]) => normalizeCategoryText(value) === normalized,
+  );
+  return match?.[0] || normalized.toLowerCase().replace(/\s+/g, "-");
+};
+
+export const programMatchesCategorySlug = (
+  category: string | null | undefined,
+  slug: string | null | undefined,
+) => !!category && !!slug && programCategoryToSlug(category) === slug;
+
 // Strength-only periodization focus values. Do not use these for non-Strength categories.
 export const STRENGTH_FOCUS_OPTIONS = [
   "LOWER BODY",
