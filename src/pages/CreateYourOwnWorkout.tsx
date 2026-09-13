@@ -139,6 +139,7 @@ const CreateYourOwnWorkout = () => {
   const [confirmHard, setConfirmHard] = useState(false);
   const [name, setName] = useState<string>("");
   const [builtToday, setBuiltToday] = useState<number | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   const remaining = builtToday === null ? null : Math.max(0, DAILY_LIMIT - builtToday);
   const limitReached = remaining === 0;
@@ -148,7 +149,8 @@ const CreateYourOwnWorkout = () => {
     (async () => {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) {
-        navigate("/auth", { replace: true });
+        // Visitors can view the page; only creating a session needs an account.
+        if (!cancelled) setIsLoggedIn(false);
         return;
       }
       const { data: profile } = await supabase
@@ -166,6 +168,7 @@ const CreateYourOwnWorkout = () => {
       if (cancelled) return;
       setName((profile?.full_name as string) ?? "");
       setBuiltToday(count ?? 0);
+      setIsLoggedIn(true);
     })();
     return () => {
       cancelled = true;
