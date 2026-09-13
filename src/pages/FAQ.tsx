@@ -22,7 +22,7 @@ const FAQ = () => {
     <>
       <Helmet>
         <title>FAQ | SmartyGym Online Fitness</title>
-        <meta name="description" content="Answers to common SmartyGym questions: online workouts, training programs, pricing, equipment needs and how to get started." />
+        <meta name="description" content="Answers to common SmartyGym questions: online workouts, training programs, Create Your Own Workout, pricing, equipment needs and how to get started." />
         <meta name="keywords" content="smartygym faq, online fitness questions, home workout help, training program questions, fitness coaching faq, online gym help" />
         
         {/* Open Graph */}
@@ -71,6 +71,22 @@ const FAQ = () => {
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "We're 100% human, 0% AI. Every workout is personally designed by Haris Falas, a qualified Sports Scientist and S&C Coach — never by algorithms or AI. You get real expertise from a real coach with 20+ years of experience, real support, and direct access to the person who created your program."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is Create Your Own Workout?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Create Your Own Workout is a guided builder that asks about your goal, available time, equipment, location, and energy level, then assembles a session from the Smarty Gym exercise library using Haris Falas's coaching rules, training philosophy, and 20+ years of expertise. It is not an AI workout generator — every exercise, rep scheme, and structure is drawn from the same human-designed system that powers all SmartyGym content."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I create my own workout?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. After signing in, go to the Smarty Workouts page and tap Create Your Own Workout. Answer a few quick questions and the builder will produce a personalised session that matches your goal, time, and equipment. Each session is built from the Smarty Gym exercise library and follows Haris Falas's coaching methodology, so it stays true to the same philosophy behind every workout and program on the platform."
                 }
               },
               {
@@ -215,6 +231,26 @@ const FAQ = () => {
                       a qualified Sports Scientist and S&C Coach — never by algorithms or AI. You get real expertise from a real coach with 20+ years 
                       of experience, real support, and direct access to the person who created your program. We focus on sustainable, functional training 
                       that fits into your real life — not quick fixes or unrealistic promises.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3b">
+                    <AccordionTrigger className="text-left">What is Create Your Own Workout?</AccordionTrigger>
+                    <AccordionContent className="py-2 leading-relaxed">
+                      <strong>Create Your Own Workout</strong> is a guided builder that asks about your goal, available time, equipment, location, and energy level, 
+                      then assembles a session from the Smarty Gym exercise library using <a href="/coach-profile" className="text-primary hover:underline font-medium">Haris Falas</a>'s 
+                      coaching rules, training philosophy, and 20+ years of expertise. It is <strong>not an AI workout generator</strong> — every exercise, rep scheme, and structure 
+                      is drawn from the same human-designed system that powers all SmartyGym content.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3c">
+                    <AccordionTrigger className="text-left">Can I create my own workout?</AccordionTrigger>
+                    <AccordionContent className="py-2 leading-relaxed">
+                      Yes. After signing in, go to the <a href="/workouts" className="text-primary hover:underline font-medium">Smarty Workouts</a> page and tap 
+                      <strong> Create Your Own Workout</strong>. Answer a few quick questions and the builder will produce a personalised session that matches your goal, time, and equipment. 
+                      Each session is built from the Smarty Gym exercise library and follows <a href="/coach-profile" className="text-primary hover:underline font-medium">Haris Falas</a>'s 
+                      coaching methodology, so it stays true to the same philosophy behind every workout and program on the platform.
                     </AccordionContent>
                   </AccordionItem>
 
