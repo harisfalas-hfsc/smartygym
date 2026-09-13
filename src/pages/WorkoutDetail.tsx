@@ -34,7 +34,7 @@ import { useWorkoutInteractions } from "@/hooks/useWorkoutInteractions";
 import { supabase } from "@/integrations/supabase/client";
 import { stripHtmlTags } from "@/lib/text";
 import { buildUniqueContentSlugs, slugifyContentName } from "@/lib/seo-slugs";
-import { STRENGTH_FOCUS_OPTIONS, isStrengthFocus, type StrengthFocus } from "@/constants/workoutCategories";
+import { WORKOUT_CATEGORY_BY_SLUG, STRENGTH_FOCUS_OPTIONS, isStrengthFocus, workoutMatchesCategorySlug, type StrengthFocus } from "@/constants/workoutCategories";
 
 type EquipmentFilter = "all" | "bodyweight" | "equipment";
 type LevelFilter = "all" | "beginner" | "intermediate" | "advanced";
@@ -130,17 +130,7 @@ const WorkoutDetail = () => {
   }
   
   // Map URL type to database category
-  const categoryMap: { [key: string]: string } = {
-    "strength": "STRENGTH",
-    "calorie-burning": "CALORIE BURNING",
-    "metabolic": "METABOLIC",
-    "cardio": "CARDIO",
-    "mobility": "MOBILITY & STABILITY",
-    "challenge": "CHALLENGE",
-    "pilates": "PILATES",
-    "recovery": "RECOVERY",
-    "micro-workouts": "MICRO-WORKOUTS"
-  };
+  const categoryMap = WORKOUT_CATEGORY_BY_SLUG;
 
   const workoutTitles: { [key: string]: string } = {
     "strength": "Strength Workouts",
@@ -211,7 +201,7 @@ const WorkoutDetail = () => {
   const fallbackWorkoutImage = workoutFallbackByType[type || ""] || "/images/workouts/strength-category-bg.jpg";
   // First filter by category from URL - EXCLUDE active WODs (they should only appear on WOD page)
   const currentTypeWorkouts = allWorkouts.filter(workout => {
-    const categoryMatch = workout.category?.toUpperCase().includes(mappedCategory);
+    const categoryMatch = workoutMatchesCategorySlug(workout.category, type);
     const isNotActiveWOD = workout.is_workout_of_day !== true || workout.wod_source === 'library'; // Library-selected WODs remain visible in categories
     return categoryMatch && isNotActiveWOD;
   });

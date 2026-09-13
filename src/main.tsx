@@ -45,8 +45,7 @@ clearLovableDeploymentPinCookie();
 // wrapper or native shell. Every launch loads the current deployment.
 void purgeAppServiceWorkers();
 
-// Already-open browser/PWA tabs check the published bundle every 30 seconds
-// and refresh themselves when a new deployment reaches the live domain.
+// Refresh an open browser or installed web app when a new deployment lands.
 startDeploymentUpdateWatcher();
 
 const rootElement = document.getElementById("root");

@@ -63,63 +63,52 @@ export const purgeAppServiceWorkers = async (): Promise<void> => {
   );
 };
 
-const getLoadedAppBundle = (): string | null => {
-  const scripts = Array.from(document.querySelectorAll<HTMLScriptElement>('script[type="module"][src]'));
-  return scripts.map((script) => script.src).find((src) => src.includes("/assets/index-")) ?? null;
-};
-
-const getPublishedAppBundle = (html: string): string | null => {
-  const parsed = new DOMParser().parseFromString(html, "text/html");
-  const scripts = Array.from(parsed.querySelectorAll<HTMLScriptElement>('script[type="module"][src]'));
-  const source = scripts.map((script) => script.getAttribute("src")).find((src) => src?.includes("/assets/index-"));
+const getAppBundle = (documentRoot: Document): string | null => {
+  const source = Array.from(documentRoot.querySelectorAll<HTMLScriptElement>('script[type="module"][src]'))
+    .map((script) => script.getAttribute("src"))
+    .find((src) => src?.includes("/assets/index-"));
   return source ? new URL(source, window.location.origin).href : null;
 };
 
-/** Reload an already-open web app as soon as a newer published bundle is available. */
+/** Refresh already-open clients when the live deployment changes. */
 export const startDeploymentUpdateWatcher = (): (() => void) => {
   if (typeof window === "undefined" || window.location.hostname === "localhost") return () => undefined;
-
-  const loadedBundle = getLoadedAppBundle();
+  const loadedBundle = getAppBundle(document);
   if (!loadedBundle) return () => undefined;
 
   let checking = false;
-  const checkForUpdate = async () => {
+  const check = async () => {
     if (checking || !navigator.onLine) return;
     checking = true;
-
     try {
-      const response = await fetch(`${window.location.pathname}?__smarty_version=${Date.now()}`, {
+      // Always inspect the root document, avoiding route-specific prerender or CDN variance.
+      const response = await fetch(`/?__smarty_version=${Date.now()}`, {
         cache: "no-store",
-        headers: { "Cache-Control": "no-cache" },
+        headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
       });
       if (!response.ok) return;
-
-      const publishedBundle = getPublishedAppBundle(await response.text());
+      const publishedDocument = new DOMParser().parseFromString(await response.text(), "text/html");
+      const publishedBundle = getAppBundle(publishedDocument);
       if (publishedBundle && publishedBundle !== loadedBundle) {
-        const nextUrl = new URL(window.location.href);
-        nextUrl.searchParams.set("__smarty_refresh", Date.now().toString());
-        window.location.replace(nextUrl.href);
+        window.location.reload();
       }
     } catch {
-      // A temporary network failure should never interrupt the current screen.
+      // Keep the current screen usable during temporary connectivity failures.
     } finally {
       checking = false;
     }
   };
 
-  const interval = window.setInterval(() => void checkForUpdate(), 10_000);
-  const onVisibilityChange = () => {
-    if (document.visibilityState === "visible") void checkForUpdate();
-  };
-  const onOnline = () => void checkForUpdate();
-
-  document.addEventListener("visibilitychange", onVisibilityChange);
-  window.addEventListener("online", onOnline);
-  void checkForUpdate();
+  const interval = window.setInterval(() => void check(), 10_000);
+  const onVisible = () => document.visibilityState === "visible" && void check();
+  window.addEventListener("online", check);
+  document.addEventListener("visibilitychange", onVisible);
+  void check();
 
   return () => {
     window.clearInterval(interval);
-    document.removeEventListener("visibilitychange", onVisibilityChange);
-    window.removeEventListener("online", onOnline);
+    window.removeEventListener("online", check);
+    document.removeEventListener("visibilitychange", onVisible);
   };
 };
+

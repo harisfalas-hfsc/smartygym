@@ -22,15 +22,7 @@ import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { cn } from "@/lib/utils";
 import { fetchVisibleWorkoutMetadata } from "@/hooks/useTodayWods";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
-
-const WOD_CATEGORIES = [
-  "STRENGTH",
-  "CALORIE BURNING", 
-  "METABOLIC",
-  "CARDIO",
-  "MOBILITY & STABILITY",
-  "CHALLENGE"
-];
+import { WORKOUT_CATEGORIES } from "@/constants/workoutCategories";
 
 const EQUIPMENT_OPTIONS = ["BODYWEIGHT", "EQUIPMENT"];
 const DIFFICULTY_OPTIONS = ["Beginner", "Intermediate", "Advanced"];
@@ -259,7 +251,7 @@ const WODArchive = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {WOD_CATEGORIES.map((cat) => (
+              {WORKOUT_CATEGORIES.map((cat) => (
                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
               ))}
             </SelectContent>
