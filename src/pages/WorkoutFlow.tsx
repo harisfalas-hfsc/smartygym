@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { InfoRibbon } from "@/components/InfoRibbon";
-import { Dumbbell, Flame, Zap, Heart, Move, Activity, CalendarCheck, Flower2, RefreshCw, Timer, Wand2 } from "lucide-react";
+import { Dumbbell, Flame, Zap, Heart, Move, Activity, CalendarCheck, Flower2, RefreshCw, Timer, Wand2, Star } from "lucide-react";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { generateBreadcrumbSchema } from "@/utils/seoHelpers";
 import { useAccessControl } from "@/hooks/useAccessControl";
@@ -134,7 +134,7 @@ const WorkoutFlow = () => {
 
   // Extended descriptions for mobile carousel
   const workoutDescriptions: Record<string, string> = {
-    "create-your-own": "Answer a few questions and get a session built for today — your goal, your time, your equipment.",
+    "create-your-own": "A session built around your goal, your time and your equipment.",
     "wod": "Your daily dose of expertly programmed fitness, following science-based periodization.",
     "strength": "Single-session workouts to build foundational strength, power, and muscular endurance.",
     "calorie-burning": "High-intensity sessions designed to maximize calorie burn and fat loss.",
@@ -149,7 +149,7 @@ const WorkoutFlow = () => {
 
   const CREATE_OWN_IMAGE = "/images/workouts/create-your-own-card.jpg";
   const CREATE_OWN_TITLE = "Create Your Own Workout";
-  const CREATE_OWN_DESC = "Answer a few questions and get a coach-grade session built around your goal, your time and your equipment.";
+  const CREATE_OWN_DESC = "A session built around your goal, your time and your equipment.";
 
   const workoutTypes = [{
     id: "wod",
