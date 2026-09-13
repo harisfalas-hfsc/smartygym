@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccessControl } from "@/hooks/useAccessControl";
 import { useToast } from "@/hooks/use-toast";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
+import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { GeneratingDialog } from "@/components/workout/GeneratingDialog";
 import {
   AlertDialog,
@@ -299,7 +300,7 @@ const CreateYourOwnWorkout = () => {
   // access-control context, so this gate disappears automatically.
   if (!accessLoading && !isPremium) {
     return (
-      <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-12 lg:max-w-6xl lg:px-8 lg:py-12">
+      <div className="container mx-auto min-h-screen max-w-6xl px-4 pb-8 md:max-w-[1500px] md:px-6">
         <Helmet>
           <title>Create Your Own Workout | Smarty Gym</title>
           <meta
@@ -308,6 +309,14 @@ const CreateYourOwnWorkout = () => {
           />
           <meta name="robots" content="noindex" />
         </Helmet>
+
+        <PageBreadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Smarty Workouts", href: "/workout" },
+            { label: "Create Your Own Workout" },
+          ]}
+        />
 
         <DesktopPageIntro icon={Sparkles} title="Create Your Own Workout">
           <p className="font-bold text-foreground">{PAGE_DESCRIPTION}</p>
@@ -344,7 +353,7 @@ const CreateYourOwnWorkout = () => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-12 lg:max-w-6xl lg:px-8 lg:py-12">
+    <div className="container mx-auto min-h-screen max-w-6xl px-4 pb-8 md:max-w-[1500px] md:px-6">
       <Helmet>
         <title>Create Your Own Workout | Smarty Gym</title>
         <meta
@@ -353,6 +362,14 @@ const CreateYourOwnWorkout = () => {
         />
         <meta name="robots" content="noindex" />
       </Helmet>
+
+      <PageBreadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Smarty Workouts", href: "/workout" },
+          { label: "Create Your Own Workout" },
+        ]}
+      />
 
       {/* Desktop: category-style description card */}
       <Card className="hidden lg:block mb-6 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
