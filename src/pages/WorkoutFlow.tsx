@@ -511,7 +511,7 @@ const WorkoutFlow = () => {
                               key={w.id}
                               type="button"
                               onClick={() => navigate(`/workout/${slug}/${w.id}`)}
-                              className="flex flex-1 items-stretch bg-card border border-border rounded-xl overflow-hidden hover:border-primary hover:shadow-lg transition-all duration-300 text-left w-full"
+                              className="flex flex-1 items-stretch bg-card border-2 border-green-500/60 rounded-xl overflow-hidden hover:border-green-500 hover:shadow-lg transition-all duration-300 text-left w-full"
                             >
                               <div className="relative w-16 flex-shrink-0 bg-muted">
                                 <img
@@ -607,10 +607,10 @@ const WorkoutFlow = () => {
                          itemScope
                          itemType="https://schema.org/ExercisePlan"
                          onClick={() => handleWorkoutSelect(workout.id)}
-                            className="smarty-carousel-card-portrait-tablet flex flex-col h-[300px] min-[540px]:h-[600px] bg-card border-2 border-green-500/60 rounded-xl overflow-hidden cursor-pointer hover:border-green-500 hover:scale-[1.02] hover:shadow-xl transition-all duration-300"
-                         role="button"
-                         aria-label={`${workout.title} workouts`}
-                       >
+                             className="smarty-carousel-card-portrait-tablet flex flex-col h-[300px] min-[540px]:h-[600px] bg-card border-2 border-primary/60 rounded-xl overflow-hidden cursor-pointer hover:border-primary hover:scale-[1.02] hover:shadow-xl transition-all duration-300"
+                          role="button"
+                          aria-label={`${workout.title} workouts`}
+                        >
                          {/* Image section */}
                            <div className="smarty-carousel-image-portrait-tablet relative h-[58%] min-[540px]:h-[72%] min-[540px]:aspect-auto overflow-hidden flex-shrink-0 bg-muted">
                           {isWodCard && wodImages.length > 0 ? (
@@ -695,7 +695,7 @@ const WorkoutFlow = () => {
                       key={w.id}
                       type="button"
                       onClick={() => navigate(`/workout/${slug}/${w.id}`)}
-                      className="flex items-stretch bg-card border-2 border-primary/40 rounded-xl overflow-hidden hover:border-primary hover:shadow-xl transition-all duration-300 text-left"
+                      className="flex items-stretch bg-card border-2 border-green-500/60 rounded-xl overflow-hidden hover:border-green-500 hover:shadow-xl transition-all duration-300 text-left"
                     >
                       <div className="relative w-28 flex-shrink-0 bg-muted">
                         <img

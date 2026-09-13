@@ -355,7 +355,13 @@ const CreateYourOwnWorkout = () => {
       </Helmet>
 
       <DesktopPageIntro icon={Sparkles} title="Create Your Own Workout">
-        <p className="font-bold text-foreground">{PAGE_DESCRIPTION}</p>
+        <p className="font-bold text-foreground">
+          <span className="text-primary font-semibold">Create Your Own Workout</span> puts Coach Haris Falas's knowledge and experience in your pocket.{" "}
+          <span className="text-primary font-semibold">
+            Every session is assembled from his coaching rules and the Smarty Gym exercise library — a huge collection of human-designed movements — matched to your goal, your time, your equipment and how you feel today. Nothing generic, nothing random: the right workout for you
+          </span>
+          , built on real coaching.
+        </p>
       </DesktopPageIntro>
 
       <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
@@ -369,7 +375,13 @@ const CreateYourOwnWorkout = () => {
                 {name}, what's your workout today?
               </p>
             ) : null}
-            <p className="text-sm text-center">{PAGE_DESCRIPTION}</p>
+            <p className="text-sm text-center">
+              <span className="text-primary font-semibold">Create Your Own Workout</span> puts Coach Haris Falas's knowledge and experience in your pocket.{" "}
+              <span className="text-primary font-semibold">
+                Every session is assembled from his coaching rules and the Smarty Gym exercise library — a huge collection of human-designed movements — matched to your goal, your time, your equipment and how you feel today. Nothing generic, nothing random: the right workout for you
+              </span>
+              , built on real coaching.
+            </p>
           </div>
         </div>
       </Card>
