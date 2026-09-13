@@ -5,6 +5,7 @@ import { WorkoutDisplay } from "@/components/WorkoutDisplay";
 import { AccessGate } from "@/components/AccessGate";
 import { useTrainingProgramData, type TrainingProgramData } from "@/hooks/useTrainingProgramData";
 import { useAccessControl } from "@/hooks/useAccessControl";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { ContentNotFound } from "@/components/ContentNotFound";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { getProgramCategorySlug, slugifyContentName } from "@/lib/seo-slugs";
@@ -28,6 +29,7 @@ const IndividualTrainingProgram = () => {
   const { type, id } = useParams();
   const lookupId = id || type;
   const { userTier, hasPurchased } = useAccessControl();
+  const { freeAccessMode } = useFreeAccessMode();
   
   // Helper function to format focus label
   const getFocusLabel = (type: string | undefined): string => {
