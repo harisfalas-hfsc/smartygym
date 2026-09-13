@@ -51,6 +51,8 @@ export const useAllPrograms = () => {
     refetchOnMount: "always",
     refetchOnWindowFocus: "always",
     refetchOnReconnect: "always",
+    refetchInterval: 30 * 1000,
+    retry: 3,
     queryFn: offlineQueryFn("programs:list:all", async () => {
       const { data, error } = await supabase
         .rpc("get_visible_program_metadata" as never, { _program_id: null } as never);
@@ -64,7 +66,7 @@ export const useAllPrograms = () => {
         if (import.meta.env.DEV) {
           console.error("Error fetching programs:", error);
         }
-        return [];
+        throw error;
       }
 
       return (data || []).sort((a: any, b: any) => a.name.localeCompare(b.name));

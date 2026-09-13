@@ -73,7 +73,7 @@ const IndividualTrainingProgram = () => {
     const isPremium = dbProgram.is_premium;
     const canPurchase = dbProgram.is_standalone_purchase && dbProgram.price && isPremium;
     const alreadyPurchased = hasPurchased(dbProgram.id, "program");
-    const hasAccess = userTier === "premium" || alreadyPurchased || !isPremium;
+    const hasAccess = freeAccessMode || userTier === "premium" || alreadyPurchased || !isPremium;
     
     const programCategorySlug = getProgramCategorySlug(dbProgram.category, type || "functional-strength");
     const programUrl = `https://smartygym.com/trainingprogram/${programCategorySlug}/${dbProgram.canonical_slug || slugifyContentName(dbProgram.name || dbProgram.id)}.html`;
@@ -227,7 +227,7 @@ const IndividualTrainingProgram = () => {
 
             <AccessGate 
               requireAuth={true} 
-              requirePremium={isPremium && !hasAccess} 
+              requirePremium={!freeAccessMode && isPremium && !hasAccess} 
               contentType="program"
               contentId={dbProgram.id}
               contentName={dbProgram.name}

@@ -79,6 +79,7 @@ const TrainingProgramFlow = () => {
     refetchOnMount: "always",
     refetchOnWindowFocus: "always",
     refetchOnReconnect: "always",
+    refetchInterval: 30 * 1000,
   });
 
   const totalProgramCount = Object.values(programCounts).reduce((sum, c) => sum + c, 0);
@@ -98,6 +99,7 @@ const TrainingProgramFlow = () => {
     refetchOnMount: "always",
     refetchOnWindowFocus: "always",
     refetchOnReconnect: "always",
+    refetchInterval: 30 * 1000,
   });
 
   const programCategoryToSlug = (cat?: string | null) =>
