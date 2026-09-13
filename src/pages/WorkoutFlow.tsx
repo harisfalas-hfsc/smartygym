@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { InfoRibbon } from "@/components/InfoRibbon";
-import { Dumbbell, Flame, Zap, Heart, Move, Activity, CalendarCheck, Flower2, RefreshCw, Timer, Wand2 } from "lucide-react";
+import { Dumbbell, Flame, Zap, Heart, Move, Activity, CalendarCheck, Flower2, RefreshCw, Timer, Wand2, Star } from "lucide-react";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { generateBreadcrumbSchema } from "@/utils/seoHelpers";
 import { useAccessControl } from "@/hooks/useAccessControl";
@@ -71,7 +71,7 @@ const WorkoutFlow = () => {
         .filter((w) => w.is_workout_of_day !== true || w.wod_source === "library")
         .filter((w) => !!w.created_at)
         .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
-        .slice(0, 6);
+        .slice(0, 3);
     },
     staleTime: 1000 * 60 * 5,
   });
@@ -134,7 +134,7 @@ const WorkoutFlow = () => {
 
   // Extended descriptions for mobile carousel
   const workoutDescriptions: Record<string, string> = {
-    "create-your-own": "Answer a few questions and get a session built for today — your goal, your time, your equipment.",
+    "create-your-own": "A session built around your goal, your time and your equipment.",
     "wod": "Your daily dose of expertly programmed fitness, following science-based periodization.",
     "strength": "Single-session workouts to build foundational strength, power, and muscular endurance.",
     "calorie-burning": "High-intensity sessions designed to maximize calorie burn and fat loss.",
@@ -149,7 +149,7 @@ const WorkoutFlow = () => {
 
   const CREATE_OWN_IMAGE = "/images/workouts/create-your-own-card.jpg";
   const CREATE_OWN_TITLE = "Create Your Own Workout";
-  const CREATE_OWN_DESC = "Answer a few questions and get a coach-grade session built around your goal, your time and your equipment.";
+  const CREATE_OWN_DESC = "A session built around your goal, your time and your equipment.";
 
   const workoutTypes = [{
     id: "wod",
@@ -491,48 +491,53 @@ const WorkoutFlow = () => {
                 </ScrollReveal>
               );
             })}
-            {/* Desktop: Featured Workouts (latest 6) — fills empty space beside Micro-Workouts */}
+            {/* Desktop: Featured Workouts — card aligned with the other category cards, 3 latest */}
             {latestWorkouts.length > 0 && (
-              <div className="lg:col-span-2 flex flex-col">
-                <div className="rounded-xl border-2 border-green-500/60 bg-green-500/[0.05] p-4 flex flex-col flex-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-sm font-extrabold tracking-tight text-green-400 uppercase">Featured Workouts</span>
-                    <div className="h-px flex-1 bg-green-500/30" />
+              <ScrollReveal>
+                <Card className="transition-all duration-500 ease-out border-2 border-border overflow-hidden bg-card h-full">
+                  <div className="p-5 flex flex-col items-center text-center space-y-3 h-full">
+                    <div className="relative w-14 h-14 rounded-full flex items-center justify-center" aria-hidden="true">
+                      <div className="absolute inset-0 rounded-full bg-primary/10 pointer-events-none" aria-hidden="true" />
+                      <Star className="relative w-7 h-7 text-primary" />
+                    </div>
+                    <div className="w-full">
+                      <h3 className="font-semibold text-lg mb-3 text-foreground">Featured Workouts</h3>
+                      <div className="flex flex-col gap-2 w-full">
+                        {latestWorkouts.map((w) => {
+                          const slug = workoutCategoryToSlug(w.category);
+                          const image = w.image_url || categoryMobileImages[slug] || "/images/workouts/wod-card-mobile.jpg";
+                          return (
+                            <button
+                              key={w.id}
+                              type="button"
+                              onClick={() => navigate(`/workout/${slug}/${w.id}`)}
+                              className="flex items-stretch bg-card border border-border rounded-xl overflow-hidden hover:border-primary hover:shadow-lg transition-all duration-300 text-left w-full"
+                            >
+                              <div className="relative w-16 flex-shrink-0 bg-muted">
+                                <img
+                                  src={image}
+                                  alt={w.name}
+                                  loading="lazy"
+                                  className="absolute inset-0 w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0 p-2 flex flex-col justify-center">
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary line-clamp-1">{w.category}</span>
+                                <span className="text-xs font-bold text-foreground leading-tight line-clamp-1 mt-0.5">{w.name}</span>
+                                {(w.duration || w.difficulty) && (
+                                  <span className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
+                                    {[w.duration, w.difficulty].filter(Boolean).join(" · ")}
+                                  </span>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 flex-1">
-                    {latestWorkouts.map((w) => {
-                      const slug = workoutCategoryToSlug(w.category);
-                      const image = w.image_url || categoryMobileImages[slug] || "/images/workouts/wod-card-mobile.jpg";
-                      return (
-                        <button
-                          key={w.id}
-                          type="button"
-                          onClick={() => navigate(`/workout/${slug}/${w.id}`)}
-                          className="flex items-stretch bg-card border border-border rounded-xl overflow-hidden hover:border-green-400 hover:shadow-lg transition-all duration-300 text-left min-h-0"
-                        >
-                          <div className="relative w-24 flex-shrink-0 bg-muted">
-                            <img
-                              src={image}
-                              alt={w.name}
-                              loading="lazy"
-                              className="absolute inset-0 w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0 p-2.5 flex flex-col justify-center">
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-green-400 line-clamp-1">{w.category}</span>
-                            <h3 className="text-xs font-bold text-foreground leading-tight line-clamp-2 mt-0.5">{w.name}</h3>
-                            {(w.duration || w.difficulty) && (
-                              <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
-                                {[w.duration, w.difficulty].filter(Boolean).join(" · ")}
-                              </p>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+                </Card>
+              </ScrollReveal>
             )}
           </div>
 

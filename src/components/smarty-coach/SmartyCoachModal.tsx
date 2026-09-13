@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { ChevronRight, ChevronLeft, Clock, Dumbbell, Zap, Brain, BookOpen, Target, Activity, Wrench, Flame, Sparkles, Wand2, X } from "lucide-react";
+import { ChevronRight, ChevronLeft, Clock, Dumbbell, Zap, Brain, BookOpen, Target, Activity, Wrench, Flame, Sparkles, Wand2, HelpCircle, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -390,6 +390,17 @@ export const SmartyCoachModal = ({ isOpen, onClose, initialPath = 'menu' }: Smar
                   accent="rose"
                   onClick={() => handleNavigateTo('/about')}
                 />
+                {/* Desktop only: fills the empty grid slot */}
+                <div className="hidden md:block">
+                  <MenuCard
+                    emoji="❓"
+                    title="Frequently Asked Questions"
+                    description="Quick answers about workouts, plans & your account"
+                    Icon={HelpCircle}
+                    accent="primary"
+                    onClick={() => handleNavigateTo('/faq')}
+                  />
+                </div>
               </div>
             </div>
           </>
