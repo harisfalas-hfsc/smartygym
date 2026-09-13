@@ -314,10 +314,11 @@ const CreateYourOwnWorkout = () => {
     void generate(surprise);
   }
 
-  // Premium gate: building workouts is a Premium feature. When Free Access
-  // Mode is on, every signed-in member already resolves to "premium" via the
-  // access-control context, so this gate disappears automatically.
-  if (!accessLoading && !isPremium) {
+  // Premium gate: building workouts is a Premium feature. Visitors (not signed
+  // in) still get to view the whole page — only the build action asks them to
+  // log in. When Free Access Mode is on, every signed-in member already
+  // resolves to "premium" via the access-control context.
+  if (!accessLoading && !isPremium && isLoggedIn === true) {
     return (
       <div className="container mx-auto min-h-screen max-w-6xl px-4 pb-8 md:max-w-[1500px] md:px-6">
         <Helmet>
