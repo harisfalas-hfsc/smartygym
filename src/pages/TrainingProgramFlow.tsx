@@ -50,7 +50,7 @@ const TrainingProgramFlow = () => {
 
   // Fetch program counts by category
   const { data: programCounts = {} } = useQuery({
-    queryKey: ["program-category-counts", "live-v2"],
+    queryKey: ["program-category-counts", "live-v3"],
     queryFn: offlineQueryFn("programs:category-counts", async () => {
       const { data } = await supabase
         .from("admin_training_programs")
@@ -79,14 +79,15 @@ const TrainingProgramFlow = () => {
     refetchOnMount: "always",
     refetchOnWindowFocus: "always",
     refetchOnReconnect: "always",
-    refetchInterval: 30 * 1000,
+    refetchInterval: 10 * 1000,
+    refetchIntervalInBackground: true,
   });
 
   const totalProgramCount = Object.values(programCounts).reduce((sum, c) => sum + c, 0);
 
   // Latest 3 programs for mobile "Featured" section
   const { data: latestPrograms = [] } = useQuery({
-    queryKey: ["featured-latest-programs", "live-v2"],
+    queryKey: ["featured-latest-programs", "live-v3"],
     queryFn: offlineQueryFn("programs:featured-latest", async () => {
       const { data } = await supabase.rpc("get_visible_program_metadata", {});
       return (data || [])
@@ -99,7 +100,8 @@ const TrainingProgramFlow = () => {
     refetchOnMount: "always",
     refetchOnWindowFocus: "always",
     refetchOnReconnect: "always",
-    refetchInterval: 30 * 1000,
+    refetchInterval: 10 * 1000,
+    refetchIntervalInBackground: true,
   });
 
   const programCategoryToSlug = (cat?: string | null) =>

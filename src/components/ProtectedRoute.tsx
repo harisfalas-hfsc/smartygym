@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
-import { restoreCachedSessionOffline, setCurrentUserId } from "@/lib/offline";
-import { isReachable } from "@/lib/offline/connectivity";
+import { setCurrentUserId } from "@/lib/offline";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -21,13 +20,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       const { data } = await supabase.auth.getSession();
       let current = data.session;
 
-      // Offline: fall back to the session cached on this device so saved
-      // content stays reachable with no internet.
-      // "Offline" also covers: network present but the backend unreachable.
-      if (!current && !isReachable()) {
-        current = await restoreCachedSessionOffline();
-      }
-
       if (cancelled) return;
       if (current) setCurrentUserId(current.user.id);
       setSession(current);
@@ -40,9 +32,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Never bounce an authenticated member to /auth just because the
-      // backend cannot be reached — only a real sign-out clears the session.
-      if (!session && !isReachable()) return;
       if (session) setCurrentUserId(session.user.id);
       setSession(session);
       setLoading(false);

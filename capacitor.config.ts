@@ -4,6 +4,10 @@ const config: CapacitorConfig = {
   appId: 'com.smartygym.app',
   appName: 'SmartyGym',
   webDir: 'dist',
+  server: {
+    url: 'https://smartygym.com',
+    cleartext: false,
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
