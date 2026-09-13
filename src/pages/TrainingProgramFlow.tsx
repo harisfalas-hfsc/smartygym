@@ -22,6 +22,7 @@ import { CategoryCountBadge } from "@/components/ui/category-count-badge";
 import { SwipeToExplore } from "@/components/ui/SwipeToExplore";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { offlineQueryFn } from "@/lib/offline";
+import { programCategoryToSlug } from "@/constants/workoutCategories";
 
 type VisibleProgramMetadata = Database["public"]["Functions"]["get_visible_program_metadata"]["Returns"][number];
 
@@ -52,23 +53,14 @@ const TrainingProgramFlow = () => {
   const { data: programCounts = {} } = useQuery({
     queryKey: ["program-category-counts", "live-v3"],
     queryFn: offlineQueryFn("programs:category-counts", async () => {
-      const { data } = await supabase
-        .from("admin_training_programs")
-        .select("category")
-        .neq("is_visible", false);
+      const { data, error } = await supabase.rpc("get_visible_program_metadata", { _program_id: null });
+      if (error) throw error;
       
       const counts: Record<string, number> = {};
       data?.forEach(p => {
         if (p.category) {
           // Map DB category to card ID
-          const cat = p.category.toLowerCase()
-            .replace("cardio endurance", "cardio-endurance")
-            .replace("functional strength", "functional-strength")
-            .replace("muscle hypertrophy", "muscle-hypertrophy")
-            .replace("weight loss", "weight-loss")
-            .replace("low back pain", "low-back-pain")
-            .replace("mobility & stability", "mobility-stability")
-            .replace(/\s+/g, "-");
+          const cat = programCategoryToSlug(p.category);
           counts[cat] = (counts[cat] || 0) + 1;
         }
       });
@@ -103,17 +95,6 @@ const TrainingProgramFlow = () => {
     refetchInterval: 10 * 1000,
     refetchIntervalInBackground: true,
   });
-
-  const programCategoryToSlug = (cat?: string | null) =>
-    (cat || "")
-      .toLowerCase()
-      .replace("cardio endurance", "cardio-endurance")
-      .replace("functional strength", "functional-strength")
-      .replace("muscle hypertrophy", "muscle-hypertrophy")
-      .replace("weight loss", "weight-loss")
-      .replace("low back pain", "low-back-pain")
-      .replace("mobility & stability", "mobility-stability")
-      .replace(/\s+/g, "-");
 
   // Category background images for programs
   const programBackgrounds: Record<string, string> = {

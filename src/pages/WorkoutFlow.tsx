@@ -20,6 +20,7 @@ import { CategoryCountBadge } from "@/components/ui/category-count-badge";
 import { SwipeToExplore } from "@/components/ui/SwipeToExplore";
 import { fetchVisibleWorkoutMetadata, useTodayWods } from "@/hooks/useTodayWods";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
+import { workoutCategoryToSlug } from "@/constants/workoutCategories";
 
 const WorkoutFlow = () => {
   const navigate = useNavigate();
@@ -48,16 +49,17 @@ const WorkoutFlow = () => {
         .forEach(w => {
         if (w.category) {
           // Map DB category to card ID
-          const cat = w.category.toLowerCase()
-            .replace("calorie burning", "calorie-burning")
-            .replace("mobility & stability", "mobility")
-            .replace(/\s+/g, "-");
+          const cat = workoutCategoryToSlug(w.category);
           counts[cat] = (counts[cat] || 0) + 1;
         }
       });
       return counts;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
   });
 
   const totalWorkoutCount = Object.values(workoutCounts).reduce((sum, c) => sum + c, 0);
@@ -73,15 +75,12 @@ const WorkoutFlow = () => {
         .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
         .slice(0, 3);
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
   });
-
-  const workoutCategoryToSlug = (cat?: string | null) =>
-    (cat || "")
-      .toLowerCase()
-      .replace("calorie burning", "calorie-burning")
-      .replace("mobility & stability", "mobility")
-      .replace(/\s+/g, "-");
 
   // Rotate WOD images every 2.5 seconds
   useEffect(() => {

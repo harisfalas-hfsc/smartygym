@@ -251,7 +251,7 @@ const WODArchive = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {WOD_CATEGORIES.map((cat) => (
+              {WORKOUT_CATEGORIES.map((cat) => (
                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
               ))}
             </SelectContent>
