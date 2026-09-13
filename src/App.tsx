@@ -211,7 +211,7 @@ const AppContent = () => {
       <AccessControlProvider>
         <AnnouncementManager />
         {/* <FreeTrialPopup /> */}
-        <SmartyCoachWelcomePopup />
+        
         <SisterAppsPopup />
         <ScrollToTop />
         <AnalyticsTracker />
