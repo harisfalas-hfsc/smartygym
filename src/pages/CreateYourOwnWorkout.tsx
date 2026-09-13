@@ -354,15 +354,36 @@ const CreateYourOwnWorkout = () => {
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <DesktopPageIntro icon={Sparkles} title="Create Your Own Workout">
-        <p className="font-bold text-foreground">
-          <span className="text-primary font-semibold">Create Your Own Workout</span> puts Coach Haris Falas's knowledge and experience in your pocket.{" "}
-          <span className="text-primary font-semibold">
-            Every session is assembled from his coaching rules and the Smarty Gym exercise library — a huge collection of human-designed movements — matched to your goal, your time, your equipment and how you feel today. Nothing generic, nothing random: the right workout for you
-          </span>
-          , built on real coaching.
-        </p>
-      </DesktopPageIntro>
+      {/* Desktop: category-style description card */}
+      <Card className="hidden lg:block mb-6 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
+        <div className="p-4 sm:p-5">
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight uppercase mb-3 text-center">
+            Create Your Own Workout
+          </h1>
+          <div className="max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground text-center mb-4">
+              Create Your Own Workout puts Coach Haris Falas's knowledge and experience in your pocket.{" "}
+              <span className="text-primary font-semibold">
+                Every session is assembled from his coaching rules and the Smarty Gym exercise library
+              </span>
+              {" "}— a huge collection of human-designed movements — matched to your goal, your time, your equipment and how you feel today.{" "}
+              <span className="text-primary font-semibold">Nothing generic, nothing random</span>
+              : the right workout for you, built on real coaching.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-muted-foreground text-center">
+              <span className="italic text-center">
+                Crafted by{" "}
+                <a href="/coach-profile" className="text-primary font-semibold hover:underline">
+                  Haris Falas
+                </a>
+                {" "}BSc, Sport Science
+              </span>
+              <span className="hidden sm:inline">•</span>
+              <span className="font-medium text-primary text-center">Personalised | All Levels | Any Equipment</span>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       <Card className="lg:hidden mb-8 bg-white dark:bg-card border-2 border-primary/40 shadow-primary">
         <div className="p-4 sm:p-5">
@@ -376,11 +397,13 @@ const CreateYourOwnWorkout = () => {
               </p>
             ) : null}
             <p className="text-sm text-center">
-              <span className="text-primary font-semibold">Create Your Own Workout</span> puts Coach Haris Falas's knowledge and experience in your pocket.{" "}
+              Create Your Own Workout puts Coach Haris Falas's knowledge and experience in your pocket.{" "}
               <span className="text-primary font-semibold">
-                Every session is assembled from his coaching rules and the Smarty Gym exercise library — a huge collection of human-designed movements — matched to your goal, your time, your equipment and how you feel today. Nothing generic, nothing random: the right workout for you
+                Every session is assembled from his coaching rules and the Smarty Gym exercise library
               </span>
-              , built on real coaching.
+              {" "}— a huge collection of human-designed movements — matched to your goal, your time, your equipment and how you feel today.{" "}
+              <span className="text-primary font-semibold">Nothing generic, nothing random</span>
+              : the right workout for you, built on real coaching.
             </p>
           </div>
         </div>
