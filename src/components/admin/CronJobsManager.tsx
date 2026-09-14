@@ -306,6 +306,9 @@ export function CronJobsManager() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      setFrozen(!!data?.frozen);
+      setFrozenAt(data?.frozen_at || null);
+      setFrozenCount(Array.isArray(data?.jobs) ? data.jobs.length : 0);
       toast.success(data?.message || (next === 'freeze' ? 'System frozen' : 'System unfrozen'));
       await fetchFreezeStatus();
       await fetchJobs();
@@ -619,6 +622,7 @@ export function CronJobsManager() {
             variant={frozen ? "default" : "destructive"}
             onClick={() => setShowFreezeConfirm(true)}
             disabled={freezing}
+            aria-label={frozen ? "Unfreeze System" : "Freeze System"}
           >
             {freezing
               ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
