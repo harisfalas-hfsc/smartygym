@@ -6,8 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const FREEZE_SETTING_KEY = 'background_frozen';
+const FREEZE_SNAPSHOT_KEY = 'background_freeze_snapshot';
+
 interface CronJobRequest {
-  action: 'list' | 'add' | 'edit' | 'delete' | 'test' | 'sync';
+  action: 'list' | 'add' | 'edit' | 'delete' | 'test' | 'sync' | 'freeze' | 'unfreeze' | 'freeze_status';
   job_name?: string;
   display_name?: string;
   description?: string;
