@@ -259,7 +259,7 @@ export function WorkoutPlayerDialog({ open, onOpenChange, title, steps }: Workou
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="left-0 top-0 h-[calc(100dvh-var(--mobile-bottom-nav-h))] max-h-none w-screen max-w-none translate-x-0 translate-y-0 gap-0 overflow-hidden border-0 p-0 shadow-none data-[state=closed]:slide-out-to-left-0 data-[state=closed]:slide-out-to-top-0 data-[state=open]:slide-in-from-left-0 data-[state=open]:slide-in-from-top-0 sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[95vw] sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:border sm:shadow-lg [&>button:last-child]:hidden"
+        className="!left-0 !top-0 h-[calc(100dvh-var(--mobile-bottom-nav-h))] max-h-none w-screen max-w-none !translate-x-0 !translate-y-0 gap-0 overflow-hidden border-0 p-0 shadow-none data-[state=closed]:slide-out-to-left-0 data-[state=closed]:slide-out-to-top-0 data-[state=open]:slide-in-from-left-0 data-[state=open]:slide-in-from-top-0 sm:!left-1/2 sm:!top-1/2 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[95vw] sm:max-w-2xl sm:!-translate-x-1/2 sm:!-translate-y-1/2 sm:border sm:shadow-lg [&>button:last-child]:hidden"
       >
         <DialogTitle className="sr-only">Workout player</DialogTitle>
         {/* Header */}
