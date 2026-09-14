@@ -4,6 +4,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { getDayIn84Cycle, getPeriodizationForDay } from "../_shared/periodization-84day.ts";
 import { validateWodPublishContract } from "../_shared/wod-integrity.ts";
 import { requireServiceRole } from "../_shared/cron-auth.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -182,6 +183,9 @@ serve(async (req) => {
   try {
     const unauthorized = requireServiceRole(req, corsHeaders);
     if (unauthorized) return unauthorized;
+
+    const frozen = await freezeGuard(corsHeaders, "select-wod-from-library");
+    if (frozen) return frozen;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

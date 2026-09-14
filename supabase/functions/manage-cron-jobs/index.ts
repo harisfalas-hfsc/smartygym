@@ -6,8 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const FREEZE_SETTING_KEY = 'background_frozen';
+const FREEZE_SNAPSHOT_KEY = 'background_freeze_snapshot';
+
 interface CronJobRequest {
-  action: 'list' | 'add' | 'edit' | 'delete' | 'test' | 'sync';
+  action: 'list' | 'add' | 'edit' | 'delete' | 'test' | 'sync' | 'freeze' | 'unfreeze' | 'freeze_status';
   job_name?: string;
   display_name?: string;
   description?: string;
@@ -757,6 +760,147 @@ serve(async (req: Request) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // ============================================
+    // FREEZE / UNFREEZE — global background switch
+    // ============================================
+
+    // FREEZE STATUS
+    if (action === 'freeze_status') {
+      const { data } = await serviceClient
+        .from('system_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', [FREEZE_SETTING_KEY, FREEZE_SNAPSHOT_KEY]);
+
+      const map = new Map((data || []).map((r: any) => [r.setting_key, r.setting_value]));
+      const rawFlag = map.get(FREEZE_SETTING_KEY);
+      const snapshot = (map.get(FREEZE_SNAPSHOT_KEY) || {}) as any;
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          frozen: rawFlag === true || rawFlag === 'true' || rawFlag?.enabled === true,
+          frozen_at: snapshot?.frozen_at || null,
+          snapshot_jobs: Array.isArray(snapshot?.jobs) ? snapshot.jobs : [],
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // FREEZE - snapshot currently active jobs, then pause them all
+    if (action === 'freeze') {
+      const { data: cronJobs, error: cronError } = await serviceClient.rpc('get_cron_jobs');
+      if (cronError) {
+        throw new Error(`Could not read scheduler jobs: ${cronError.message}`);
+      }
+
+      const activeNames = (cronJobs || [])
+        .filter((j: any) => j.active)
+        .map((j: any) => String(j.jobname))
+        .filter((n: string) => validateJobName(n).valid);
+
+      console.log(`🧊 Freezing ${activeNames.length} active scheduler jobs`);
+
+      if (activeNames.length > 0) {
+        const inList = activeNames.map((n: string) => `'${escapeSqlString(n)}'`).join(', ');
+        const pauseResult = await executeCronSql(
+          serviceClient,
+          `SELECT cron.alter_job(jobid, active := false) FROM cron.job WHERE jobname IN (${inList});`,
+          'freeze-pause-jobs'
+        );
+        if (!pauseResult.success) {
+          throw new Error(`Failed to pause scheduler jobs: ${pauseResult.error}`);
+        }
+
+        await serviceClient
+          .from('cron_job_metadata')
+          .update({ is_active: false, updated_at: new Date().toISOString() })
+          .in('job_name', activeNames);
+      }
+
+      const frozenAt = new Date().toISOString();
+
+      await serviceClient.from('system_settings').upsert({
+        setting_key: FREEZE_SNAPSHOT_KEY,
+        setting_value: { jobs: activeNames, frozen_at: frozenAt },
+        description: 'Snapshot of scheduler jobs that were active when the system was frozen',
+      }, { onConflict: 'setting_key' });
+
+      await serviceClient.from('system_settings').upsert({
+        setting_key: FREEZE_SETTING_KEY,
+        setting_value: true,
+        description: 'When true, all background automation (crons + event-driven senders) is paused',
+      }, { onConflict: 'setting_key' });
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          frozen: true,
+          frozen_at: frozenAt,
+          paused: activeNames.length,
+          jobs: activeNames,
+          message: `Frozen. ${activeNames.length} scheduled jobs paused and background senders disabled.`,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // UNFREEZE - restore exactly the jobs that were active before the freeze
+    if (action === 'unfreeze') {
+      const { data: snapRow } = await serviceClient
+        .from('system_settings')
+        .select('setting_value')
+        .eq('setting_key', FREEZE_SNAPSHOT_KEY)
+        .maybeSingle();
+
+      const snapshot = (snapRow?.setting_value || {}) as any;
+      const names: string[] = (Array.isArray(snapshot?.jobs) ? snapshot.jobs : [])
+        .map((n: any) => String(n))
+        .filter((n: string) => validateJobName(n).valid);
+
+      console.log(`🔥 Unfreezing ${names.length} snapshotted jobs`);
+
+      if (names.length > 0) {
+        const inList = names.map((n) => `'${escapeSqlString(n)}'`).join(', ');
+        const resumeResult = await executeCronSql(
+          serviceClient,
+          `SELECT cron.alter_job(jobid, active := true) FROM cron.job WHERE jobname IN (${inList});`,
+          'unfreeze-resume-jobs'
+        );
+        if (!resumeResult.success) {
+          throw new Error(`Failed to resume scheduler jobs: ${resumeResult.error}`);
+        }
+
+        await serviceClient
+          .from('cron_job_metadata')
+          .update({ is_active: true, updated_at: new Date().toISOString() })
+          .in('job_name', names);
+      }
+
+      await serviceClient.from('system_settings').upsert({
+        setting_key: FREEZE_SETTING_KEY,
+        setting_value: false,
+        description: 'When true, all background automation (crons + event-driven senders) is paused',
+      }, { onConflict: 'setting_key' });
+
+      await serviceClient.from('system_settings').upsert({
+        setting_key: FREEZE_SNAPSHOT_KEY,
+        setting_value: { jobs: [], frozen_at: null, restored_at: new Date().toISOString() },
+        description: 'Snapshot of scheduler jobs that were active when the system was frozen',
+      }, { onConflict: 'setting_key' });
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          frozen: false,
+          resumed: names.length,
+          jobs: names,
+          message: `Unfrozen. ${names.length} scheduled jobs restored to their previous state.`,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
 
     return new Response(
       JSON.stringify({ error: "Invalid action" }),

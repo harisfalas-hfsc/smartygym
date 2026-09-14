@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireServiceRole } from "../_shared/cron-auth.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,6 +28,9 @@ serve(async (req) => {
 
   const authFail = requireServiceRole(req, corsHeaders);
   if (authFail) return authFail;
+
+  const frozen = await freezeGuard(corsHeaders, "process-pending-notifications");
+  if (frozen) return frozen;
 
   console.log("[PROCESS-PENDING] Starting - triggering send-new-content-notifications");
 

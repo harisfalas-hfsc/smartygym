@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { MESSAGE_TYPES } from "../_shared/notification-types.ts";
 import { requireServiceRole } from "../_shared/cron-auth.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -362,6 +363,9 @@ const handler = async (req: Request): Promise<Response> => {
 
   const authFail = requireServiceRole(req, corsHeaders);
   if (authFail) return authFail;
+
+  const frozen = await freezeGuard(corsHeaders, "send-weekly-activity-report");
+  if (frozen) return frozen;
 
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);

@@ -5,6 +5,7 @@ import { getEmailHeaders, getEmailFooter } from "../_shared/email-utils.ts";
 import { MESSAGE_TYPES } from "../_shared/notification-types.ts";
 import { logEmailDelivery } from "../_shared/email-log.ts";
 import { requireServiceRole } from "../_shared/cron-auth.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +24,9 @@ serve(async (req) => {
 
   const authFail = requireServiceRole(req, corsHeaders);
   if (authFail) return authFail;
+
+  const frozen = await freezeGuard(corsHeaders, "send-welcome-email");
+  if (frozen) return frozen;
 
   try {
     logStep("Function invoked - starting welcome email process");

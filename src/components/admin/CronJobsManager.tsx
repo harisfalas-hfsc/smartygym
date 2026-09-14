@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, Play, Pencil, Trash2, Plus, RefreshCw, AlertCircle, CheckCircle, Zap, Info, Power, PowerOff, AlertTriangle, Link2Off, Link2 } from "lucide-react";
+import { Clock, Play, Pencil, Trash2, Plus, RefreshCw, AlertCircle, CheckCircle, Zap, Info, Power, PowerOff, AlertTriangle, Link2Off, Link2, Snowflake } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CronTimeInput } from "./CronTimeInput";
@@ -240,6 +240,12 @@ export function CronJobsManager() {
   const [cronEnabled, setCronEnabled] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [orphanJobs, setOrphanJobs] = useState<CronJobMetadata[]>([]);
+  // Global freeze state
+  const [frozen, setFrozen] = useState(false);
+  const [frozenAt, setFrozenAt] = useState<string | null>(null);
+  const [frozenCount, setFrozenCount] = useState(0);
+  const [freezing, setFreezing] = useState(false);
+  const [showFreezeConfirm, setShowFreezeConfirm] = useState(false);
   // Edit form state
   const [editForm, setEditForm] = useState({
     display_name: '',
@@ -274,7 +280,42 @@ export function CronJobsManager() {
   useEffect(() => {
     fetchJobs();
     checkCronEnabled();
+    fetchFreezeStatus();
   }, []);
+
+  const fetchFreezeStatus = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-cron-jobs', {
+        body: { action: 'freeze_status' }
+      });
+      if (error) throw error;
+      setFrozen(!!data?.frozen);
+      setFrozenAt(data?.frozen_at || null);
+      setFrozenCount(Array.isArray(data?.snapshot_jobs) ? data.snapshot_jobs.length : 0);
+    } catch (e) {
+      console.log("freeze status check failed:", e);
+    }
+  };
+
+  const toggleFreeze = async () => {
+    const next = frozen ? 'unfreeze' : 'freeze';
+    setFreezing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-cron-jobs', {
+        body: { action: next }
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(data?.message || (next === 'freeze' ? 'System frozen' : 'System unfrozen'));
+      await fetchFreezeStatus();
+      await fetchJobs();
+    } catch (e) {
+      toast.error(`Failed to ${next}: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    } finally {
+      setFreezing(false);
+      setShowFreezeConfirm(false);
+    }
+  };
 
   const checkCronEnabled = async () => {
     try {
@@ -286,6 +327,7 @@ export function CronJobsManager() {
       console.log("pg_cron check failed:", e);
     }
   };
+
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -573,6 +615,16 @@ export function CronJobsManager() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <BuildVersionIndicator />
+          <Button
+            variant={frozen ? "default" : "destructive"}
+            onClick={() => setShowFreezeConfirm(true)}
+            disabled={freezing}
+          >
+            {freezing
+              ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              : frozen ? <Power className="h-4 w-4 mr-2" /> : <Snowflake className="h-4 w-4 mr-2" />}
+            {frozen ? "Unfreeze System" : "Freeze System"}
+          </Button>
           <Button variant="outline" onClick={fetchJobs} disabled={loading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -583,6 +635,48 @@ export function CronJobsManager() {
           </Button>
         </div>
       </div>
+
+      {/* Frozen banner */}
+      {frozen && (
+        <Alert variant="destructive">
+          <Snowflake className="h-4 w-4" />
+          <AlertTitle>System Frozen — nothing is running in the background</AlertTitle>
+          <AlertDescription>
+            {frozenCount} scheduled job{frozenCount === 1 ? '' : 's'} paused
+            {frozenAt ? ` since ${new Date(frozenAt).toLocaleString()}` : ''}. Automated emails and
+            notifications are blocked too. Press <strong>Unfreeze System</strong> to restore exactly
+            the same jobs that were running before.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Freeze / Unfreeze confirmation */}
+      <Dialog open={showFreezeConfirm} onOpenChange={setShowFreezeConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{frozen ? "Unfreeze the system?" : "Freeze the system?"}</DialogTitle>
+            <DialogDescription>
+              {frozen
+                ? `This restores the ${frozenCount} scheduled job${frozenCount === 1 ? '' : 's'} that were running when you froze the system. Jobs that were already off stay off.`
+                : "This saves a snapshot of every job that is running right now, pauses all of them, and blocks automated emails and notifications. Nothing is deleted — unfreeze restores the exact same setup."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFreezeConfirm(false)} disabled={freezing}>
+              Cancel
+            </Button>
+            <Button
+              variant={frozen ? "default" : "destructive"}
+              onClick={toggleFreeze}
+              disabled={freezing}
+            >
+              {freezing ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : null}
+              {frozen ? "Unfreeze" : "Freeze everything"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Status Alert */}
       <Alert variant={cronEnabled ? "default" : "destructive"}>
