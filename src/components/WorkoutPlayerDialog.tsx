@@ -252,14 +252,14 @@ export function WorkoutPlayerDialog({ open, onOpenChange, title, steps }: Workou
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         aria-describedby={undefined}
         style={{ zIndex }}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="max-w-2xl w-[95vw] p-0 gap-0 overflow-hidden [&>button:last-child]:hidden"
+        className="left-0 top-0 h-[calc(100dvh-var(--mobile-bottom-nav-h))] max-h-none w-screen max-w-none translate-x-0 translate-y-0 gap-0 overflow-hidden border-0 p-0 shadow-none data-[state=closed]:slide-out-to-left-0 data-[state=closed]:slide-out-to-top-0 data-[state=open]:slide-in-from-left-0 data-[state=open]:slide-in-from-top-0 sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[95vw] sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:border sm:shadow-lg [&>button:last-child]:hidden"
       >
         <DialogTitle className="sr-only">Workout player</DialogTitle>
         {/* Header */}
@@ -285,12 +285,12 @@ export function WorkoutPlayerDialog({ open, onOpenChange, title, steps }: Workou
         </div>
 
         {/* Carousel */}
-        <div className="relative overflow-hidden" ref={emblaRef}>
-          <div className="flex">
+        <div className="relative min-h-0 flex-1 overflow-hidden" ref={emblaRef}>
+          <div className="flex h-full">
             {slides.map((slide, i) => {
               if (slide.type === "section-break") {
                 return (
-                  <div key={`break-${i}`} className="flex-[0_0_100%] min-w-0 flex flex-col items-center justify-center text-center px-8 py-12" style={{ minHeight: "min(50vh, 340px)" }}>
+                  <div key={`break-${i}`} className="flex h-full min-w-0 flex-[0_0_100%] flex-col items-center justify-center px-8 py-8 text-center">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground mb-3">Section complete</p>
                     <h2 className="text-2xl md:text-3xl font-bold mb-3">{slide.completedSection}</h2>
                     <p className="text-sm text-muted-foreground mb-6">Next: {slide.nextSection}</p>
@@ -307,7 +307,7 @@ export function WorkoutPlayerDialog({ open, onOpenChange, title, steps }: Workou
               const fallback = m?.frame_start_url;
               const displayName = (step.name && step.name.trim()) || m?.name || "Exercise";
               return (
-                <div key={`step-${slide.stepIndex}`} className="flex-[0_0_100%] min-w-0 flex flex-col items-center px-4 pt-3 pb-2">
+                <div key={`step-${slide.stepIndex}`} className="flex h-full min-w-0 flex-[0_0_100%] flex-col items-center px-4 pb-2 pt-3">
                   <p className="text-xs uppercase tracking-wide text-primary font-semibold mb-1">{normalizeSection(step.section)}</p>
                   {step.subSection && (
                     <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">{step.subSection}</p>
@@ -316,7 +316,7 @@ export function WorkoutPlayerDialog({ open, onOpenChange, title, steps }: Workou
                   {step.prescription && (
                     <p className="text-sm text-muted-foreground mt-0.5">{step.prescription}</p>
                   )}
-                  <div className="w-full flex items-center justify-center mt-2" style={{ height: "min(50vh, 340px)" }}>
+                  <div className="mt-2 flex min-h-0 w-full flex-1 items-center justify-center">
                     {gif ? (
                       <img src={gif} alt={displayName} className="max-h-full max-w-full object-contain rounded-xl" />
                     ) : fallback ? (
@@ -354,7 +354,7 @@ export function WorkoutPlayerDialog({ open, onOpenChange, title, steps }: Workou
         </div>
 
         {/* Control bar */}
-        <div className="border-t border-border px-4 py-3 flex items-center justify-between gap-3">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-border px-4 py-3">
           <div className="flex-1 min-w-0">
             {isTimed && remaining != null ? (
               <div>
