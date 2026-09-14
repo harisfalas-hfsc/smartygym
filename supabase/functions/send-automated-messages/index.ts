@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { logEmailDelivery } from "../_shared/email-log.ts";
 import { canSend } from "../_shared/notification-preferences.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -65,6 +66,9 @@ function htmlWrap(subject: string, content: string): string {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const frozen = await freezeGuard(corsHeaders, "send-automated-messages");
+  if (frozen) return frozen;
 
   const supabase = createClient(PROJECT_URL, SERVICE_KEY);
   const resend = RESEND_KEY ? new Resend(RESEND_KEY) : null;

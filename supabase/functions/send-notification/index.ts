@@ -4,6 +4,7 @@ import { Resend } from "https://esm.sh/resend@2.0.0";
 import { getEmailHeaders, getEmailFooter } from "../_shared/email-utils.ts";
 import { logEmailDelivery } from "../_shared/email-log.ts";
 import { canSend, type AutomationKey } from "../_shared/notification-preferences.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -71,6 +72,9 @@ serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const frozen = await freezeGuard(corsHeaders, "send-notification");
+  if (frozen) return frozen;
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
