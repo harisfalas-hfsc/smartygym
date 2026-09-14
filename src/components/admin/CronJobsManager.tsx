@@ -274,7 +274,42 @@ export function CronJobsManager() {
   useEffect(() => {
     fetchJobs();
     checkCronEnabled();
+    fetchFreezeStatus();
   }, []);
+
+  const fetchFreezeStatus = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-cron-jobs', {
+        body: { action: 'freeze_status' }
+      });
+      if (error) throw error;
+      setFrozen(!!data?.frozen);
+      setFrozenAt(data?.frozen_at || null);
+      setFrozenCount(Array.isArray(data?.snapshot_jobs) ? data.snapshot_jobs.length : 0);
+    } catch (e) {
+      console.log("freeze status check failed:", e);
+    }
+  };
+
+  const toggleFreeze = async () => {
+    const next = frozen ? 'unfreeze' : 'freeze';
+    setFreezing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-cron-jobs', {
+        body: { action: next }
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(data?.message || (next === 'freeze' ? 'System frozen' : 'System unfrozen'));
+      await fetchFreezeStatus();
+      await fetchJobs();
+    } catch (e) {
+      toast.error(`Failed to ${next}: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    } finally {
+      setFreezing(false);
+      setShowFreezeConfirm(false);
+    }
+  };
 
   const checkCronEnabled = async () => {
     try {
@@ -286,6 +321,7 @@ export function CronJobsManager() {
       console.log("pg_cron check failed:", e);
     }
   };
+
 
   const fetchJobs = async () => {
     setLoading(true);
