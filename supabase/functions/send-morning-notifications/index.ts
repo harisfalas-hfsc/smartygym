@@ -4,6 +4,7 @@ import { Resend } from "https://esm.sh/resend@2.0.0";
 import { getEmailHeaders, getEmailFooter } from "../_shared/email-utils.ts";
 import { MESSAGE_TYPES } from "../_shared/notification-types.ts";
 import { requireServiceRole } from "../_shared/cron-auth.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 import { canSend } from "../_shared/notification-preferences.ts";
 import { isUnroutableEmail } from "../_shared/list-all-users.ts";
 
@@ -154,6 +155,9 @@ serve(async (req) => {
   try {
     const unauthorized = requireServiceRole(req, corsHeaders);
     if (unauthorized) return unauthorized;
+
+    const frozen = await freezeGuard(corsHeaders, "send-morning-notifications");
+    if (frozen) return frozen;
 
     logStep("Starting combined morning notification delivery (7:00 AM Cyprus time)");
 

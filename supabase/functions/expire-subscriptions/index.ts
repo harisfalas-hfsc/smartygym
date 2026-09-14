@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireServiceRole } from "../_shared/cron-auth.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,6 +21,9 @@ serve(async (req) => {
   try {
     const unauthorized = requireServiceRole(req, corsHeaders);
     if (unauthorized) return unauthorized;
+
+    const frozen = await freezeGuard(corsHeaders, "expire-subscriptions");
+    if (frozen) return frozen;
 
     logStep("Function invoked");
 

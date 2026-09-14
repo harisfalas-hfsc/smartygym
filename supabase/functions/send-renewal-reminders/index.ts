@@ -5,6 +5,7 @@ import { getEmailHeaders, getEmailFooter } from "../_shared/email-utils.ts";
 import { MESSAGE_TYPES } from "../_shared/notification-types.ts";
 import { logEmailDelivery } from "../_shared/email-log.ts";
 import { requireServiceRole } from "../_shared/cron-auth.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,6 +20,9 @@ serve(async (req) => {
   try {
     const unauthorized = requireServiceRole(req, corsHeaders);
     if (unauthorized) return unauthorized;
+
+    const frozen = await freezeGuard(corsHeaders, "send-renewal-reminders");
+    if (frozen) return frozen;
 
     console.log("[SEND-RENEWAL-REMINDERS] Starting subscription expiration check");
 

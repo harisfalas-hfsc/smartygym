@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireServiceRole } from "../_shared/cron-auth.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,6 +16,9 @@ serve(async (req: Request) => {
 
   const authError = requireServiceRole(req, corsHeaders);
   if (authError) return authError;
+
+  const frozen = await freezeGuard(corsHeaders, "send-scheduled-emails");
+  if (frozen) return frozen;
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

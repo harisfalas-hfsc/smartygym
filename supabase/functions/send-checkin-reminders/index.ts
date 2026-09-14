@@ -4,6 +4,7 @@ import { Resend } from "https://esm.sh/resend@2.0.0";
 import { MESSAGE_TYPES } from "../_shared/notification-types.ts";
 import { logEmailDelivery } from "../_shared/email-log.ts";
 import { requireServiceRole } from "../_shared/cron-auth.ts";
+import { freezeGuard } from "../_shared/system-freeze.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -105,6 +106,9 @@ serve(async (req: Request) => {
 
   const authFail = requireServiceRole(req, corsHeaders);
   if (authFail) return authFail;
+
+  const frozen = await freezeGuard(corsHeaders, "send-checkin-reminders");
+  if (frozen) return frozen;
 
   try {
     const supabase = createClient(
