@@ -240,6 +240,12 @@ export function CronJobsManager() {
   const [cronEnabled, setCronEnabled] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [orphanJobs, setOrphanJobs] = useState<CronJobMetadata[]>([]);
+  // Global freeze state
+  const [frozen, setFrozen] = useState(false);
+  const [frozenAt, setFrozenAt] = useState<string | null>(null);
+  const [frozenCount, setFrozenCount] = useState(0);
+  const [freezing, setFreezing] = useState(false);
+  const [showFreezeConfirm, setShowFreezeConfirm] = useState(false);
   // Edit form state
   const [editForm, setEditForm] = useState({
     display_name: '',
