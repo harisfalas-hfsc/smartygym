@@ -615,6 +615,16 @@ export function CronJobsManager() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <BuildVersionIndicator />
+          <Button
+            variant={frozen ? "default" : "destructive"}
+            onClick={() => setShowFreezeConfirm(true)}
+            disabled={freezing}
+          >
+            {freezing
+              ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              : frozen ? <Power className="h-4 w-4 mr-2" /> : <Snowflake className="h-4 w-4 mr-2" />}
+            {frozen ? "Unfreeze System" : "Freeze System"}
+          </Button>
           <Button variant="outline" onClick={fetchJobs} disabled={loading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -625,6 +635,48 @@ export function CronJobsManager() {
           </Button>
         </div>
       </div>
+
+      {/* Frozen banner */}
+      {frozen && (
+        <Alert variant="destructive">
+          <Snowflake className="h-4 w-4" />
+          <AlertTitle>System Frozen — nothing is running in the background</AlertTitle>
+          <AlertDescription>
+            {frozenCount} scheduled job{frozenCount === 1 ? '' : 's'} paused
+            {frozenAt ? ` since ${new Date(frozenAt).toLocaleString()}` : ''}. Automated emails and
+            notifications are blocked too. Press <strong>Unfreeze System</strong> to restore exactly
+            the same jobs that were running before.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Freeze / Unfreeze confirmation */}
+      <Dialog open={showFreezeConfirm} onOpenChange={setShowFreezeConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{frozen ? "Unfreeze the system?" : "Freeze the system?"}</DialogTitle>
+            <DialogDescription>
+              {frozen
+                ? `This restores the ${frozenCount} scheduled job${frozenCount === 1 ? '' : 's'} that were running when you froze the system. Jobs that were already off stay off.`
+                : "This saves a snapshot of every job that is running right now, pauses all of them, and blocks automated emails and notifications. Nothing is deleted — unfreeze restores the exact same setup."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFreezeConfirm(false)} disabled={freezing}>
+              Cancel
+            </Button>
+            <Button
+              variant={frozen ? "default" : "destructive"}
+              onClick={toggleFreeze}
+              disabled={freezing}
+            >
+              {freezing ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : null}
+              {frozen ? "Unfreeze" : "Freeze everything"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Status Alert */}
       <Alert variant={cronEnabled ? "default" : "destructive"}>
