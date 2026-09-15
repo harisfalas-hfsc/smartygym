@@ -22,9 +22,12 @@ const BOT_PATTERNS = [
   "%semrush%",
   "%ahrefs%",
   "%playstore-google%",
-  // Automated scraper that spoofs a long-obsolete desktop Chrome build.
-  // It is responsible for the vast majority of recorded "visits" and is not a human.
-  "%Chrome/126.0.0.0%",
+  // Automated scrapers that spoof long-obsolete desktop Chrome builds.
+  // These are responsible for the vast majority of recorded "visits" and are not humans.
+  "%Chrome/119.%",
+  "%Chrome/124.%",
+  "%Chrome/125.%",
+  "%Chrome/126.%",
 ] as const;
 
 const ADMIN_PATH_PATTERNS = [
