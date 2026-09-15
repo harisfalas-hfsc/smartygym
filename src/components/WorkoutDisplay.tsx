@@ -674,5 +674,6 @@ export const WorkoutDisplay = ({
         steps={player.steps}
       />
     </div>
+    </ParqWaiverGate>
   );
 };
