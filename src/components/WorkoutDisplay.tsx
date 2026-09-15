@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { WorkoutToolsCards } from "@/components/WorkoutToolsCards";
 import workoutHero from "@/assets/workout-hero.jpg";
 import { ParQReminder } from "@/components/ParQReminder";
+import { ParqWaiverGate } from "@/components/ParqWaiverGate";
 
 import { ShareButtons } from "@/components/ShareButtons";
 import { WorkoutInteractions } from "@/components/WorkoutInteractions";
@@ -236,6 +237,7 @@ export const WorkoutDisplay = ({
   }
 
   return (
+    <ParqWaiverGate confirmLabel="I confirm — open my training">
     <div className="space-y-6">
       {/* Workout Header */}
       <div className="space-y-6">
@@ -672,5 +674,6 @@ export const WorkoutDisplay = ({
         steps={player.steps}
       />
     </div>
+    </ParqWaiverGate>
   );
 };

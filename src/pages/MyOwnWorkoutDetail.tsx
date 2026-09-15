@@ -15,6 +15,7 @@ import { WorkoutToolsCards } from "@/components/WorkoutToolsCards";
 import { normalizeWorkoutHtml } from "@/utils/htmlNormalizer";
 import { parseWorkoutSteps } from "@/utils/parseWorkoutSteps";
 import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
+import { ParqWaiverGate } from "@/components/ParqWaiverGate";
 
 interface CustomWorkoutDetail {
   id: string;
@@ -101,6 +102,7 @@ const MyOwnWorkoutDetail = () => {
   }
 
   return (
+    <ParqWaiverGate confirmLabel="I confirm — open my workout">
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-10 lg:max-w-5xl lg:px-8">
       <Helmet>
         <title>{`${workout.name} | My Own Workouts`}</title>
@@ -246,6 +248,7 @@ const MyOwnWorkoutDetail = () => {
         steps={steps}
       />
     </div>
+    </ParqWaiverGate>
   );
 };
 
