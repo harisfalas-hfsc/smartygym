@@ -328,6 +328,7 @@ serve(async (req) => {
 
   const supabase = createClient(PROJECT_URL, SERVICE_KEY);
   const nowMs = Date.now();
+  const freeze = await loadFreezeInfo(supabase);
 
   await supabase.rpc("sync_cron_metadata_from_live_scheduler");
 
@@ -346,7 +347,7 @@ serve(async (req) => {
 
   const overdueJobs: Array<{ job: CronRow; reason: string }> = [];
   const report = filtered.map((row: CronSnapshotRow) => {
-    const r = evaluateSnapshot(row, nowMs);
+    const r = evaluateSnapshot(row, nowMs, freeze);
     if (r.overdue) overdueJobs.push({ job: r.job, reason: r.reason });
     return {
       job_name: row.job_name,
