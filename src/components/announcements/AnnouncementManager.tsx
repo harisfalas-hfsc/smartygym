@@ -41,39 +41,9 @@ export const AnnouncementManager = () => {
     return `${prefix}_${cyprusToday}`;
   };
 
-  // Check if this is user's first sign-in and schedule PAR-Q popup
-  // IMPORTANT: Only runs for AUTHENTICATED users
-  const checkFirstSignInAndScheduleParQ = useCallback(async () => {
-    // First, verify user is actually authenticated
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.user) {
-      console.log("[AnnouncementManager] No authenticated user - skipping PAR-Q check");
-      return;
-    }
-    
-    // Mark that this browser has had an authenticated user
-    localStorage.setItem(USER_AUTHENTICATED_KEY, "true");
-    
-    const firstSignInCompleted = localStorage.getItem(FIRST_SIGNIN_KEY);
-    const parqReminderShown = localStorage.getItem(PARQ_REMINDER_SHOWN_KEY);
-    
-    // If this is NOT the first sign-in, or PAR-Q reminder already shown, skip
-    if (firstSignInCompleted || parqReminderShown) {
-      console.log("[AnnouncementManager] Not first sign-in or PAR-Q already shown");
-      return;
-    }
-
-    // Mark first sign-in as happening now
-    localStorage.setItem(FIRST_SIGNIN_KEY, new Date().toISOString());
-    
-    // Schedule PAR-Q popup for 30 seconds later
-    console.log("[AnnouncementManager] First sign-in detected - scheduling PAR-Q popup in 30 seconds");
-    parqTimerRef.current = setTimeout(() => {
-      closeOpenOverlays();
-      setShowParQModal(true);
-    }, PARQ_POPUP_DELAY_MS);
-  }, []);
+  // The PAR-Q reminder is no longer shown on launch. The health warning is
+  // raised only when a member opens a workout or training program
+  // (see ParqWaiverGate).
 
   // Trigger Ritual modal only when today's WODs are genuinely unavailable
   const triggerRitualModalIfNeeded = useCallback(async () => {
