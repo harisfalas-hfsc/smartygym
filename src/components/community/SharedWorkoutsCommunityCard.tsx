@@ -39,7 +39,7 @@ export function SharedWorkoutsCommunityCard({ limit = 6 }: { limit?: number }) {
           className="flex items-center gap-3 rounded-xl border border-border p-2 transition hover:border-primary"
         >
           <img
-            src={w.image_url || FALLBACK_IMAGE}
+            src={FALLBACK_IMAGE}
             alt={w.name}
             loading="lazy"
             className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
