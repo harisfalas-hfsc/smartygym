@@ -21,16 +21,11 @@ export const EmailManager = () => {
       <CardContent>
         <Tabs defaultValue="templates" className="w-full">
           <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-5 gap-1">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-4 gap-1">
               <TabsTrigger value="templates" className="flex items-center gap-1 sm:gap-2 whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
                 <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Templates</span>
                 <span className="sm:hidden">Temp.</span>
-              </TabsTrigger>
-              <TabsTrigger value="automated" className="flex items-center gap-1 sm:gap-2 whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
-                <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Automated Emails</span>
-                <span className="sm:hidden">Auto</span>
               </TabsTrigger>
               <TabsTrigger value="scheduled" className="flex items-center gap-1 sm:gap-2 whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
                 <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
