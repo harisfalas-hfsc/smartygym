@@ -172,14 +172,12 @@ const SharedWorkoutDetail = () => {
             </div>
           </header>
 
-          {workout.image_url ? (
-            <img
-              src={workout.image_url}
-              alt={workout.name}
-              loading="lazy"
-              className="mb-5 h-56 w-full rounded-2xl object-cover sm:h-72"
-            />
-          ) : null}
+          <img
+            src={SHARED_WORKOUTS_IMAGE}
+            alt={workout.name}
+            loading="lazy"
+            className="mb-5 h-56 w-full rounded-2xl object-cover sm:h-72"
+          />
 
           {workout.description_html ? (
             <Card className="mb-5 rounded-2xl border-2 border-primary/20">
