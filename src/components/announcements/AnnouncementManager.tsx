@@ -87,22 +87,13 @@ export const AnnouncementManager = () => {
     hasStartedRef.current = true;
 
     const init = async () => {
-      // Check for first sign-in PAR-Q popup
-      checkFirstSignInAndScheduleParQ();
-
       // Small delay to let page render first
       await new Promise(resolve => setTimeout(resolve, 1000));
       triggerRitualModalIfNeeded();
     };
 
     init();
-
-    return () => {
-      if (parqTimerRef.current) {
-        clearTimeout(parqTimerRef.current);
-      }
-    };
-  }, [triggerRitualModalIfNeeded, checkFirstSignInAndScheduleParQ]);
+  }, [triggerRitualModalIfNeeded]);
 
   // Handle Ritual modal close
   const handleRitualClose = useCallback((dontShowAgain?: boolean) => {
