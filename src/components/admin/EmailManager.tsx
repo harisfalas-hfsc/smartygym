@@ -54,9 +54,7 @@ export const EmailManager = () => {
             <EmailTemplatesManager />
           </TabsContent>
           
-          <TabsContent value="automated">
-            <AutomationRulesManager />
-          </TabsContent>
+          
           
           <TabsContent value="scheduled">
             <ScheduledEmailsManager />
