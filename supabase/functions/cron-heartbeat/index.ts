@@ -102,6 +102,31 @@ function estimateIntervalMinutes(cron: string): number {
   return 24 * 60;
 }
 
+/**
+ * Freeze awareness. While the admin Freeze System switch is on, every scheduled
+ * job is intentionally disabled — nothing is "overdue". After an unfreeze, each
+ * job needs one full interval before it can legitimately have run again, so
+ * missed runs from the freeze window must not be reported as failures.
+ */
+interface FreezeInfo { frozen: boolean; restoredAtMs: number | null }
+
+async function loadFreezeInfo(supabase: ReturnType<typeof createClient>): Promise<FreezeInfo> {
+  try {
+    const { data } = await supabase
+      .from("system_settings")
+      .select("setting_key, setting_value")
+      .in("setting_key", ["background_frozen", "background_freeze_snapshot"]);
+    const rows = data ?? [];
+    const frozenRaw = rows.find((r: any) => r.setting_key === "background_frozen")?.setting_value;
+    const frozen = frozenRaw === true || frozenRaw === "true";
+    const snapshot = rows.find((r: any) => r.setting_key === "background_freeze_snapshot")?.setting_value as any;
+    const restoredAt = snapshot?.restored_at ? new Date(snapshot.restored_at).getTime() : null;
+    return { frozen, restoredAtMs: Number.isFinite(restoredAt as number) ? restoredAt : null };
+  } catch (_e) {
+    return { frozen: false, restoredAtMs: null };
+  }
+}
+
 function isOverdue(job: CronRow, nowMs: number): { overdue: boolean; reason: string; thresholdMinutes: number } {
   const intervalMin = estimateIntervalMinutes(job.schedule);
   // grace = 2x interval + 30 min. Only cap daily jobs at 25h so weekly/yearly
