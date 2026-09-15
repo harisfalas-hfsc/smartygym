@@ -127,7 +127,7 @@ const SharedWorkouts = () => {
     >
       <div className="relative h-44 overflow-hidden bg-muted">
         <img
-          src={w.image_url || FALLBACK_IMAGE}
+          src={FALLBACK_IMAGE}
           alt={w.name}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
