@@ -248,6 +248,7 @@ const MyOwnWorkoutDetail = () => {
         steps={steps}
       />
     </div>
+    </ParqWaiverGate>
   );
 };
 
