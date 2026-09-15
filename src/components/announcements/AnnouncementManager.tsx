@@ -1,18 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { RitualAnnouncementModal } from "./RitualAnnouncementModal";
-import { ParQReminderModal } from "./ParQReminderModal";
 import { getCyprusTodayStr } from "@/lib/cyprusDate";
 import { fetchVisibleWorkoutMetadata } from "@/hooks/useTodayWods";
 
-// Delay for PAR-Q popup after first sign-in (30 seconds)
-const PARQ_POPUP_DELAY_MS = 30 * 1000;
-
-// Key to track if this is user's first session ever
-const FIRST_SIGNIN_KEY = "smartygym_first_signin_completed";
-const PARQ_REMINDER_SHOWN_KEY = "smartygym_parq_reminder_shown";
-// Key to track if user was EVER authenticated (prevents false triggers)
-const USER_AUTHENTICATED_KEY = "smartygym_user_authenticated";
 
 /**
  * Close any open Radix overlays (DropdownMenu, Popover, Tooltip) so an
