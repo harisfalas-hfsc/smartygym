@@ -153,6 +153,7 @@ const Index = () => {
     { id: "pilates", title: "Pilates", description: "Controlled movements and alignment", icon: Sparkles, route: "/workout/pilates", image: "/images/workouts/pilates-card-mobile.jpg" },
     { id: "recovery", title: "Recovery", description: "Regeneration and active recovery workouts", icon: Heart, route: "/workout/recovery", image: "/images/workouts/recovery-card-mobile.jpg" },
     { id: "micro-workouts", title: "Micro-Workouts", description: "Quick 5-minute exercise snacks, anytime", icon: Clock, route: "/workout/micro-workouts", image: "/images/workouts/micro-workouts-card-mobile.jpg" },
+    { id: "shared", title: "Shared Workouts", description: "Member-made sessions shared with the community", icon: Users, route: "/workout/shared", image: "/images/workouts/shared-workouts-card-mobile.jpg" },
   ];
 
   // Second carousel: training program categories (matches TrainingProgramFlow)
