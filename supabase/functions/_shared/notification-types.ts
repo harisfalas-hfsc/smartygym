@@ -199,7 +199,7 @@ export const MESSAGE_TYPE_SOURCES: Record<string, { source: string; schedule: st
   [MESSAGE_TYPES.CONTENT_UPDATE]: { source: 'send-new-content-notifications', schedule: 'On new content' },
   [MESSAGE_TYPES.REACTIVATION]: { source: 'send-reengagement-emails', schedule: 'Manual trigger' },
   [MESSAGE_TYPES.SUPPORT]: { source: 'send-contact-response-notification', schedule: 'On response' },
-  [MESSAGE_TYPES.PROGRAM_DELIVERED]: { source: 'send-program-notification', schedule: 'On delivery' },
+  [MESSAGE_TYPES.PROGRAM_DELIVERED]: { source: 'send-new-content-notifications', schedule: 'On delivery' },
 };
 
 /**

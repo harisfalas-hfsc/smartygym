@@ -90,9 +90,6 @@ verify_jwt = true
 [functions.update-stripe-product]
 verify_jwt = true
 
-[functions.send-notification]
-verify_jwt = true
-
 [functions.send-new-content-notifications]
 verify_jwt = false
 
@@ -157,9 +154,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-wod-notifications]
-verify_jwt = false
-
-[functions.send-ritual-notifications]
 verify_jwt = false
 
 [functions.send-morning-notifications]
