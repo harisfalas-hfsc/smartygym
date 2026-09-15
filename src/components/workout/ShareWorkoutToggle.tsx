@@ -39,31 +39,10 @@ export function ShareWorkoutToggle({ workout, compact, onChanged }: ShareWorkout
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [shared, setShared] = useState(!!workout.is_shared);
 
-  /**
-   * Creates the cover picture in the background. Until it is ready the card
-   * shows the Shared Workouts category picture, so nothing ever looks empty.
-   */
-  const generateCover = async () => {
-    if (workout.image_url) return;
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-workout-image", {
-        body: {
-          name: workout.name,
-          category: workout.category,
-          format: workout.format ?? null,
-          difficulty_stars: workout.difficulty_stars ?? 3,
-        },
-      });
-      if (error || !data?.image_url) return;
-      await supabase
-        .from("user_custom_workouts")
-        .update({ image_url: data.image_url })
-        .eq("id", workout.id);
-      onChanged?.();
-    } catch {
-      /* the category picture is used until an image exists */
-    }
-  };
+  // Shared workouts all use the single Shared Workouts picture, so no picture
+  // is created here.
+
+
 
   const share = async () => {
     setBusy(true);
@@ -95,7 +74,7 @@ export function ShareWorkoutToggle({ workout, compact, onChanged }: ShareWorkout
         title: "Shared with the community",
         description: "Premium members can now find it in Shared Workouts.",
       });
-      void generateCover();
+      
     } catch {
       toast({
         title: "Could not share this workout",
