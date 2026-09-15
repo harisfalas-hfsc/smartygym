@@ -41,6 +41,9 @@ interface SharedWorkoutDetailRow {
   is_shared: boolean;
 }
 
+// Every shared workout uses the same Shared Workouts picture.
+const SHARED_WORKOUTS_IMAGE = "/images/workouts/shared-workouts-card-mobile.jpg";
+
 const SharedWorkoutDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
