@@ -152,11 +152,24 @@ function isOverdue(job: CronRow, nowMs: number): { overdue: boolean; reason: str
   return { overdue: false, reason: `last ran ${ageMin} minutes ago`, thresholdMinutes: graceMin };
 }
 
-function evaluateSnapshot(row: CronSnapshotRow, nowMs: number): { overdue: boolean; reason: string; thresholdMinutes: number; job: CronRow } {
+function evaluateSnapshot(row: CronSnapshotRow, nowMs: number, freeze: FreezeInfo): { overdue: boolean; reason: string; thresholdMinutes: number; job: CronRow } {
   const job = snapshotToCronRow(row);
   // Retired/inactive jobs must never be reported as overdue or critical.
   if (!row.is_active) {
     return { overdue: false, reason: "inactive (retired)", thresholdMinutes: 0, job };
+  }
+  if (freeze.frozen) {
+    return { overdue: false, reason: "system frozen by admin", thresholdMinutes: 0, job };
+  }
+  if (freeze.restoredAtMs) {
+    const base = isOverdue(job, nowMs);
+    const sinceUnfreezeMin = (nowMs - freeze.restoredAtMs) / 60000;
+    const lastMs = job.last_run_at ? new Date(job.last_run_at).getTime() : 0;
+    // Missed run happened while the system was frozen and the job has not had a
+    // full expected window since the unfreeze — not a real failure.
+    if (base.overdue && lastMs < freeze.restoredAtMs && sinceUnfreezeMin < base.thresholdMinutes) {
+      return { overdue: false, reason: "catching up after unfreeze", thresholdMinutes: base.thresholdMinutes, job };
+    }
   }
   if (!row.live_job_exists) {
     return { overdue: true, reason: "not registered in the live scheduler", thresholdMinutes: 0, job };
