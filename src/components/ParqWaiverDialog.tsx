@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 interface ParqWaiverDialogProps {
   open: boolean;
   flags: string[];
+  /** "missing" = no PAR-Q on file, "flagged" = completed with a YES answer. */
+  reason?: "missing" | "flagged" | "none";
   confirmLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
