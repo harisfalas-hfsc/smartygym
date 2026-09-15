@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { InfoRibbon } from "@/components/InfoRibbon";
-import { Dumbbell, Flame, Zap, Heart, Move, Activity, CalendarCheck, Flower2, RefreshCw, Timer, Wand2, Star } from "lucide-react";
+import { Dumbbell, Flame, Zap, Heart, Move, Activity, CalendarCheck, Flower2, RefreshCw, Timer, Wand2, Star, Users } from "lucide-react";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { generateBreadcrumbSchema } from "@/utils/seoHelpers";
 import { useAccessControl } from "@/hooks/useAccessControl";
@@ -21,6 +21,7 @@ import { SwipeToExplore } from "@/components/ui/SwipeToExplore";
 import { fetchVisibleWorkoutMetadata, useTodayWods } from "@/hooks/useTodayWods";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { workoutCategoryToSlug } from "@/constants/workoutCategories";
+import { useSharedWorkoutCount } from "@/hooks/useSharedWorkouts";
 
 const WorkoutFlow = () => {
   const navigate = useNavigate();
@@ -61,6 +62,10 @@ const WorkoutFlow = () => {
     refetchOnWindowFocus: "always",
     refetchOnReconnect: "always",
   });
+
+  // Member-shared workouts are counted separately — they live in their own table.
+  const { data: sharedCount = 0 } = useSharedWorkoutCount();
+  const categoryCounts: Record<string, number> = { ...workoutCounts, shared: sharedCount };
 
   const totalWorkoutCount = Object.values(workoutCounts).reduce((sum, c) => sum + c, 0);
 
@@ -115,6 +120,7 @@ const WorkoutFlow = () => {
     "pilates": "/images/workouts/pilates-category-bg.jpg",
     "recovery": "/images/workouts/recovery-category-bg.jpg",
     "micro-workouts": "/images/workouts/micro-workouts-category-bg.jpg",
+    "shared": "/images/workouts/shared-workouts-card-mobile.jpg",
   };
 
   // Mobile card images for stacked blog-card layout
@@ -129,6 +135,7 @@ const WorkoutFlow = () => {
     "pilates": "/images/workouts/pilates-card-mobile.jpg",
     "recovery": "/images/workouts/recovery-card-mobile.jpg",
     "micro-workouts": "/images/workouts/micro-workouts-card-mobile.jpg",
+    "shared": "/images/workouts/shared-workouts-card-mobile.jpg",
   };
 
   // Extended descriptions for mobile carousel
@@ -144,6 +151,7 @@ const WorkoutFlow = () => {
     "pilates": "Core strength, spinal alignment, and body awareness through precise movements.",
     "recovery": "Active recovery sessions to help your body repair, rebuild, and prevent injuries.",
     "micro-workouts": "Quick 5-minute bodyweight exercises you can do anywhere — desk, sofa, or on the go.",
+    "shared": "Sessions built by members and shared with the community, from the Smarty Gym exercise library.",
   };
 
   const CREATE_OWN_IMAGE = "/images/workouts/create-your-own-card.jpg";
@@ -220,6 +228,13 @@ const WorkoutFlow = () => {
     icon: Timer,
     level: "All Levels",
     equipment: "Bodyweight/Minimal"
+  }, {
+    id: "shared",
+    title: "Shared Workouts",
+    description: "Member-made sessions shared with the community",
+    icon: Users,
+    level: "All Levels",
+    equipment: "Various"
   }];
 
   /** Slide ids in carousel order — Create Your Own Workout first, then the categories. */
@@ -442,7 +457,7 @@ const WorkoutFlow = () => {
                         />
                       ) : null}
                       {/* Counter Badge */}
-                      {!isWodCard && <CategoryCountBadge count={workoutCounts[workout.id] || 0} />}
+                      {!isWodCard && <CategoryCountBadge count={categoryCounts[workout.id] || 0} />}
                     </div>
 
                     {/* Content Section */}
@@ -632,7 +647,7 @@ const WorkoutFlow = () => {
                             />
                           )}
                           {!isWodCard && (
-                            <CategoryCountBadge count={workoutCounts[workout.id] || 0} size="sm" className="top-1.5 right-1.5 left-auto" />
+                            <CategoryCountBadge count={categoryCounts[workout.id] || 0} size="sm" className="top-1.5 right-1.5 left-auto" />
                           )}
                         </div>
                         {/* Content section */}

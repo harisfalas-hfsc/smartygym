@@ -2897,8 +2897,10 @@ export type Database = {
           format: string | null
           has_viewed: boolean
           id: string
+          image_url: string | null
           instructions_html: string | null
           is_favorite: boolean
+          is_shared: boolean
           location: string | null
           main_workout: string | null
           mood: string | null
@@ -2907,6 +2909,9 @@ export type Database = {
           rated_at: string | null
           rating: number | null
           review_warnings: string[]
+          share_report_count: number
+          shared_at: string | null
+          shared_by_name: string | null
           status: string
           tips_html: string | null
           updated_at: string
@@ -2927,8 +2932,10 @@ export type Database = {
           format?: string | null
           has_viewed?: boolean
           id?: string
+          image_url?: string | null
           instructions_html?: string | null
           is_favorite?: boolean
+          is_shared?: boolean
           location?: string | null
           main_workout?: string | null
           mood?: string | null
@@ -2937,6 +2944,9 @@ export type Database = {
           rated_at?: string | null
           rating?: number | null
           review_warnings?: string[]
+          share_report_count?: number
+          shared_at?: string | null
+          shared_by_name?: string | null
           status?: string
           tips_html?: string | null
           updated_at?: string
@@ -2957,8 +2967,10 @@ export type Database = {
           format?: string | null
           has_viewed?: boolean
           id?: string
+          image_url?: string | null
           instructions_html?: string | null
           is_favorite?: boolean
+          is_shared?: boolean
           location?: string | null
           main_workout?: string | null
           mood?: string | null
@@ -2967,6 +2979,9 @@ export type Database = {
           rated_at?: string | null
           rating?: number | null
           review_warnings?: string[]
+          share_report_count?: number
+          shared_at?: string | null
+          shared_by_name?: string | null
           status?: string
           tips_html?: string | null
           updated_at?: string
