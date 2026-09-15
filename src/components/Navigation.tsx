@@ -27,7 +27,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { SafeNotificationBadge } from "@/components/NotificationBadge";
 
 import { useAdminRole } from "@/hooks/useAdminRole";
-import { SmartyCoachModal, SmartyCoachButton } from "@/components/smarty-coach";
+import { SmartyCoachModal } from "@/components/smarty-coach";
 import smartyCoachIcon from "@/assets/smarty-gym-icon-noborder.png";
 import { cn } from "@/lib/utils";
 
