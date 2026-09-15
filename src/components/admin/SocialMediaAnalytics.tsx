@@ -47,15 +47,26 @@ export const SocialMediaAnalytics = () => {
 
       // Fetch all analytics data — exclude preview/bot traffic so the totals
       // match the Website tab and the dashboard overview card.
-      let query = supabase
-        .from('social_media_analytics')
-        .select('*')
-        .gte('created_at', startDate.toISOString())
-        .order('created_at', { ascending: true });
-      query = applyBotFilter(query as any) as typeof query;
-      const { data, error } = await query;
-
-      if (error) throw error;
+      // IMPORTANT: the API caps a single response at 1000 rows, so we page
+      // through the whole window. Without this the totals were silently
+      // truncated to the first 1000 records.
+      const PAGE_SIZE = 1000;
+      const data: any[] = [];
+      for (let page = 0; ; page++) {
+        let query = supabase
+          .from('social_media_analytics')
+          .select('*')
+          .gte('created_at', startDate.toISOString())
+          .order('created_at', { ascending: true })
+          .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
+        query = applyBotFilter(query as any) as typeof query;
+        const { data: rows, error } = await query;
+        if (error) throw error;
+        if (!rows?.length) break;
+        data.push(...rows);
+        if (rows.length < PAGE_SIZE) break;
+        if (page > 200) break; // hard safety stop
+      }
 
       // Process platform metrics
       const platformStats: { [key: string]: PlatformMetrics } = {};
