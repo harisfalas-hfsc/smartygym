@@ -198,21 +198,21 @@ export const DesktopWellnessHero = ({
               <button
                 type="button"
                 onClick={() => navigate("/workout")}
-                className="inline-flex h-11 items-center gap-2 rounded-full border-2 border-primary px-8 text-base font-bold text-primary hover:bg-primary/10 transition-all"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary border-2 border-green-500 px-8 text-base font-bold text-primary-foreground hover:opacity-95 transition-all"
               >
                 Browse Workouts <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => navigate("/create-your-own-workout")}
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground hover:opacity-95 transition-all"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary border-2 border-green-500 px-8 text-base font-bold text-primary-foreground hover:opacity-95 transition-all"
               >
                 Create Your Workout <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => navigate("/trainingprogram")}
-                className="inline-flex h-11 items-center gap-2 rounded-full border-2 border-primary px-8 text-base font-bold text-primary hover:bg-primary/10 transition-all"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary border-2 border-green-500 px-8 text-base font-bold text-primary-foreground hover:opacity-95 transition-all"
               >
                 Browse Training Programs <ArrowRight className="w-4 h-4" />
               </button>
