@@ -69,7 +69,7 @@ const WorkoutFlow = () => {
 
   const totalWorkoutCount = Object.values(workoutCounts).reduce((sum, c) => sum + c, 0);
 
-  // Latest workouts for "Featured" section (mobile: 6, desktop: 6 inside grid)
+  // Latest workouts for "Featured" section (mobile: 3, desktop: 9 in a full-width 3x3 grid)
   const { data: latestWorkouts = [] } = useQuery({
     queryKey: ["featured-latest-workouts"],
     queryFn: async () => {
@@ -78,7 +78,7 @@ const WorkoutFlow = () => {
         .filter((w) => w.is_workout_of_day !== true || w.wod_source === "library")
         .filter((w) => !!w.created_at)
         .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
-        .slice(0, 3);
+        .slice(0, 9);
     },
     staleTime: 0,
     gcTime: 0,
@@ -505,9 +505,9 @@ const WorkoutFlow = () => {
                 </ScrollReveal>
               );
             })}
-            {/* Desktop: Featured Workouts — card aligned with the other category cards, 3 latest */}
+            {/* Desktop: Featured Workouts — full-width card spanning all three columns, 9 latest in a 3x3 grid */}
             {latestWorkouts.length > 0 && (
-              <ScrollReveal>
+              <ScrollReveal className="lg:col-span-3">
                 <Card className="transition-all duration-500 ease-out border-2 border-border overflow-hidden bg-card h-full">
                   <div className="p-5 flex flex-col items-center text-center space-y-3 h-full">
                     <div className="relative w-14 h-14 rounded-full flex items-center justify-center" aria-hidden="true">
@@ -516,7 +516,7 @@ const WorkoutFlow = () => {
                     </div>
                     <div className="w-full flex-1 flex flex-col">
                       <h3 className="font-semibold text-lg mb-3 text-foreground">Featured Workouts</h3>
-                      <div className="flex flex-col gap-2 w-full flex-1">
+                      <div className="grid grid-cols-3 gap-2 w-full flex-1">
                         {latestWorkouts.map((w) => {
                           const slug = workoutCategoryToSlug(w.category);
                           const image = w.image_url || categoryMobileImages[slug] || "/images/workouts/wod-card-mobile.jpg";
@@ -701,7 +701,7 @@ const WorkoutFlow = () => {
                 <div className="h-px flex-1 bg-primary/20" />
               </div>
               <div className="flex flex-col gap-3">
-                {latestWorkouts.map((w) => {
+                {latestWorkouts.slice(0, 3).map((w) => {
                   const slug = workoutCategoryToSlug(w.category);
                   const image = w.image_url || categoryMobileImages[slug] || "/images/workouts/wod-card-mobile.jpg";
                   return (
