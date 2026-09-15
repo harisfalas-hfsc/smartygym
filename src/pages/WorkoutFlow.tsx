@@ -701,7 +701,7 @@ const WorkoutFlow = () => {
                 <div className="h-px flex-1 bg-primary/20" />
               </div>
               <div className="flex flex-col gap-3">
-                {latestWorkouts.map((w) => {
+                {latestWorkouts.slice(0, 3).map((w) => {
                   const slug = workoutCategoryToSlug(w.category);
                   const image = w.image_url || categoryMobileImages[slug] || "/images/workouts/wod-card-mobile.jpg";
                   return (
