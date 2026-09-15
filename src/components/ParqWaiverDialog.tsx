@@ -93,7 +93,9 @@ export function ParqWaiverDialog({
             {confirmLabel}
           </Button>
           <Button asChild variant="secondary" className="h-11 rounded-2xl">
-            <Link to="/userdashboard?tab=account">Update my PAR-Q answers</Link>
+            <Link to="/userdashboard?tab=account">
+              {reason === "missing" ? "Complete my PAR-Q now" : "Update my PAR-Q answers"}
+            </Link>
           </Button>
         </div>
       </DialogContent>
