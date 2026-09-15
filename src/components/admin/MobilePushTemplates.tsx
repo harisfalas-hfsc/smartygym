@@ -149,38 +149,38 @@ export const MobilePushTemplates = () => {
               className="border rounded-lg p-4 space-y-3 hover:bg-muted/10 transition-colors"
             >
               {/* Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-primary/10">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <div className="p-2 rounded-lg bg-primary/10 shrink-0">
                     <Icon className="h-4 w-4 text-primary" />
                   </div>
-                  <span className="font-semibold">{template.type}</span>
+                  <span className="font-semibold break-words">{template.type}</span>
                 </div>
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs shrink-0">
                   {template.frequency}
                 </Badge>
               </div>
 
               {/* Template Fields */}
-              <div className="grid gap-2 text-sm">
+              <div className="grid gap-2 text-sm min-w-0">
                 {/* Title */}
-                <div className="flex items-center gap-2 p-2 bg-muted/30 rounded border">
-                  <span className="text-xs font-medium text-muted-foreground w-16 shrink-0">Title:</span>
-                  <span className="flex-1 font-medium truncate">{template.title}</span>
+                <div className="flex min-w-0 items-start gap-2 p-2 bg-muted/30 rounded border">
+                  <span className="text-xs font-medium text-muted-foreground w-16 shrink-0 pt-0.5">Title:</span>
+                  <span className="flex-1 min-w-0 font-medium break-words">{template.title}</span>
                   <CopyButton text={template.title} fieldId={`${template.id}-title`} />
                 </div>
 
                 {/* Message */}
-                <div className="flex items-center gap-2 p-2 bg-muted/30 rounded border">
-                  <span className="text-xs font-medium text-muted-foreground w-16 shrink-0">Message:</span>
-                  <span className="flex-1 truncate">{template.message}</span>
+                <div className="flex min-w-0 items-start gap-2 p-2 bg-muted/30 rounded border">
+                  <span className="text-xs font-medium text-muted-foreground w-16 shrink-0 pt-0.5">Message:</span>
+                  <span className="flex-1 min-w-0 break-words">{template.message}</span>
                   <CopyButton text={template.message} fieldId={`${template.id}-message`} />
                 </div>
 
                 {/* Link */}
-                <div className="flex items-center gap-2 p-2 bg-muted/30 rounded border">
-                  <span className="text-xs font-medium text-muted-foreground w-16 shrink-0">Link:</span>
-                  <span className="flex-1 text-xs font-mono truncate text-primary">{fullUrl}</span>
+                <div className="flex min-w-0 items-start gap-2 p-2 bg-muted/30 rounded border">
+                  <span className="text-xs font-medium text-muted-foreground w-16 shrink-0 pt-0.5">Link:</span>
+                  <span className="flex-1 min-w-0 text-xs font-mono break-all text-primary">{fullUrl}</span>
                   <CopyButton text={fullUrl} fieldId={`${template.id}-link`} />
                   <a 
                     href={fullUrl} 

@@ -12,11 +12,19 @@ const BOT_PATTERNS = [
   "%bot%",
   "%crawler%",
   "%spider%",
+  "%scraper%",
+  "%headless%",
+  "%python%",
+  "%curl%",
   "%meta-external%",
   "%adsbot%",
   "%facebookexternalhit%",
   "%semrush%",
   "%ahrefs%",
+  "%playstore-google%",
+  // Automated scraper that spoofs a long-obsolete desktop Chrome build.
+  // It is responsible for the vast majority of recorded "visits" and is not a human.
+  "%Chrome/126.0.0.0%",
 ] as const;
 
 const ADMIN_PATH_PATTERNS = [
