@@ -1,18 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { RitualAnnouncementModal } from "./RitualAnnouncementModal";
-import { ParQReminderModal } from "./ParQReminderModal";
 import { getCyprusTodayStr } from "@/lib/cyprusDate";
 import { fetchVisibleWorkoutMetadata } from "@/hooks/useTodayWods";
 
-// Delay for PAR-Q popup after first sign-in (30 seconds)
-const PARQ_POPUP_DELAY_MS = 30 * 1000;
-
-// Key to track if this is user's first session ever
-const FIRST_SIGNIN_KEY = "smartygym_first_signin_completed";
-const PARQ_REMINDER_SHOWN_KEY = "smartygym_parq_reminder_shown";
-// Key to track if user was EVER authenticated (prevents false triggers)
-const USER_AUTHENTICATED_KEY = "smartygym_user_authenticated";
 
 /**
  * Close any open Radix overlays (DropdownMenu, Popover, Tooltip) so an
@@ -31,8 +21,6 @@ const closeOpenOverlays = () => {
 
 export const AnnouncementManager = () => {
   const [showRitualModal, setShowRitualModal] = useState(false);
-  const [showParQModal, setShowParQModal] = useState(false);
-  const parqTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasStartedRef = useRef(false);
 
   const getTodayKey = (prefix: string) => {
@@ -41,39 +29,9 @@ export const AnnouncementManager = () => {
     return `${prefix}_${cyprusToday}`;
   };
 
-  // Check if this is user's first sign-in and schedule PAR-Q popup
-  // IMPORTANT: Only runs for AUTHENTICATED users
-  const checkFirstSignInAndScheduleParQ = useCallback(async () => {
-    // First, verify user is actually authenticated
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.user) {
-      console.log("[AnnouncementManager] No authenticated user - skipping PAR-Q check");
-      return;
-    }
-    
-    // Mark that this browser has had an authenticated user
-    localStorage.setItem(USER_AUTHENTICATED_KEY, "true");
-    
-    const firstSignInCompleted = localStorage.getItem(FIRST_SIGNIN_KEY);
-    const parqReminderShown = localStorage.getItem(PARQ_REMINDER_SHOWN_KEY);
-    
-    // If this is NOT the first sign-in, or PAR-Q reminder already shown, skip
-    if (firstSignInCompleted || parqReminderShown) {
-      console.log("[AnnouncementManager] Not first sign-in or PAR-Q already shown");
-      return;
-    }
-
-    // Mark first sign-in as happening now
-    localStorage.setItem(FIRST_SIGNIN_KEY, new Date().toISOString());
-    
-    // Schedule PAR-Q popup for 30 seconds later
-    console.log("[AnnouncementManager] First sign-in detected - scheduling PAR-Q popup in 30 seconds");
-    parqTimerRef.current = setTimeout(() => {
-      closeOpenOverlays();
-      setShowParQModal(true);
-    }, PARQ_POPUP_DELAY_MS);
-  }, []);
+  // The PAR-Q reminder is no longer shown on launch. The health warning is
+  // raised only when a member opens a workout or training program
+  // (see ParqWaiverGate).
 
   // Trigger Ritual modal only when today's WODs are genuinely unavailable
   const triggerRitualModalIfNeeded = useCallback(async () => {
@@ -117,22 +75,13 @@ export const AnnouncementManager = () => {
     hasStartedRef.current = true;
 
     const init = async () => {
-      // Check for first sign-in PAR-Q popup
-      checkFirstSignInAndScheduleParQ();
-
       // Small delay to let page render first
       await new Promise(resolve => setTimeout(resolve, 1000));
       triggerRitualModalIfNeeded();
     };
 
     init();
-
-    return () => {
-      if (parqTimerRef.current) {
-        clearTimeout(parqTimerRef.current);
-      }
-    };
-  }, [triggerRitualModalIfNeeded, checkFirstSignInAndScheduleParQ]);
+  }, [triggerRitualModalIfNeeded]);
 
   // Handle Ritual modal close
   const handleRitualClose = useCallback((dontShowAgain?: boolean) => {
@@ -148,28 +97,11 @@ export const AnnouncementManager = () => {
     }
   }, []);
 
-  // Handle PAR-Q modal close
-  const handleParQClose = useCallback((dontShowAgain?: boolean) => {
-    setShowParQModal(false);
-    
-    // Always mark as shown (we only show once ever)
-    localStorage.setItem(PARQ_REMINDER_SHOWN_KEY, new Date().toISOString());
-    
-    if (parqTimerRef.current) {
-      clearTimeout(parqTimerRef.current);
-      parqTimerRef.current = null;
-    }
-  }, []);
-
   return (
     <>
       <RitualAnnouncementModal 
         open={showRitualModal} 
         onClose={handleRitualClose} 
-      />
-      <ParQReminderModal
-        open={showParQModal}
-        onClose={handleParQClose}
       />
     </>
   );
