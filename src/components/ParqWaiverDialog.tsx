@@ -44,14 +44,23 @@ export function ParqWaiverDialog({
           <AlertTriangle className="h-5 w-5" /> Health warning
         </DialogTitle>
 
-        <p className="text-sm text-muted-foreground">
-          Your health assessment (PAR-Q) has a YES answer:
-        </p>
-        <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-          {flags.map((flag) => (
-            <li key={flag}>{flag}</li>
-          ))}
-        </ul>
+        {reason === "missing" ? (
+          <p className="text-sm text-muted-foreground">
+            You have not completed your health assessment (PAR-Q) yet. We strongly recommend
+            completing it before you train, so we know it is safe for you.
+          </p>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">
+              Your health assessment (PAR-Q) has a YES answer:
+            </p>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+              {flags.map((flag) => (
+                <li key={flag}>{flag}</li>
+              ))}
+            </ul>
+          </>
+        )}
 
         <p className="text-sm text-muted-foreground">
           SmartyGym is not a doctor. We strongly suggest you speak to your physician before
