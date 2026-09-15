@@ -416,7 +416,7 @@ serve(async (req) => {
   const dailyReport: DailyReport = { overdue: overdueJobs, failed24h, healthy24h, inactive };
 
   let alert_status: "sent" | "throttled" | "failed" = "sent";
-  const alreadySentToday = await wasAlertAlreadySentToday(supabase, nowMs);
+  const alreadySentToday = !force && await wasAlertAlreadySentToday(supabase, nowMs);
   if (alreadySentToday) {
     alert_status = "throttled";
     console.log("[cron-heartbeat] daily summary already sent today; skipping");
