@@ -4,8 +4,7 @@ import { EmailComposer } from "./EmailComposer";
 import { EmailTemplatesManager } from "./EmailTemplatesManager";
 import { ScheduledEmailsManager } from "./ScheduledEmailsManager";
 import { TestEmailSender } from "./TestEmailSender";
-import { AutomationRulesManager } from "./AutomationRulesManager";
-import { Mail, FileText, Calendar, Send, Zap } from "lucide-react";
+import { Mail, FileText, Calendar, Send } from "lucide-react";
 
 export const EmailManager = () => {
   return (
