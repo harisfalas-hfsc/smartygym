@@ -732,7 +732,6 @@ export const Navigation = () => {
     </header>
     )}
     <SmartyCoachModal isOpen={smartyCoachOpen} onClose={() => setSmartyCoachOpen(false)} />
-    {!isMobile && <SmartyCoachButton />}
     </>
   );
 };
