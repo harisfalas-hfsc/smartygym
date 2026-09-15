@@ -102,6 +102,31 @@ function estimateIntervalMinutes(cron: string): number {
   return 24 * 60;
 }
 
+/**
+ * Freeze awareness. While the admin Freeze System switch is on, every scheduled
+ * job is intentionally disabled — nothing is "overdue". After an unfreeze, each
+ * job needs one full interval before it can legitimately have run again, so
+ * missed runs from the freeze window must not be reported as failures.
+ */
+interface FreezeInfo { frozen: boolean; restoredAtMs: number | null }
+
+async function loadFreezeInfo(supabase: ReturnType<typeof createClient>): Promise<FreezeInfo> {
+  try {
+    const { data } = await supabase
+      .from("system_settings")
+      .select("setting_key, setting_value")
+      .in("setting_key", ["background_frozen", "background_freeze_snapshot"]);
+    const rows = data ?? [];
+    const frozenRaw = rows.find((r: any) => r.setting_key === "background_frozen")?.setting_value;
+    const frozen = frozenRaw === true || frozenRaw === "true";
+    const snapshot = rows.find((r: any) => r.setting_key === "background_freeze_snapshot")?.setting_value as any;
+    const restoredAt = snapshot?.restored_at ? new Date(snapshot.restored_at).getTime() : null;
+    return { frozen, restoredAtMs: Number.isFinite(restoredAt as number) ? restoredAt : null };
+  } catch (_e) {
+    return { frozen: false, restoredAtMs: null };
+  }
+}
+
 function isOverdue(job: CronRow, nowMs: number): { overdue: boolean; reason: string; thresholdMinutes: number } {
   const intervalMin = estimateIntervalMinutes(job.schedule);
   // grace = 2x interval + 30 min. Only cap daily jobs at 25h so weekly/yearly
@@ -127,11 +152,24 @@ function isOverdue(job: CronRow, nowMs: number): { overdue: boolean; reason: str
   return { overdue: false, reason: `last ran ${ageMin} minutes ago`, thresholdMinutes: graceMin };
 }
 
-function evaluateSnapshot(row: CronSnapshotRow, nowMs: number): { overdue: boolean; reason: string; thresholdMinutes: number; job: CronRow } {
+function evaluateSnapshot(row: CronSnapshotRow, nowMs: number, freeze: FreezeInfo): { overdue: boolean; reason: string; thresholdMinutes: number; job: CronRow } {
   const job = snapshotToCronRow(row);
   // Retired/inactive jobs must never be reported as overdue or critical.
   if (!row.is_active) {
     return { overdue: false, reason: "inactive (retired)", thresholdMinutes: 0, job };
+  }
+  if (freeze.frozen) {
+    return { overdue: false, reason: "system frozen by admin", thresholdMinutes: 0, job };
+  }
+  if (freeze.restoredAtMs) {
+    const base = isOverdue(job, nowMs);
+    const sinceUnfreezeMin = (nowMs - freeze.restoredAtMs) / 60000;
+    const lastMs = job.last_run_at ? new Date(job.last_run_at).getTime() : 0;
+    // Missed run happened while the system was frozen and the job has not had a
+    // full expected window since the unfreeze — not a real failure.
+    if (base.overdue && lastMs < freeze.restoredAtMs && sinceUnfreezeMin < base.thresholdMinutes) {
+      return { overdue: false, reason: "catching up after unfreeze", thresholdMinutes: base.thresholdMinutes, job };
+    }
   }
   if (!row.live_job_exists) {
     return { overdue: true, reason: "not registered in the live scheduler", thresholdMinutes: 0, job };
@@ -290,6 +328,7 @@ serve(async (req) => {
 
   const supabase = createClient(PROJECT_URL, SERVICE_KEY);
   const nowMs = Date.now();
+  const freeze = await loadFreezeInfo(supabase);
 
   await supabase.rpc("sync_cron_metadata_from_live_scheduler");
 
@@ -308,7 +347,7 @@ serve(async (req) => {
 
   const overdueJobs: Array<{ job: CronRow; reason: string }> = [];
   const report = filtered.map((row: CronSnapshotRow) => {
-    const r = evaluateSnapshot(row, nowMs);
+    const r = evaluateSnapshot(row, nowMs, freeze);
     if (r.overdue) overdueJobs.push({ job: r.job, reason: r.reason });
     return {
       job_name: row.job_name,
