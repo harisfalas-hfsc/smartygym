@@ -22,6 +22,7 @@ interface ParqWaiverDialogProps {
 export function ParqWaiverDialog({
   open,
   flags,
+  reason = "flagged",
   confirmLabel = "I confirm — continue",
   onConfirm,
   onCancel,
