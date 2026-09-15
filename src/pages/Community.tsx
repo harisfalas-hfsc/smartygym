@@ -35,7 +35,8 @@ import {
   CarouselNext,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Trophy, MessageSquare, Star, User, Calendar, ClipboardCheck, Eye, Award, Quote, Lock, Crown } from "lucide-react";
+import { Trophy, MessageSquare, Star, User, Users, Calendar, ClipboardCheck, Eye, Award, Quote, Lock, Crown } from "lucide-react";
+import { SharedWorkoutsCommunityCard } from "@/components/community/SharedWorkoutsCommunityCard";
 import { SwipeToExplore } from "@/components/ui/SwipeToExplore";
 import { TestimonialsSection } from "@/components/community/TestimonialsSection";
 import { formatDistanceToNow } from "date-fns";
@@ -853,12 +854,27 @@ const Community = () => {
                     <TestimonialsSection compact />
                   </div>
                 </CarouselItem>
+
+                {/* Slide 5: Shared Workouts */}
+                <CarouselItem className="pl-2 basis-[88%]">
+                  <Card className={`border-2 border-green-500/60 shadow-lg flex flex-col ${MOBILE_CAROUSEL_CARD_CLASS}`}>
+                    <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 p-4">
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Users className="h-5 w-5 text-primary" />
+                        Shared Workouts
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 flex-1 min-h-0 overflow-auto">
+                      <SharedWorkoutsCommunityCard limit={5} />
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
               </CarouselContent>
             </Carousel>
             
             {/* Dot navigation indicators */}
             <div className="flex justify-center gap-2 mt-4">
-              {[0, 1, 2, 3].map((index) => (
+              {[0, 1, 2, 3, 4].map((index) => (
                 <button
                   key={index}
                   onClick={() => carouselApi?.scrollTo(index)}
@@ -1227,6 +1243,21 @@ const Community = () => {
                     </CardContent>
                   </Card>
                 </CarouselItem>
+
+                {/* Slide 5: Shared Workouts */}
+                <CarouselItem className="pl-4 basis-[70%]">
+                  <Card className="h-[600px] border-2 border-primary/30 shadow-lg flex flex-col">
+                    <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 md:p-6">
+                      <CardTitle className="flex items-center gap-2 text-xl md:text-2xl mb-4">
+                        <Users className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                        Shared Workouts
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 md:pt-6 flex-1 overflow-auto">
+                      <SharedWorkoutsCommunityCard />
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
               </CarouselContent>
               
               <CarouselPrevious className="-left-24 lg:-left-28 xl:-left-32 h-14 w-14 z-20" />
@@ -1235,7 +1266,7 @@ const Community = () => {
 
             {/* Dot navigation */}
             <div className="flex justify-center gap-2 mt-2">
-              {[0, 1, 2, 3].map((index) => (
+              {[0, 1, 2, 3, 4].map((index) => (
                 <button
                   key={index}
                   onClick={() => desktopCarouselApi?.scrollTo(index)}

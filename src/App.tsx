@@ -39,6 +39,8 @@ const IndividualWorkout = lazy(() => import("./pages/IndividualWorkout"));
 const CreateYourOwnWorkout = lazy(() => import("./pages/CreateYourOwnWorkout"));
 const MyOwnWorkouts = lazy(() => import("./pages/MyOwnWorkouts"));
 const MyOwnWorkoutDetail = lazy(() => import("./pages/MyOwnWorkoutDetail"));
+const SharedWorkouts = lazy(() => import("./pages/SharedWorkouts"));
+const SharedWorkoutDetail = lazy(() => import("./pages/SharedWorkoutDetail"));
 const WODArchive = lazy(() => import("./pages/WODArchive"));
 const DailySmartyRitual = lazy(() => import("./pages/DailySmartyRitual"));
 const WODCategory = lazy(() => import("./pages/WODCategory"));
@@ -267,6 +269,8 @@ const AppContent = () => {
                 {/* Public workout and plan flows - anyone can browse */}
                 <Route path="/workout" element={<WorkoutFlow />} />
                 <Route path="/workout/wod" element={<WODCategory />} />
+                <Route path="/workout/shared" element={<SharedWorkouts />} />
+                <Route path="/workout/shared/:id" element={<SharedWorkoutDetail />} />
                 <Route path="/workout/:type" element={<WorkoutDetail />} />
                 <Route path="/workout/:type/:id" element={<IndividualWorkout />} />
                 <Route path="/wod-archive" element={<WODArchive />} />

@@ -16,6 +16,7 @@ import { normalizeWorkoutHtml } from "@/utils/htmlNormalizer";
 import { parseWorkoutSteps } from "@/utils/parseWorkoutSteps";
 import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
 import { ParqWaiverGate } from "@/components/ParqWaiverGate";
+import { ShareWorkoutToggle } from "@/components/workout/ShareWorkoutToggle";
 
 interface CustomWorkoutDetail {
   id: string;
@@ -38,6 +39,8 @@ interface CustomWorkoutDetail {
   completed_at: string | null;
   has_viewed: boolean | null;
   rating: number | null;
+  is_shared?: boolean | null;
+  image_url?: string | null;
   needs_review: boolean;
   review_warnings: string[] | null;
   created_at: string;
@@ -167,8 +170,9 @@ const MyOwnWorkoutDetail = () => {
       ) : null}
 
       <Card className="mb-5 rounded-2xl border-2 border-primary/20">
-        <CardContent className="p-4 sm:p-5">
+        <CardContent className="space-y-3 p-4 sm:p-5">
           <CustomWorkoutActions workout={workout} />
+          <ShareWorkoutToggle workout={workout} />
         </CardContent>
       </Card>
 

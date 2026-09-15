@@ -12,6 +12,7 @@ import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { CustomWorkoutActions } from "@/components/workout/CustomWorkoutActions";
 import { useScheduledWorkouts } from "@/hooks/useScheduledWorkouts";
 import { CompactFilters } from "@/components/CompactFilters";
+import { ShareWorkoutToggle } from "@/components/workout/ShareWorkoutToggle";
 
 type StatusFilter = "all" | "favorites" | "completed" | "viewed" | "rated" | "scheduled";
 type SortOrder = "newest" | "oldest";
@@ -33,6 +34,8 @@ export interface CustomWorkoutRow {
   has_viewed: boolean | null;
   rating: number | null;
   created_at: string;
+  is_shared?: boolean | null;
+  image_url?: string | null;
 }
 
 const Stars = ({ count }: { count: number }) => (
@@ -60,14 +63,14 @@ const MyOwnWorkouts = () => {
     });
   }, [navigate]);
 
-  const { data: workouts = [], isLoading } = useQuery({
+  const { data: workouts = [], isLoading, refetch: refetchWorkouts } = useQuery({
     queryKey: ["my-own-workouts", userId],
     enabled: !!userId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("user_custom_workouts")
         .select(
-          "id,name,category,format,focus,difficulty_stars,difficulty_label,duration_label,duration_min,equipment,location,is_favorite,completed_at,has_viewed,rating,created_at",
+          "id,name,category,format,focus,difficulty_stars,difficulty_label,duration_label,duration_min,equipment,location,is_favorite,completed_at,has_viewed,rating,created_at,is_shared,image_url",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -258,8 +261,9 @@ const MyOwnWorkouts = () => {
                        </span>
                      ) : null}
                   </div>
-                  <div onClick={(e) => e.stopPropagation()} className="mt-3">
+                  <div onClick={(e) => e.stopPropagation()} className="mt-3 space-y-2">
                      <CustomWorkoutActions workout={w} compact onScheduled={() => void refetchScheduled()} />
+                     <ShareWorkoutToggle workout={w} compact onChanged={() => void refetchWorkouts()} />
                   </div>
                 </div>
               </CardContent>
