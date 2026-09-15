@@ -74,7 +74,7 @@ export function ShareWorkoutToggle({ workout, compact, onChanged }: ShareWorkout
         title: "Shared with the community",
         description: "Premium members can now find it in Shared Workouts.",
       });
-      void generateCover();
+      
     } catch {
       toast({
         title: "Could not share this workout",
