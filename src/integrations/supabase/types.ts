@@ -4223,6 +4223,7 @@ export type Database = {
         | "welcome_onboarding"
         | "payment_failed_attempt"
         | "payment_failed_final"
+        | "announcement_new_article"
       plan_type:
         | "free"
         | "gold"
@@ -4400,6 +4401,7 @@ export const Constants = {
         "welcome_onboarding",
         "payment_failed_attempt",
         "payment_failed_final",
+        "announcement_new_article",
       ],
       plan_type: [
         "free",
