@@ -601,7 +601,7 @@ export const Navigation = () => {
             type="button"
             onClick={() => setSmartyCoachOpen(true)}
             aria-label="Smarty Coach"
-            className="smarty-coach-blink motion-reduce:animate-none inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_2px_8px_-2px_hsl(var(--primary)/0.4)]"
+            className="smarty-coach-blink motion-reduce:animate-none inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-background transition-colors hover:bg-primary/10"
           >
             <img src={smartyCoachIcon} alt="" aria-hidden="true" className="h-6 w-6 rounded-full object-contain" width={24} height={24} />
           </button>
