@@ -21,8 +21,6 @@ const closeOpenOverlays = () => {
 
 export const AnnouncementManager = () => {
   const [showRitualModal, setShowRitualModal] = useState(false);
-  const [showParQModal, setShowParQModal] = useState(false);
-  const parqTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasStartedRef = useRef(false);
 
   const getTodayKey = (prefix: string) => {
@@ -99,28 +97,11 @@ export const AnnouncementManager = () => {
     }
   }, []);
 
-  // Handle PAR-Q modal close
-  const handleParQClose = useCallback((dontShowAgain?: boolean) => {
-    setShowParQModal(false);
-    
-    // Always mark as shown (we only show once ever)
-    localStorage.setItem(PARQ_REMINDER_SHOWN_KEY, new Date().toISOString());
-    
-    if (parqTimerRef.current) {
-      clearTimeout(parqTimerRef.current);
-      parqTimerRef.current = null;
-    }
-  }, []);
-
   return (
     <>
       <RitualAnnouncementModal 
         open={showRitualModal} 
         onClose={handleRitualClose} 
-      />
-      <ParQReminderModal
-        open={showParQModal}
-        onClose={handleParQClose}
       />
     </>
   );
