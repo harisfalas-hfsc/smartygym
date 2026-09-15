@@ -326,6 +326,8 @@ async function recordDailyAlertAttempt(
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const { force = false } = await req.json().catch(() => ({ force: false }));
+
   const supabase = createClient(PROJECT_URL, SERVICE_KEY);
   const nowMs = Date.now();
   const freeze = await loadFreezeInfo(supabase);
