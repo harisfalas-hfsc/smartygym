@@ -346,10 +346,31 @@ export function filterPool(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   if (momentum.includes(f.category)) pool = pool.filter((e) => !STATIC_HOLD_RE.test(e.name));
 
   // 5. Body focus (§15) — a HARD filter for EVERY category that carries one.
-  //    A focus is never widened because fewer than N exercises survive.
+  //    The focus is never dropped. When a narrow focus (e.g. SHOULDERS) leaves
+  //    too little vocabulary to build a real session, it is widened ONLY to the
+  //    same body region (upper / lower / core) so the session still trains what
+  //    the athlete asked for, with neighbouring support work allowed.
   if (f.focus) {
-    pool = pool.filter((e) => !focusViolation(e, f.focus!));
+    const strictFocus = pool.filter((e) => !focusViolation(e, f.focus!));
+    if (strictFocus.length >= 10) {
+      pool = strictFocus;
+    } else {
+      const region = focusRegion(f.focus);
+      const regional =
+        region === "full"
+          ? pool
+          : pool.filter((e) => {
+              const r = regionOf(e);
+              return r === region || r === "full";
+            });
+      const widened = [
+        ...strictFocus,
+        ...regional.filter((e) => !strictFocus.some((s) => s.id === e.id)),
+      ];
+      pool = widened.length >= strictFocus.length ? widened : strictFocus;
+    }
   }
+
 
 
 
