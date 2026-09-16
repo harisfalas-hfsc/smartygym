@@ -333,6 +333,7 @@ export const ContentCreationWizard = ({
         if (current.status === "failed") throw new Error(current.error_message || "Generation failed");
         if (current.status === "completed") {
           draft = current.draft_payload as Record<string, any> | null;
+          await supabase.from("admin_generation_jobs").delete().eq("id", job.id);
           break;
         }
       }
