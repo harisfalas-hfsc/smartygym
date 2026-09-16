@@ -366,14 +366,47 @@ export function estimateSessionMinutes(html: string): number {
   return all;
 }
 
+/**
+ * §19b — protocol declarations ("4 rounds", "AMRAP for 12 minutes", "EMOM for
+ * 20 minutes", "Cap: 15 minutes") multiply or fix the cost of a whole block.
+ * Without this a six-station circuit repeated four times was costed as one
+ * pass and every conditioning session looked materially short.
+ */
+function protocolBudget(html: string, sections: string[]): { fixedSeconds: number | null; rounds: number } {
+  const text = html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\{\{exercise:[^}]*\}\}/g, " ")
+    .replace(/\s+/g, " ");
+  // Only trust declarations when the estimate covers the training sections.
+  if (!sections.includes("Main Workout")) return { fixedSeconds: null, rounds: 1 };
+  const declared = text.match(
+    /(?:amrap|as many rounds as possible|emom|every minute on the minute|cap)[^.;]{0,40}?(\d+)\s*(?:min|minute)/i,
+  );
+  if (declared) {
+    const mins = Number(declared[1]);
+    if (mins >= 4 && mins <= 90) return { fixedSeconds: mins * 60, rounds: 1 };
+  }
+  // "8 rounds of 20 sec work / 10 sec rest" is a Tabata protocol already priced
+  // into each line — it must never multiply the block again.
+  const rounds = text.match(/\b(\d+)\s*rounds?\b(?!\s*of\s*\d+\s*(?:sec|second))/i);
+  if (rounds && !/tabata/i.test(text)) {
+    const n = Number(rounds[1]);
+    if (n >= 2 && n <= 10) return { fixedSeconds: null, rounds: n };
+  }
+  return { fixedSeconds: null, rounds: 1 };
+}
+
 function estimateMinutes(html: string, sections: string[], transitionSec: number): number {
   const steps = parseWorkoutSteps(html).filter((s) => sections.includes(s.section));
+  const budget = protocolBudget(html, sections);
   let seconds = 0;
   for (const step of steps) {
     const timing = parseStepTiming(step);
     if (timing.mode === "tabata") seconds += timing.rounds * (timing.work + timing.rest);
-    else if (timing.mode === "timed") seconds += timing.seconds + 20;
-    else {
+    else if (timing.mode === "timed") seconds += (timing.seconds + 20) * budget.rounds;
+    else if (!/\d+\s*sets?/i.test(step.prescription)) {
+      seconds += (Number(step.prescription.match(/(\d+)\s*reps?/i)?.[1] ?? 12) * 4 + 25) * budget.rounds;
+    } else {
       const line = step.prescription;
       const sets = Number(line.match(/(\d+)\s*sets?/i)?.[1] ?? 1);
       const reps = Number(line.match(/(\d+)\s*reps?/i)?.[1] ?? 12);
@@ -391,6 +424,7 @@ function estimateMinutes(html: string, sections: string[], transitionSec: number
     }
     seconds += transitionSec;
   }
+  if (budget.fixedSeconds !== null) seconds = Math.max(seconds, budget.fixedSeconds);
   return Math.round(seconds / 60);
 }
 

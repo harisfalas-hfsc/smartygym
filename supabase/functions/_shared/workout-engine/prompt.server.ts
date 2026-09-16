@@ -23,7 +23,7 @@ const CATEGORY_COACHING: Record<Category, string> = {
   METABOLIC:
     "Strength + conditioning blend with minimal rest, built on continuous human movement and fast transitions. Bodyweight: push/pull/squat/hinge circuits. Equipment: dumbbells, kettlebells, medicine or slam balls, TRX, bands, portable boxes, carries — dumbbell/kettlebell complexes, thrusters, swings, devil press. ABSOLUTELY FORBIDDEN: barbell work of any kind including barbell complexes, bench press, back squat, heavy deadlift, rack- or spotter-dependent lifts, cable and selectorized machine strength work.",
   CARDIO:
-    "Sustained cardiovascular output. Bodyweight: jumping jacks, skater jumps, high knees, mountain climbers, burpees. Equipment: rower, assault bike, jump rope, kettlebell swings, ski erg, sled.",
+    "Sustained cardiovascular output built on REPEATABLE aerobic work: marching, jogging in place, step-ups, shuttle runs, jumping jacks, high knees, skaters, jump rope, rower, bike, ski erg, elliptical, stairs. HARD RULE: at most ONE high-fatigue conditioning movement (burpee, mountain climber, jump squat, squat jump, jumping lunge, swing, thruster, box jump, slam, clean, snatch) may appear in the whole Main Workout, and it may never make up half the block — this is aerobic training, not a metabolic session.",
   "MOBILITY & STABILITY":
     "Controlled mobility and stability ONLY: CARs, balance holds, bird dog, side bridge, cat-cow, ankle and wrist circles, slow breathing. Equipment variant: bands, balance board, foam roller, ball, rope-assisted stretches. HARD BAN: jumps, burpees, plyometrics, heavy strength, push-ups, crunches, sit-ups, dynamic leg-raise core, kettlebell power work, conditioning.",
   CHALLENGE:
@@ -255,6 +255,13 @@ LIBRARY-FIRST RULE (non-negotiable)
 - Never invent an exercise. Never write a plain exercise name without markup. Slug ids such as {{exercise:bird-dog:...}} are forbidden.
 - Exception: the 🧽 Soft Tissue Preparation section contains NO tokens at all.
 
+SOFT TISSUE PREPARATION IS ALWAYS POSSIBLE
+- It is coaching text, not equipment. When no roller or ball is available, prescribe hands-on and floor-based self-release instead (hand/knuckle release, floor-assisted glute and calf release, wall-assisted thoracic release, joint circles) — 2 to 4 lines with time doses.
+- Never omit this section, never write "omitted because no equipment", and never call it a conflict with a bodyweight allowance.
+
+NEVER REFUSE
+- You always return a complete workout. Never answer with an explanation, an apology or a note saying the library lacks options: build the best safe, simple session from the rows supplied, repeating a pattern with a different dose if needed.
+
 COACHING STANDARD (how a professional S&C coach programmes)
 - Sequence by nervous-system cost: most technical and heaviest first, then accessory, then metabolic, then core. Never fatigue a stabiliser before the lift that needs it.
 - Every prescription is measurable and repeatable: sets, reps or seconds, tempo and rest all written on the line.
@@ -342,6 +349,9 @@ QUALITY GATE (your workout is rejected if it fails)
 - Every token line in 💪 and ⚡ carries a dose BEFORE the token.
 - The protocol structure (minutes, rounds, cap, ladder, 20/10 x 8) must be declared in writing.
 - Advertised duration counts 💪 Main + ⚡ Finisher only and must reach the requested "${input.duration}".
+- DO THE ARITHMETIC BEFORE YOU WRITE: add up (sets × work time) + (sets × rest) for every 💪 and ⚡ line. That total MUST land within ±10% of the requested "${input.duration}" — not under it, not over it. Too short and too long are both automatic rejections: add sets or exercises when short, remove sets or shorten rest when long.
+- Budget the whole session too: 🧽 + 🔥 + 💪 + ⚡ + 🧘 together must stay inside roughly "${input.duration}" plus a short warm-up and cool-down allowance. Keep 🧽 under 3 min, 🔥 under 5 min and 🧘 under 5 min; the training minutes belong to 💪 and ⚡.
+- 🔥 Activation must prepare the SAME region the Main Workout trains: if the Main Workout is lower-body dominant, at least 3 of the 4 activation lines must be hip, glute, knee or ankle drills; if it is upper-body dominant, at least 3 must be shoulder, scapula, thoracic or arm drills.
 
 NAMES ALREADY USED (never reuse):
 ${input.bannedNames.slice(0, 120).join(", ") || "none"}
