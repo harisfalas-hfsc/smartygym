@@ -177,7 +177,7 @@ export async function generateWorkoutContent(
 
   const duration = durationLabel(input.minutes);
   const recentIds = input.recentIds ?? [];
-  const promptPool = samplePool(pool, 260, favoriteIds, recentIds);
+  const promptPool = samplePool(pool, 260, favoriteIds, recentIds, input.category);
 
   const plan = buildSessionPlan({
     category: input.category,
