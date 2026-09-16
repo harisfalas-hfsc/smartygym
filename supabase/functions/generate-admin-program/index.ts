@@ -69,10 +69,7 @@ function difficultyLabel(stars: number) {
   return "Beginner";
 }
 
-// Admin wizard uses Pro for stronger instruction-following on long prompts
-// (library-first rules, sets×reps math, M-3 format). Flash kept as fallback
-// only if Pro rate-limits/errors. All prompts/rules unchanged.
-const AI_MODELS = ["google/gemini-2.5-pro", "google/gemini-2.5-flash"];
+const AI_MODEL = "openai/gpt-6-astra";
 
 function aiGatewayFailureMessage(status: number, body: string): string {
   try {
@@ -94,36 +91,33 @@ function aiGatewayFailureMessage(status: number, body: string): string {
 }
 
 async function callAI(apiKey: string, system: string, user: string, maxTokens = 16000): Promise<string | null> {
-  for (const model of AI_MODELS) {
-    try {
-      const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  try {
+    const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model,
+          model: AI_MODEL,
+          service_tier: "priority",
+          reasoning_effort: "low",
           messages: [
             { role: "system", content: system },
             { role: "user", content: user },
           ],
-          temperature: 0.6,
-          max_tokens: maxTokens,
+          max_completion_tokens: maxTokens,
         }),
-      });
-      if (r.ok) {
-        const d = await r.json();
-        const c = d.choices?.[0]?.message?.content;
-        if (c) return c;
-      } else {
-        const raw = await r.text();
-        log("AI non-OK", { model, status: r.status, body: raw.slice(0, 300) });
-        if (r.status === 402) throw new Error(aiGatewayFailureMessage(r.status, raw));
-        if (r.status === 429) await new Promise((s) => setTimeout(s, 8000));
-      }
-    } catch (e: any) {
-      log("AI error", { model, err: e.message });
+    });
+    if (r.ok) {
+      const d = await r.json();
+      const c = d.choices?.[0]?.message?.content;
+      if (c) return c;
     }
+    const raw = await r.text();
+    log("AI non-OK", { model: AI_MODEL, status: r.status, body: raw.slice(0, 300) });
+    throw new Error(aiGatewayFailureMessage(r.status, raw));
+  } catch (e: any) {
+    log("AI error", { model: AI_MODEL, err: e.message });
+    throw e;
   }
-  return null;
 }
 
 async function generateProse(
@@ -195,19 +189,14 @@ serve(async (req) => {
     const library: LibExercise[] = filterLibraryForProgram(rawLibrary as LibExercise[], equipment, difficultyText, body.category);
     log("Library filtered", { remaining: library.length });
 
-    // ── 1. Name (cheap AI) ─────────────────────────────────────────────────
-    const name = (await generateProse(lovableApiKey, "name", body.category, weeks, daysPerWeek, difficulty, equipment, philosophy))
-      || `${body.category.split(" ")[0]} Protocol`;
-
-    // ── 2. Description (cheap AI) — overview only, no exercises ────────────
-    const descriptionRaw = await generateProse(
-      lovableApiKey, "description", body.category, weeks, daysPerWeek, difficulty, equipment, philosophy,
-    );
-
-    // ── 2b. Overview (longer narrative for the program page) ───────────────
-    const overviewRaw = await generateProse(
-      lovableApiKey, "overview", body.category, weeks, daysPerWeek, difficulty, equipment, philosophy,
-    );
+    // Independent copy requests run together so program generation stays
+    // inside the browser request window instead of waiting three times.
+    const [generatedName, descriptionRaw, overviewRaw] = await Promise.all([
+      generateProse(lovableApiKey, "name", body.category, weeks, daysPerWeek, difficulty, equipment, philosophy),
+      generateProse(lovableApiKey, "description", body.category, weeks, daysPerWeek, difficulty, equipment, philosophy),
+      generateProse(lovableApiKey, "overview", body.category, weeks, daysPerWeek, difficulty, equipment, philosophy),
+    ]);
+    const name = generatedName || `${body.category.split(" ")[0]} Protocol`;
 
     // ── 3. Compact Week A/B schedule via STANDARDIZED SKELETON + deterministic library picks ──
     // We do NOT ask the model to pick exercises. The picker guarantees every

@@ -668,34 +668,44 @@ export const ContentCreationWizard = ({
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-2 pt-4 mt-4 border-t">
-          <Button variant="outline" onClick={goBack} disabled={step === 0 || generating}>
-            <ArrowLeft className="w-4 h-4 mr-1" /> Back
-          </Button>
-          <Badge variant="outline" className="text-xs">
-            {step + 1} / {totalSteps}
-          </Badge>
+        <div className="pt-4 mt-4 border-t">
           {currentKey === "review" ? (
-            <div className="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
-              <Button variant="outline" className="min-w-0 flex-1 sm:flex-none" onClick={handleFinish} disabled={generating}>
-                <span className="truncate sm:hidden">Editor</span><span className="hidden sm:inline">Open Editor</span>
-              </Button>
-              <Button className="min-w-0 flex-1 sm:flex-none" onClick={handleGenerate} disabled={generating}>
+            <div className="space-y-3">
+              <Button className="h-12 w-full text-base font-semibold" onClick={handleGenerate} disabled={generating}>
                 {generating ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-1 shrink-0 animate-spin" /> <span className="truncate sm:hidden">Generating</span><span className="hidden sm:inline">Generating…</span>
+                    <Loader2 className="w-5 h-5 mr-2 shrink-0 animate-spin" /> Generating workout…
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 mr-1 shrink-0" /> <span className="truncate sm:hidden">Generate</span><span className="hidden sm:inline">Generate &amp; Review</span>
+                    <Sparkles className="w-5 h-5 mr-2 shrink-0" /> Generate &amp; Review
                   </>
                 )}
               </Button>
+              <div className="flex items-center justify-between gap-2">
+                <Button variant="outline" onClick={goBack} disabled={generating}>
+                  <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                </Button>
+                <Badge variant="outline" className="text-xs">
+                  {step + 1} / {totalSteps}
+                </Badge>
+                <Button variant="ghost" size="sm" onClick={handleFinish} disabled={generating}>
+                  Write manually
+                </Button>
+              </div>
             </div>
           ) : (
-            <Button onClick={goNext} disabled={!canContinue()}>
-              Next <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
+            <div className="flex items-center justify-between gap-2">
+              <Button variant="outline" onClick={goBack} disabled={step === 0 || generating}>
+                <ArrowLeft className="w-4 h-4 mr-1" /> Back
+              </Button>
+              <Badge variant="outline" className="text-xs">
+                {step + 1} / {totalSteps}
+              </Badge>
+              <Button onClick={goNext} disabled={!canContinue()}>
+                Next <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
           )}
         </div>
       </DialogContent>
