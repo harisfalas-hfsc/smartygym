@@ -34,6 +34,8 @@ export type PoolExercise = {
   movement_pattern: string | null;
   body_region: string | null;
   gif_path: string | null;
+  /** One-line technique cue built from the library description/instructions. */
+  cue: string | null;
 };
 
 /**
@@ -41,7 +43,8 @@ export type PoolExercise = {
  * `target` and `gif_url` and has no `movement_pattern`, `body_region` or
  * `is_active` columns, so the rows are normalised into the doctrine shape.
  */
-const SELECT = "id,name,body_part,target,secondary_muscles,equipment,category,difficulty,gif_url";
+const SELECT =
+  "id,name,body_part,target,secondary_muscles,equipment,category,difficulty,gif_url,description,instructions";
 
 type LibraryRow = {
   id: string;
@@ -53,7 +56,18 @@ type LibraryRow = {
   category: string | null;
   difficulty: string | null;
   gif_url: string | null;
+  description: string | null;
+  instructions: string[] | null;
 };
+
+/** Shortest useful technique cue for the prompt: one sentence, never a paragraph. */
+function buildCue(row: LibraryRow): string | null {
+  const from = (row.instructions ?? []).find((s) => s && s.trim().length > 20)
+    ?? (row.description ?? "").split(/(?<=\.)\s+/).find((s) => s.trim().length > 20);
+  if (!from) return null;
+  const cue = from.replace(/\s+/g, " ").trim();
+  return cue.length > 120 ? `${cue.slice(0, 117)}...` : cue;
+}
 
 function toPoolExercise(row: LibraryRow): PoolExercise {
   return {
@@ -68,8 +82,10 @@ function toPoolExercise(row: LibraryRow): PoolExercise {
     movement_pattern: null,
     body_region: null,
     gif_path: row.gif_url,
+    cue: buildCue(row),
   };
 }
+
 
 /** Loads the whole exercises table, paginated 1000 rows at a time. */
 // deno-lint-ignore no-explicit-any
