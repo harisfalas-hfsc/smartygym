@@ -306,6 +306,9 @@ export async function generateWorkoutContent(
     }
 
     const html = String(payload["main_workout"] ?? "");
+    console.log(
+      `[ENGINE] attempt ${attempt} raw keys=${Object.keys(payload).join(",")} len=${html.length} head=${html.slice(0, 400)}`,
+    );
     const enforced = enforceWorkout(html, pool, enforceOpts);
 
     // Only structural faults block delivery — drift becomes a caution note.
