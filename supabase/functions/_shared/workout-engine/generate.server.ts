@@ -272,7 +272,7 @@ export async function generateWorkoutContent(
   // quality score is below the ideal threshold; deterministic enforcement and
   // the template fallback preserve safety without holding the request open for
   // several expensive full regenerations.
-  for (let attempt = 0; attempt < 1; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     let payload: Record<string, unknown>;
     try {
       const { system, user } = buildWorkoutPrompt({
