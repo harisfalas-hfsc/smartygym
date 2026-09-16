@@ -241,7 +241,11 @@ function matchesCategoryRule(ex: LibExercise, category: string): boolean {
 }
 
 function categorySelectionPool(library: LibExercise[], category: string, needed: number, difficulty?: string | null): LibExercise[] {
-  const safe = library.filter((ex) => excludesSkillExercises(ex, difficulty));
+  const safe = library
+    .filter((ex) => excludesSkillExercises(ex, difficulty))
+    // Coach's permanent bans — bosu loading, unstable surfaces, elevated
+    // single-leg squats, lever/gymnastic complexity. Same rules as workouts.
+    .filter((ex) => !isForbiddenName(ex.name || ""));
   if (!ruleForCategory(category)) return safe;
   const categoryMatched = safe.filter((ex) => matchesCategoryRule(ex, category));
   return categoryMatched;
