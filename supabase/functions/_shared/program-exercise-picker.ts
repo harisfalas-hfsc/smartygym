@@ -15,6 +15,7 @@ export interface LibExercise {
   difficulty?: string | null;
   description?: string | null;
 }
+import { isDeprioritisedName, isForbiddenName, isPriorityName, simplicityPenalty } from "./workout-engine/priority.ts";
 
 const BODYWEIGHT_EQUIPMENT = new Set(["body weight", "bodyweight"]);
 
