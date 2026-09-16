@@ -16,7 +16,7 @@ import {
   STRETCH_RE,
   type BodyRegion,
 } from "./doctrine.ts";
-import { isPriorityName } from "./priority.ts";
+import { isDeprioritisedName, isForbiddenName, isPriorityName } from "./priority.ts";
 
 // STRETCH_RE stays exported from here for existing importers (enforcement).
 export { STRETCH_RE };
