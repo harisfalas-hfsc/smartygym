@@ -542,7 +542,9 @@ function shuffle<T>(arr: T[]): T[] {
 
 /**
  * Balanced sample so every body part is represented in the prompt vocabulary.
- * Favourite ids are always carried through, whatever the sample size.
+ * Favourite ids are always carried through, whatever the sample size, and the
+ * coach's PRIORITY vocabulary is sorted to the front of every body part so the
+ * model sees the preferred stations and movements first.
  */
 export function samplePool(
   pool: PoolExercise[],
@@ -569,6 +571,11 @@ export function samplePool(
   const budget = Math.max(0, max - favourites.length);
   const per = Math.max(8, Math.ceil(budget / Math.max(1, byPart.size)));
   const out: PoolExercise[] = [];
-  for (const list of byPart.values()) out.push(...shuffle(list).slice(0, per));
+  for (const list of byPart.values()) {
+    const priority = shuffle(list.filter((e) => isPriorityName(e.name)));
+    const others = shuffle(list.filter((e) => !isPriorityName(e.name)));
+    out.push(...[...priority, ...others].slice(0, per));
+  }
+
   return [...favourites, ...shuffle(out).slice(0, budget)];
 }
