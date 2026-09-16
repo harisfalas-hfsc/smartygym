@@ -4224,6 +4224,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      start_admin_generation: {
+        Args: { _content_type: string; _request_payload: Json }
+        Returns: string
+      }
       sync_cron_metadata_from_live_scheduler: { Args: never; Returns: number }
       user_has_active_premium_access: {
         Args: { _user_id: string }
