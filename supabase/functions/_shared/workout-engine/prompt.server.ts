@@ -240,7 +240,8 @@ NO 🧽 Soft Tissue Preparation. NO 🔥 Activation. NO ⚡ Finisher. NO 🧘 Co
 4. ⚡ Finisher — library exercises, minimum 3
 5. 🧘 Cool Down — 3 lines, EVERY line a token from the COOL DOWN LIST, then one breathing line`;
 
-  const poolText = poolTable(input.pool);
+  const poolText = poolTable(input.pool, true);
+  const priorityCount = input.pool.filter((e) => isPriorityName(e.name)).length;
   const activationText = poolTable(trimPrep(input.activationPool ?? [], 90));
   const cooldownText = poolTable(trimPrep(input.cooldownPool ?? [], 70));
 
