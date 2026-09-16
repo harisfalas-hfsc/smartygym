@@ -3,7 +3,7 @@
 // Used by generate-workout-of-day and generate-fitness-plan to link exercises
 // ═══════════════════════════════════════════════════════════════════════════════
 // ONE selection policy for the whole platform — see ./exercise-selection.ts
-import { applySelectionPolicy } from "./exercise-selection.ts";
+import { applySelectionPolicy, COACH_MINDSET } from "./exercise-selection.ts";
 
 export interface ExerciseBasic {
   id: string;
@@ -1008,6 +1008,8 @@ export function buildExerciseReferenceList(exercises: ExerciseBasic[], equipment
   }
   
   const lines: string[] = [
+    COACH_MINDSET,
+    '',
     '═══════════════════════════════════════════════════════════════════════════════',
     'PERMANENT GLOBAL RULE — NO EXCEPTIONS:',
     '═══════════════════════════════════════════════════════════════════════════════',

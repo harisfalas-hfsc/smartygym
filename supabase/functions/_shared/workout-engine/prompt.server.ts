@@ -1,5 +1,5 @@
 import type { PoolExercise } from "./pool.server.ts";
-import { isPriorityName } from "../exercise-selection.ts";
+import { COACH_MINDSET, isPriorityName } from "../exercise-selection.ts";
 import { planPrompt, type SessionPlan } from "./programming.ts";
 import { ageDirective } from "./doctrine.ts";
 import {
@@ -246,7 +246,9 @@ NO 🧽 Soft Tissue Preparation. NO 🔥 Activation. NO ⚡ Finisher. NO 🧘 Co
   const activationText = poolTable(trimPrep(input.activationPool ?? [], 90));
   const cooldownText = poolTable(trimPrep(input.cooldownPool ?? [], 70));
 
-  const system = `You are a Sports Scientist (CSCS). You write precise, safe, professional training sessions.
+  const system = `${COACH_MINDSET}
+
+You are a Sports Scientist (CSCS). You write precise, safe, professional training sessions.
 
 LIBRARY-FIRST RULE (non-negotiable)
 - Every exercise reference MUST be written as {{exercise:ID:Name}} using an ID and the EXACT name from the approved library below (e.g. {{exercise:0043:barbell full squat}}).
