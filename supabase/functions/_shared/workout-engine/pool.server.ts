@@ -206,12 +206,13 @@ export function filterByLocation(pool: PoolExercise[], location?: string | null)
 const isBodyweight = (e: PoolExercise) => (e.equipment ?? "").toLowerCase().includes("body weight");
 
 const EQUIPMENT_LABELS: Record<string, string[]> = {
-  bodyweight: ["body weight"],
-  dumbbells: ["dumbbell"],
+  // Bodyweight covers the simple props a living room already has.
+  bodyweight: ["body weight", "bodyweight", "weighted", "stability ball", "bosu ball", "roller"],
+  dumbbells: ["dumbbell", "medicine ball"],
   kettlebells: ["kettlebell"],
-  barbell: ["barbell", "ez barbell", "olympic barbell", "trap bar"],
-  bands: ["band", "resistance band"],
-  trx: ["assisted"],
+  barbell: ["barbell", "ez barbell", "olympic barbell", "trap bar", "weight plate", "hammer"],
+  bands: ["band", "resistance band", "elastic band", "rope"],
+  trx: ["assisted", "suspension", "trx"],
   machines: [
     "cable",
     "leverage machine",
@@ -225,29 +226,41 @@ const EQUIPMENT_LABELS: Record<string, string[]> = {
   ],
 };
 
-/** Requires every apparatus named by the library row to be explicitly selected. */
+/** Library equipment strings that carry no apparatus of their own. */
+const NEUTRAL_EQUIPMENT = new Set(["", "none", "n/a", "no equipment", "mat", "pilates mat"]);
+
+/**
+ * Requires every apparatus named by the library row to be explicitly selected.
+ * Combined values ("dumbbell, bench", "barbell / rack") are split so a row is
+ * legal when EVERY listed apparatus is covered by the athlete's selection.
+ */
 export function matchesSelectedEquipment(
   e: PoolExercise,
   selected: string[],
   custom: string[] = [],
 ): boolean {
   if (selected.includes("fullgym")) return true;
-  const equipment = (e.equipment ?? "").toLowerCase().trim();
-  if (!equipment) return false;
-  const known = selected.some((id) =>
-    (EQUIPMENT_LABELS[id] ?? []).some(
-      (label) => equipment === label || equipment.startsWith(`${label} (`),
-    ),
-  );
-  if (known) return true;
-  // "Other" free-text: only honoured when the library actually has that apparatus.
-  if (selected.includes("other") && custom.length) {
-    return custom.some(
-      (term) => term.length > 2 && (equipment.includes(term) || term.includes(equipment)),
-    );
-  }
-  return false;
+  const raw = (e.equipment ?? "").toLowerCase().trim();
+  if (!raw) return false;
+  if (NEUTRAL_EQUIPMENT.has(raw)) return selected.includes("bodyweight");
+
+  const labels = selected.flatMap((id) => EQUIPMENT_LABELS[id] ?? []);
+  const customTerms = selected.includes("other") ? custom.filter((t) => t.length > 2) : [];
+
+  const parts = raw
+    .split(/\s*(?:,|\/|\+|\band\b)\s*/)
+    .map((p) => p.replace(/\(.*?\)/g, "").trim())
+    .filter(Boolean);
+  const pieces = parts.length ? parts : [raw];
+
+  return pieces.every((piece) => {
+    if (NEUTRAL_EQUIPMENT.has(piece)) return true;
+    if (labels.some((label) => piece === label || piece.startsWith(`${label} `) || piece.includes(label)))
+      return true;
+    return customTerms.some((term) => piece.includes(term) || term.includes(piece));
+  });
 }
+
 
 /** Keeps only the free-text apparatus that really exists in the exercise library. */
 export function resolveCustomEquipment(all: PoolExercise[], raw: string): string[] {
