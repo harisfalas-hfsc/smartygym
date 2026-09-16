@@ -5,7 +5,8 @@
 // every bullet uses a real {{exercise:ID:Name}} token (eye icon preserved) and
 // to enforce equipment + difficulty constraints WITHOUT relying on the model.
 // ═══════════════════════════════════════════════════════════════════════════════
-import { isDeprioritisedName, isForbiddenName, isPriorityName, simplicityPenalty } from "./workout-engine/priority.ts";
+// ONE selection policy for the whole platform — see ./exercise-selection.ts
+import { isSelectable, selectionTier } from "./exercise-selection.ts";
 
 export interface LibExercise {
   id: string;

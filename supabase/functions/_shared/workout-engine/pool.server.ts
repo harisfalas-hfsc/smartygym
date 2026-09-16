@@ -16,7 +16,12 @@ import {
   STRETCH_RE,
   type BodyRegion,
 } from "./doctrine.ts";
-import { isDeprioritisedName, isForbiddenName, isPriorityName, simplestFirst } from "./priority.ts";
+// ONE selection policy for the whole platform — see ../exercise-selection.ts
+import {
+  isSelectable,
+  orderBySelectionPolicy,
+  selectionTier,
+} from "../exercise-selection.ts";
 
 // STRETCH_RE stays exported from here for existing importers (enforcement).
 export { STRETCH_RE };
