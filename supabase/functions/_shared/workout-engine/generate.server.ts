@@ -117,7 +117,8 @@ async function askModel(system: string, user: string): Promise<Record<string, un
     body: JSON.stringify({
       model: MODEL,
       service_tier: "priority",
-      reasoning_effort: "low",
+      reasoning_effort: "medium",
+      max_completion_tokens: 16000,
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
