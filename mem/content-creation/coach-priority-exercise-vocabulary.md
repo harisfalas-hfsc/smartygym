@@ -1,37 +1,15 @@
 ---
-name: Coach Priority Exercise Vocabulary
-description: Haris Falas priority machine/free-weight/bodyweight/Pilates/recovery movements are preferred first in all workout and program generation
+name: Coach priority exercise vocabulary
+description: Master "simple, common, recognizable" exercise reference list and selection rules shared by all four generators
 type: feature
 ---
-The shared workout engine keeps a priority vocabulary in
-`supabase/functions/_shared/workout-engine/priority.ts` (machines, free weights,
-bodyweight, Pilates, recovery/mobility). Rules:
 
-- Priority exercises are a PREFERENCE, never a whitelist. Category, focus,
-  difficulty, equipment and location filters always win.
-- `samplePool` sorts priority matches to the front; the prompt marks them
-  `PREFERRED` and instructs the model to build from them first.
-- The prompt also carries a one-line technique cue per exercise (from the
-  library description/instructions) to improve execution language.
-- Narrow focus pools (e.g. SHOULDERS) are never dropped: when fewer than 10
-  exercises survive, the pool widens only to the same body region.
-- Equipment matching splits combined values and maps aliases (stability ball,
-  bosu, roller, weighted, medicine ball, plates, rope, suspension).
-- Applies to user-created workouts, admin workouts and admin programs — all use
-  the shared engine.
+The Priority Exercise Reference List (275 entries across gym machines/stations, machine-based, free weights, bodyweight, Pilates, recovery/mobility/stability) lives in `supabase/functions/_shared/workout-engine/priority.ts` and is the source of truth for WHICH VARIATION of a needed movement gets picked.
 
-Bosu rule (coach): bosu is never a priority. Loaded/dynamic work on a bosu
-(squat, deadlift, lunge, press, row, clean, snatch, jump) is permanently banned
-and filtered out of the pool; other bosu exercises stay legal but sort last and
-are never marked PREFERRED.
-
-Name matching is synonym + fuzzy: library wording that differs from the coach's
-wording still resolves (lever chest press, knee extension, farmers walk, lying
-triceps extension, hyperextension, front pulldown, etc.).
-
-Simplicity rule (coach, absolute): only simple, common, understandable
-exercises. No "lever"-named entries (the 71 leverage-machine rows were renamed
-to "machine ..."), no planches, front/back levers, human flags, muscle-ups,
-handstands, pistols or other gymnastic skill work — these are filtered out of
-the pool and banned in the prompt for member, admin workout and admin program
-generation alike.
+Rules:
+- Applies identically to the member Workout Generator, Smarty Coach, Admin Workout Generator and Admin Training Program Generator (`program-exercise-picker.ts` imports the same module).
+- Semantic matching: word order, equipment prefixes (lever/machine/leverage), and synonyms are ignored.
+- Never a whitelist — category, format, questionnaire, equipment and difficulty still decide which movement is needed.
+- Simplest wins: when several library entries mean the same movement, the plainest standard version is selected (`simplicityPenalty`, `simplestFirst`, `movementKey`).
+- Permanently banned: bosu loading, unstable surfaces (wobble/balance board, discs), elevated single-leg/pistol/shrimp squats, gymnastic complexity (planche, levers, flags, muscle-up, handstand). Exception: stability-ball entries named in the Pilates reference list.
+- Difficulty unlocks load, reps, tempo and supersets — never unstable, lever-based or acrobatic variations.
