@@ -188,11 +188,12 @@ export type PromptInput = {
 const poolTable = (list: PoolExercise[], withCue = false) =>
   list
     .map((e) => {
-      const star = isPriorityName(e.name) ? "★" : "";
-      const base = `${star}${e.id}|${e.name}|${e.body_part ?? "-"}|${e.target_muscle ?? "-"}|${e.equipment ?? "-"}|${e.difficulty ?? "-"}`;
-      return withCue && e.cue ? `${base}|${e.cue}` : base;
+      const base = `${e.id}|${e.name}|${e.body_part ?? "-"}|${e.target_muscle ?? "-"}|${e.equipment ?? "-"}|${e.difficulty ?? "-"}`;
+      if (!withCue) return base;
+      return `${base}|${isPriorityName(e.name) ? "PREFERRED" : "-"}|${e.cue ?? "-"}`;
     })
     .join("\n");
+
 
 
 /** Keeps prompt size sane while covering every body part. */
