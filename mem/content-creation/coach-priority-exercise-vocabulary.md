@@ -28,3 +28,10 @@ are never marked PREFERRED.
 Name matching is synonym + fuzzy: library wording that differs from the coach's
 wording still resolves (lever chest press, knee extension, farmers walk, lying
 triceps extension, hyperextension, front pulldown, etc.).
+
+Simplicity rule (coach, absolute): only simple, common, understandable
+exercises. No "lever"-named entries (the 71 leverage-machine rows were renamed
+to "machine ..."), no planches, front/back levers, human flags, muscle-ups,
+handstands, pistols or other gymnastic skill work — these are filtered out of
+the pool and banned in the prompt for member, admin workout and admin program
+generation alike.
