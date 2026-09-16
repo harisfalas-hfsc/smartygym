@@ -324,6 +324,7 @@ export async function generateWorkoutContent(
     const validatedSplit = classifyIssues(validated.errors);
     if (validatedSplit.structural.length) {
       lastError = validatedSplit.structural.slice(0, 6).join(" ");
+      console.log(`[ENGINE] attempt ${attempt} validate-structural: ${lastError.slice(0, 500)}`);
       continue;
     }
 

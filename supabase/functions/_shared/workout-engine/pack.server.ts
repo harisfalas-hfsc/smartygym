@@ -148,17 +148,27 @@ function doseFor(format: Format, level: DifficultyLevel, index: number): Dose {
   }
 }
 
+/**
+ * Rounds are sized so stations × rounds × (work + rest) really fills the
+ * requested training time — the duration estimator multiplies every line by
+ * the declared round count, so this must agree with it.
+ */
+export function circuitRounds(minutes: number, stations: number): number {
+  const perStationSec = 60; // ~40 sec work + transition
+  return Math.max(2, Math.min(8, Math.round((minutes * 60 * 0.85) / Math.max(1, stations * perStationSec))));
+}
+
 function roundsFor(format: Format, minutes: number, stations: number): string | null {
-  const rounds = Math.max(2, Math.min(6, Math.round(minutes / Math.max(4, stations * 1.5))));
+  const rounds = circuitRounds(minutes, stations);
   switch (format) {
     case "CIRCUIT":
       return `${rounds} rounds. Rest 60 sec between rounds.`;
     case "AMRAP":
-      return `As many rounds as possible in ${Math.max(8, Math.round(minutes * 0.6))} minutes.`;
+      return `As many rounds as possible in ${Math.max(8, Math.round(minutes * 0.9))} minutes.`;
     case "FOR TIME":
-      return `${rounds} rounds for time. Cap: ${Math.max(10, Math.round(minutes * 0.6))} minutes.`;
+      return `${rounds} rounds for time. Cap: ${Math.max(10, Math.round(minutes * 0.9))} minutes.`;
     case "EMOM":
-      return `EMOM for ${Math.max(10, Math.round(minutes * 0.6))} minutes, cycling the list.`;
+      return `EMOM for ${Math.max(10, Math.round(minutes * 0.9))} minutes, cycling the list.`;
     case "TABATA":
       return `8 rounds of 20 sec work / 10 sec rest at every station.`;
     default:
@@ -202,6 +212,8 @@ export function buildPackWorkout(
   const budgetCount = (() => {
     if (isMicro) return 4;
     const probe = doseFor(input.format, input.level, 0);
+    // Round-based formats fill the clock with rounds, not with more stations.
+    if (!/sets?/i.test(probe.text)) return input.minutes <= 20 ? 4 : 5;
     const sets = Number(probe.text.match(/(\d+)\s*sets?/i)?.[1] ?? 1);
     const reps = Number(probe.text.match(/(\d+)\s*reps?/i)?.[1] ?? 12);
     const secondsPerExercise = sets * (reps * 4 + 60) + 15;
