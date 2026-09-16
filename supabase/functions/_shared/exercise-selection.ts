@@ -314,6 +314,81 @@ export function isSelectable(name: string): boolean {
   return !isForbiddenName(name || "");
 }
 
+// ── Category → reference pool mapping ───────────────────────────────────────
+// Which of the coach's five reference pools a category should draw from first.
+// This is a PREFERENCE layer, applied after the hard filters (user constraints,
+// category doctrine, equipment, difficulty) — it never unlocks or blocks a
+// movement pattern, it only decides which pool is offered first.
+
+export type PriorityPool =
+  | "MACHINE"
+  | "FREE_WEIGHT"
+  | "BODYWEIGHT"
+  | "PILATES"
+  | "RECOVERY";
+
+const POOL_LISTS: [PriorityPool, string[]][] = [
+  ["MACHINE", PRIORITY_MACHINE],
+  ["FREE_WEIGHT", PRIORITY_FREE_WEIGHT],
+  ["BODYWEIGHT", PRIORITY_BODYWEIGHT],
+  ["PILATES", PRIORITY_PILATES],
+  ["RECOVERY", PRIORITY_RECOVERY],
+];
+
+const POOL_NORMALISED: [PriorityPool, string[]][] = POOL_LISTS.map(
+  ([pool, list]) => [pool, [...new Set(list.map(canonical))]],
+);
+
+export const CATEGORY_POOLS: Record<string, PriorityPool[]> = {
+  STRENGTH: ["FREE_WEIGHT", "MACHINE"],
+  "MUSCLE BUILDING": ["MACHINE", "FREE_WEIGHT"],
+  "CALORIE BURNING": ["BODYWEIGHT", "FREE_WEIGHT"],
+  CARDIO: ["BODYWEIGHT"],
+  METABOLIC: ["BODYWEIGHT", "FREE_WEIGHT"],
+  CHALLENGE: ["FREE_WEIGHT", "BODYWEIGHT"],
+  "MOBILITY & STABILITY": ["RECOVERY"],
+  RECOVERY: ["RECOVERY"],
+  PILATES: ["PILATES"],
+  "MICRO-WORKOUTS": ["BODYWEIGHT"],
+};
+
+/** Equipment wording fallback when a name matches no reference entry. */
+const EQUIP_POOL_RE: [PriorityPool, RegExp][] = [
+  ["RECOVERY", /\b(stretch|mobility|foam roll|cars|pose|cat[- ]cow|breath)\b/i],
+  ["PILATES", /\bpilates\b/i],
+  ["MACHINE", /\b(machine|cable|smith|lever|leverage|pulldown|press machine|pulley)\b/i],
+  ["FREE_WEIGHT", /\b(barbell|dumbbell|kettlebell|ez[- ]bar|medicine ball|plate)\b/i],
+];
+
+/** The reference pools a library exercise belongs to. */
+export function poolsOf(name: string): PriorityPool[] {
+  const n = canonical(name || "");
+  if (!n) return [];
+  const words = new Set(n.split(" "));
+  const hits: PriorityPool[] = [];
+  for (const [pool, list] of POOL_NORMALISED) {
+    const match = list.some((p) => {
+      if (n === p || n.includes(p)) return true;
+      const tokens = p.split(" ").filter((t) => t.length > 2);
+      return tokens.length > 1 && tokens.every((t) => words.has(t));
+    });
+    if (match) hits.push(pool);
+  }
+  if (hits.length) return hits;
+  for (const [pool, re] of EQUIP_POOL_RE) if (re.test(name)) return [pool];
+  return [];
+}
+
+/** True when the exercise sits in a pool this category should draw from. */
+export function matchesCategoryPool(name: string, category?: string | null): boolean {
+  if (!category) return true;
+  const eligible = CATEGORY_POOLS[category.toUpperCase()];
+  if (!eligible) return true;
+  const pools = poolsOf(name);
+  if (!pools.length) return false;
+  return pools.some((p) => eligible.includes(p));
+}
+
 /**
  * Coach preference order for a legal exercise (lower = offered first):
  *   0 simplest reference-list movement
