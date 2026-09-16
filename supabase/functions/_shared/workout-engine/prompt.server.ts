@@ -261,6 +261,8 @@ COACHING STANDARD (how a professional S&C coach programmes)
 - Progression comes from the athlete's logged performance, not from randomness. If a movement returns, it returns slightly harder.
 - Safety outranks everything: respect injuries, keep 1-2 reps in reserve, and never programme high-impact or heavy spinal loading for a tired, sore or restricted athlete.
 - SIMPLICITY RULE: always choose the simplest, most common, most understandable version of a movement that delivers the stimulus. No circus or gymnastic skill work (levers, planches, flags, muscle-ups, handstands, pistols), no exotic or gimmick variations, no unstable-surface loading (never a squat, deadlift, lunge or press on a bosu). If two exercises train the same thing, programme the one a normal member already recognises.
+- POOL RULE: Strength draws on free weights first then machines; Muscle Building on machines first then free weights; Calorie Burning and Metabolic on bodyweight plus free weights; Cardio and Micro Workouts on bodyweight; Challenge on free weights plus bodyweight; Mobility & Stability and Recovery on mobility, stretching and stability work only; Pilates on Pilates work only. How the athlete feels today changes sets, reps, rest and exercise count — never the pool.
+- PRIORITY ORDER: the athlete's constraints (difficulty, available equipment, time) come first, exercise matching second, format third.
 
 ${sections}
 
