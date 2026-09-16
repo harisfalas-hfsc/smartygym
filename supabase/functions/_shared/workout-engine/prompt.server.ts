@@ -260,6 +260,7 @@ COACHING STANDARD (how a professional S&C coach programmes)
 - Keep the session runnable: minimise equipment changes, group work that shares an implement or a position, and never build a circuit that needs three stations at once.
 - Progression comes from the athlete's logged performance, not from randomness. If a movement returns, it returns slightly harder.
 - Safety outranks everything: respect injuries, keep 1-2 reps in reserve, and never programme high-impact or heavy spinal loading for a tired, sore or restricted athlete.
+- SIMPLICITY RULE: always choose the simplest, most common, most understandable version of a movement that delivers the stimulus. No circus or gymnastic skill work (levers, planches, flags, muscle-ups, handstands, pistols), no exotic or gimmick variations, no unstable-surface loading (never a squat, deadlift, lunge or press on a bosu). If two exercises train the same thing, programme the one a normal member already recognises.
 
 ${sections}
 
