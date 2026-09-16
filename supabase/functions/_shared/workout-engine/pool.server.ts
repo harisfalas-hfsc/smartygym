@@ -577,5 +577,7 @@ export function samplePool(
     out.push(...[...priority, ...others].slice(0, per));
   }
 
-  return [...favourites, ...shuffle(out).slice(0, budget)];
+  const sampled = shuffle(out).slice(0, budget);
+  sampled.sort((a, b) => Number(isPriorityName(b.name)) - Number(isPriorityName(a.name)));
+  return [...favourites, ...sampled];
 }
