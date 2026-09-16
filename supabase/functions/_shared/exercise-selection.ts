@@ -396,21 +396,30 @@ export function matchesCategoryPool(name: string, category?: string | null): boo
  *   2 everything else that is legal
  *   3 legal but never promoted (bosu / wobble / balance boards)
  */
-export function selectionTier(name: string): 0 | 1 | 2 | 3 {
+export function selectionTier(name: string, category?: string | null): 0 | 1 | 2 | 3 {
   const n = name || "";
   if (isDeprioritisedName(n)) return 3;
-  if (!isPriorityName(n)) return 2;
-  return simplicityPenalty(n) <= 2 ? 0 : 1;
+  let tier: 0 | 1 | 2 | 3 = !isPriorityName(n) ? 2 : simplicityPenalty(n) <= 2 ? 0 : 1;
+  // Category-to-pool mapping: a legal exercise outside the category's pools is
+  // still allowed, it is simply offered after the ones inside them.
+  if (category && !matchesCategoryPool(n, category) && tier < 2) tier = 2;
+  return tier;
 }
 
 /** Orders any list of library rows by the one shared selection policy. */
-export function orderBySelectionPolicy<T extends { name: string }>(list: T[]): T[] {
+export function orderBySelectionPolicy<T extends { name: string }>(
+  list: T[],
+  category?: string | null,
+): T[] {
   return [0, 1, 2, 3].flatMap((t) =>
-    simplestFirst(list.filter((e) => selectionTier(e.name) === t)),
+    simplestFirst(list.filter((e) => selectionTier(e.name, category) === t)),
   );
 }
 
 /** Removes everything banned, then orders by the shared selection policy. */
-export function applySelectionPolicy<T extends { name: string }>(list: T[]): T[] {
-  return orderBySelectionPolicy(list.filter((e) => isSelectable(e.name)));
+export function applySelectionPolicy<T extends { name: string }>(
+  list: T[],
+  category?: string | null,
+): T[] {
+  return orderBySelectionPolicy(list.filter((e) => isSelectable(e.name)), category);
 }
