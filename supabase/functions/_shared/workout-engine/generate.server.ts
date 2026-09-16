@@ -118,6 +118,7 @@ async function askModel(system: string, user: string): Promise<Record<string, un
     },
     body: JSON.stringify({
       model,
+      service_tier: "priority",
       temperature: 0.85,
       messages: [
         { role: "system", content: system },
