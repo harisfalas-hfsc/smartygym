@@ -5,6 +5,7 @@
 // every bullet uses a real {{exercise:ID:Name}} token (eye icon preserved) and
 // to enforce equipment + difficulty constraints WITHOUT relying on the model.
 // ═══════════════════════════════════════════════════════════════════════════════
+import { isDeprioritisedName, isForbiddenName, isPriorityName, simplicityPenalty } from "./workout-engine/priority.ts";
 
 export interface LibExercise {
   id: string;
@@ -241,7 +242,11 @@ function matchesCategoryRule(ex: LibExercise, category: string): boolean {
 }
 
 function categorySelectionPool(library: LibExercise[], category: string, needed: number, difficulty?: string | null): LibExercise[] {
-  const safe = library.filter((ex) => excludesSkillExercises(ex, difficulty));
+  const safe = library
+    .filter((ex) => excludesSkillExercises(ex, difficulty))
+    // Coach's permanent bans — bosu loading, unstable surfaces, elevated
+    // single-leg squats, lever/gymnastic complexity. Same rules as workouts.
+    .filter((ex) => !isForbiddenName(ex.name || ""));
   if (!ruleForCategory(category)) return safe;
   const categoryMatched = safe.filter((ex) => matchesCategoryRule(ex, category));
   return categoryMatched;
@@ -475,7 +480,16 @@ export function pickExercisesForDay(
   const pool = matched.length > 0 ? matched : fallbackPool;
   // Deterministic rotation so weeks vary but stay stable for the same input
   const seed = (weekIndex * 31 + dayIndex * 7) % Math.max(pool.length, 1);
-  const candidates = Array.from({ length: pool.length }, (_, i) => pool[(seed + i) % pool.length]);
+  const rotated = Array.from({ length: pool.length }, (_, i) => pool[(seed + i) % pool.length]);
+  // Coach priority: reference-list matches first (simplest variation of each
+  // movement first), then everything else, then never-promoted equipment.
+  const tier = (ex: LibExercise) => {
+    const name = ex.name || "";
+    if (isDeprioritisedName(name)) return 3;
+    if (!isPriorityName(name)) return 2;
+    return simplicityPenalty(name) <= 2 ? 0 : 1;
+  };
+  const candidates = [0, 1, 2, 3].flatMap((t) => rotated.filter((ex) => tier(ex) === t));
   const movementFamily = (ex: LibExercise): string => {
     const name = (ex.name || "").toLowerCase();
     if (/burpee|jack|jump|hop|bound/.test(name)) return "plyometric";

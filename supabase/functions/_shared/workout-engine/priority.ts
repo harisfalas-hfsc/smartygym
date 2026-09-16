@@ -1,68 +1,114 @@
 /**
- * PRIORITY VOCABULARY (Haris Falas coaching list).
+ * PRIORITY VOCABULARY (Haris Falas coaching reference list).
  *
- * These are the movements and stations the coach wants the engine to reach for
- * FIRST whenever they are legal for the requested category, focus, difficulty
- * and equipment. They are never a whitelist: anything legal in the pool can
- * still be programmed, but priority names are kept in the sample the model
- * sees and are marked as preferred in the prompt.
+ * The master reference for what a "normal, common, recognizable" exercise looks
+ * like. Names here are the coach's wording — the library may word things
+ * differently, so matching is semantic (word order, equipment prefixes and
+ * synonyms are ignored).
+ *
+ * It is never a whitelist: category, format, questionnaire, equipment and
+ * difficulty still decide WHICH movement is needed. The list decides WHICH
+ * VARIATION of that movement gets picked, and the simplest match always wins.
+ *
+ * Used by: create-custom-workout (member generator + Smarty Coach),
+ * generate-admin-workout, generate-admin-program.
  */
 
 export const PRIORITY_MACHINE = [
-  "leg press", "hack squat", "leg extension", "leg curl", "seated leg curl", "lying leg curl",
-  "hip abduction", "hip adduction", "calf raise", "smith machine squat", "chest press",
-  "incline chest press", "pec deck fly", "lat pulldown", "seated row", "shoulder press",
+  // Stations / equipment
+  "leg extension machine", "leg curl machine", "leg press", "hack squat machine",
+  "smith machine", "squat rack", "power rack", "chest press machine", "pec deck",
+  "butterfly machine", "lat pulldown machine", "seated row machine",
+  "cable crossover machine", "shoulder press machine", "lateral raise machine",
+  "assisted pull-up machine", "assisted dip machine", "dip station", "pull-up bar",
+  "hip abductor machine", "hip adductor machine", "glute kickback machine",
+  "hip thrust machine", "calf raise machine", "preacher curl bench",
+  "triceps pushdown cable station", "roman chair", "back extension bench",
+  "abdominal crunch machine",
+  // Machine-based exercises
+  "leg extension", "single-leg extension", "lying leg curl", "seated leg curl",
+  "single-leg press", "hack squat", "smith machine squat", "smith machine lunge",
+  "smith machine bench press", "smith machine incline press",
+  "smith machine shoulder press", "barbell back squat", "front squat",
+  "overhead press", "flat bench press", "incline bench press", "decline bench press",
+  "close-grip bench press", "wide-grip bench press", "machine chest press",
+  "pec deck fly", "cable crossover", "cable crossover high to low",
+  "cable crossover low to high", "lat pulldown", "wide grip lat pulldown",
+  "close grip lat pulldown", "reverse grip lat pulldown", "seated cable row",
+  "standing cable row", "single-arm cable row", "machine shoulder press",
+  "machine lateral raise", "cable lateral raise", "cable face pull",
   "rear delt machine fly", "assisted pull-up", "assisted dip", "machine dip",
-  "triceps pushdown", "cable crossover", "cable row", "cable curl", "cable lateral raise",
-  "machine ab crunch", "back extension", "hip thrust machine", "glute kickback",
-  "seated calf raise", "t-bar row", "preacher curl", "leverage row", "leverage press",
+  "hip abduction", "hip adduction", "glute kickback", "hip thrust machine press",
+  "standing calf raise", "seated calf raise", "machine preacher curl",
+  "cable bicep curl", "cable triceps pushdown", "cable overhead triceps extension",
+  "machine ab crunch", "back extension",
 ];
 
 export const PRIORITY_FREE_WEIGHT = [
-  "barbell squat", "barbell front squat", "barbell deadlift", "romanian deadlift",
-  "barbell hip thrust", "barbell bench press", "incline bench press", "barbell row",
-  "barbell overhead press", "barbell lunge", "barbell curl", "dumbbell bench press",
-  "dumbbell shoulder press", "dumbbell row", "dumbbell lunge", "dumbbell squat",
-  "dumbbell romanian deadlift", "dumbbell curl", "hammer curl", "lateral raise",
-  "front raise", "rear delt fly", "dumbbell fly", "triceps extension", "skull crusher",
-  "goblet squat", "bulgarian split squat", "step-up", "farmer's carry", "renegade row",
-  "kettlebell swing", "kettlebell goblet squat", "kettlebell deadlift", "kettlebell clean",
-  "kettlebell press", "kettlebell row", "kettlebell curl", "kettlebell halo",
-  "dumbbell thruster", "dumbbell snatch", "shrug", "upright row", "pullover",
+  "barbell deadlift", "sumo deadlift", "romanian deadlift",
+  "dumbbell romanian deadlift", "kettlebell deadlift", "barbell back squat",
+  "barbell front squat", "goblet squat", "dumbbell squat", "kettlebell squat",
+  "barbell bench press", "dumbbell bench press", "incline dumbbell press",
+  "barbell overhead press", "dumbbell shoulder press", "kettlebell push press",
+  "barbell bent-over row", "dumbbell bent-over row", "kettlebell bent-over row",
+  "single-arm dumbbell row", "pendlay row", "barbell upright row",
+  "dumbbell upright row", "barbell curl", "dumbbell curl", "hammer curl",
+  "kettlebell curl", "skull crusher", "dumbbell overhead triceps extension",
+  "barbell hip thrust", "dumbbell lunge", "barbell lunge", "walking lunge",
+  "bulgarian split squat", "kettlebell swing", "kettlebell snatch",
+  "dumbbell snatch", "ground to overhead", "kettlebell clean",
+  "dumbbell clean and press", "barbell clean and jerk", "barbell power clean",
+  "turkish get-up", "dumbbell lateral raise", "dumbbell front raise",
+  "dumbbell rear delt fly", "farmer's carry", "dumbbell pullover",
+  "kettlebell halo", "renegade row", "shrug", "dumbbell fly",
 ];
 
 export const PRIORITY_BODYWEIGHT = [
-  "push-up", "wide-grip push-up", "incline push-up", "decline push-up", "diamond push-up",
-  "pull-up", "chin-up", "inverted row", "dip", "squat", "jump squat", "split squat",
-  "reverse lunge", "walking lunge", "lateral lunge", "glute bridge", "single-leg glute bridge",
-  "hip thrust", "donkey kick", "fire hydrant", "calf raise", "step-up", "wall sit",
-  "plank", "side plank", "mountain climber", "bicycle crunch", "dead bug", "bird dog",
-  "hollow hold", "superman", "burpee", "jumping jack", "high knees", "skater jump",
-  "tuck jump", "lateral bound", "bear crawl", "crab walk", "inchworm", "toe touches",
-  "sit-up", "leg raise", "flutter kick", "russian twist", "v-up",
+  "bodyweight squat", "jump squat", "walking lunge", "reverse lunge",
+  "forward lunge", "lateral lunge", "bulgarian split squat", "step-up", "push-up",
+  "wide-grip push-up", "diamond push-up", "decline push-up", "incline push-up",
+  "pike push-up", "pull-up", "chin-up", "inverted row", "dip", "plank",
+  "side plank", "sit-up", "crunch", "bicycle crunch", "russian twist",
+  "leg raise", "hanging leg raise", "v-up", "mountain climber", "flutter kick",
+  "toe touches", "glute bridge", "single-leg glute bridge", "superman",
+  "bird dog", "burpee", "jumping jack", "high knees", "wall sit", "calf raise",
+  "box jump", "broad jump", "lateral bound", "bear crawl", "crab walk",
+  "skater jump", "shoulder tap plank", "plank to push-up", "donkey kick",
+  "fire hydrant", "tuck jump",
 ];
 
 export const PRIORITY_PILATES = [
-  "the hundred", "roll up", "roll-up", "single leg circle", "rolling like a ball",
-  "single leg stretch", "double leg stretch", "scissors", "criss cross", "spine stretch forward",
-  "open leg rocker", "corkscrew", "saw", "swan", "single leg kick", "double leg kick",
-  "neck pull", "shoulder bridge", "spine twist", "jackknife", "side kick", "teaser",
-  "swimming", "leg pull front", "leg pull back", "side bend", "boomerang", "seal",
-  "pelvic curl", "chest lift", "leg lowers", "clam", "side lying leg lift", "mermaid",
-  "cat cow", "table top", "hip roll", "arm circles", "spine articulation",
+  "the hundred", "roll-up", "roll-over", "single leg circle",
+  "rolling like a ball", "single leg stretch", "double leg stretch",
+  "spine stretch forward", "open leg rocker", "corkscrew", "saw", "swan dive",
+  "single leg kick", "double leg kick", "neck pull", "scissors", "bicycle",
+  "shoulder bridge", "spine twist", "jackknife", "side kick", "side kick circles",
+  "teaser", "hip twist", "swimming", "leg pull front", "leg pull back",
+  "side bend", "mermaid", "boomerang", "seal", "crab", "control balance",
+  "pilates push-up", "pelvic curl", "chest lift", "chest lift with rotation",
+  "criss-cross", "ab prep", "standing roll-down", "pilates plank",
+  "stability ball roll-out", "stability ball hip bridge", "stability ball pike",
+  "stability ball hamstring curl", "stability ball russian twist",
+  "band-assisted leg circle", "seated band pull-apart", "seated band rowing",
+  "band assisted roll-up", "mermaid stretch with band",
 ];
 
 export const PRIORITY_RECOVERY = [
-  "child's pose", "cat cow", "cat-cow", "thread the needle", "downward dog", "cobra",
-  "sphinx", "supine spinal twist", "figure-4 stretch", "butterfly stretch",
-  "seated forward fold", "hamstring stretch", "quad stretch", "couch stretch",
-  "hip flexor stretch", "pigeon", "90/90 hip rotation", "deep squat hold", "ankle rocks",
-  "calf stretch", "hip cars", "shoulder cars", "arm circles", "wall angels",
-  "scapular wall slides", "doorway chest stretch", "cross-body shoulder stretch",
-  "neck rotations", "thoracic rotation", "foam roll quads", "foam roll it band",
-  "foam roll upper back", "foam roll glutes", "foam roll hamstrings", "foam roll calves",
-  "single-leg balance", "single-leg rdl", "dead bug", "bird dog", "glute bridge",
-  "box breathing", "diaphragmatic breathing",
+  "cat-cow", "child's pose", "90/90 hip rotation", "bird dog", "dead bug",
+  "world's greatest stretch", "thoracic spine rotation", "thread the needle",
+  "kneeling hip flexor stretch", "couch stretch", "pigeon pose",
+  "figure-4 stretch", "butterfly stretch", "frog stretch", "deep squat hold",
+  "ankle rocks", "hip cars", "shoulder cars", "arm circles",
+  "scapular wall slides", "band pull-apart", "doorway chest stretch",
+  "cross-body shoulder stretch", "neck rotations", "cervical side bend stretch",
+  "standing quad stretch", "standing hamstring stretch", "seated forward fold",
+  "lying hamstring stretch", "piriformis stretch", "supine spinal twist",
+  "cobra stretch", "sphinx pose", "downward dog", "standing calf stretch",
+  "ankle circles", "glute bridge", "clamshell", "fire hydrant",
+  "lateral lunge stretch", "kneeling hip flexor with reach", "wall angels",
+  "foam roll it band", "foam roll quads", "foam roll upper back",
+  "foam roll glutes", "bear crawl hold", "single-leg balance",
+  "single-leg rdl balance reach", "standing 90/90 hip switch",
 ];
 
 export const ALL_PRIORITY_NAMES = [
@@ -78,39 +124,42 @@ const norm = (s: string) =>
 
 /**
  * Library wording that means the same movement under a different name.
- * Left = wording used in the exercise library, right = the coach's entry.
  * Applied before matching so "lever chest press", "lying triceps extension"
  * and "farmers walk" all resolve to their priority movement.
  */
 const SYNONYMS: [RegExp, string][] = [
   [/\blever\b|\bleverage\b|\bmachine\b|\bsled\b(?= )/g, " "],
   [/\bsmith\b/g, "smith machine"],
-  [/\bpulldown\b/g, "pulldown"],
   [/\bfarmers?\s+(walk|carry)\b/g, "farmer s carry"],
-  [/\blying triceps extension\b|\blying tricep extension\b/g, "skull crusher"],
+  [/\blying tricep(s)? extension\b/g, "skull crusher"],
   [/\bfrench press\b/g, "triceps extension"],
+  [/\btricep\b/g, "triceps"],
   [/\bpush ?down\b/g, "pushdown"],
   [/\bchest fly\b|\bpectoral fly\b|\bbutterfly\b/g, "pec deck fly"],
-  [/\bcurl up\b|\bcrunch floor\b/g, "sit up",],
+  [/\bcurl up\b|\bcrunch floor\b/g, "sit up"],
   [/\bglute bridge (two legs|one leg)\b/g, "glute bridge"],
   [/\bhyperextension\b/g, "back extension"],
-  [/\bsplit squat\b(?=.*bulgarian)|\bbulgarian\b/g, "bulgarian split squat"],
-  [/\bstep up\b/g, "step up"],
-  [/\bchin up\b/g, "chin up"],
+  [/\bbulgarian\b/g, "bulgarian split squat"],
   [/\bsissy squat\b/g, "squat"],
-  [/\bseated row cable\b|\bcable seated row\b/g, "seated row"],
+  [/\bseated row cable\b|\bcable seated row\b/g, "seated cable row"],
   [/\bfront pulldown\b|\bpull down\b/g, "lat pulldown"],
-  [/\bstanding calf raise\b|\bheel raise\b/g, "calf raise"],
+  [/\bheel raise\b/g, "calf raise"],
   [/\babduction\b/g, "hip abduction"],
   [/\badduction\b/g, "hip adduction"],
   [/\bknee extension\b/g, "leg extension"],
   [/\bknee flexion\b|\bhamstring curl\b/g, "leg curl"],
-  [/\bmilitary press\b|\boverhead press\b/g, "overhead press"],
+  [/\bmilitary press\b/g, "overhead press"],
   [/\bsplit jump\b/g, "jump squat"],
   [/\bpress up\b/g, "push up"],
+  [/\bswiss ball\b|\bexercise ball\b|\bphysio ball\b/g, "stability ball"],
+  [/\bget ?up\b/g, "get up"],
+  [/\bflutter kicks\b/g, "flutter kick"],
+  [/\bone (arm|leg)\b/g, "single $1"],
+  [/\bsingle ?arm\b/g, "single arm"],
+  [/\bsingle ?leg\b/g, "single leg"],
 ];
 
-const canonical = (s: string) => {
+export const canonical = (s: string) => {
   let n = norm(s);
   for (const [re, to] of SYNONYMS) n = n.replace(re, to);
   return norm(n);
@@ -121,14 +170,28 @@ const PRIORITY_NORMALISED = [...new Set(ALL_PRIORITY_NAMES.map(canonical))];
 const PRIORITY_TOKENS = PRIORITY_NORMALISED.map((p) => p.split(" ").filter((t) => t.length > 2));
 
 /**
- * Equipment the coach does NOT want promoted. These stay legal (they can still
- * appear occasionally) but are never marked preferred and sort last.
+ * Equipment the coach does NOT want promoted. Legal, but never preferred and
+ * always sorted last.
  */
-const DEPRIORITISED_RE = /\bbosu\b/i;
+const DEPRIORITISED_RE = /\bbosu\b|\bwobble\b|\bbalance (?:board|disc|pad|cushion)\b/i;
 
 /** Unsafe or unwanted pairings that must never be programmed at all. */
 const FORBIDDEN_RE =
-  /\bbosu\b.*\b(squat|deadlift|lunge|press|row|clean|snatch|jump)\b|\b(squat|deadlift|lunge|press|row|clean|snatch|jump)\b.*\bbosu\b/i;
+  /\bbosu\b.*\b(squat|deadlift|lunge|press|row|clean|snatch|jump|curl|step)\b|\b(squat|deadlift|lunge|press|row|clean|snatch|jump|curl|step)\b.*\bbosu\b/i;
+
+/**
+ * Unstable-surface and elevated single-leg squat work. Anything named in the
+ * reference list (single-leg balance, single-leg RDL reach, the stability-ball
+ * Pilates entries) is exempted before this test runs.
+ */
+const UNSTABLE_RE =
+  /\b(bosu|wobble board|balance board|balance disc|balance cushion|stability disc|slackline|airex)\b/i;
+
+/** The only unstable tool the reference list itself uses (Pilates entries). */
+const REFERENCE_UNSTABLE_RE = /\bstability ball\b/i;
+
+const ELEVATED_SINGLE_LEG_SQUAT_RE =
+  /\b(single leg|one leg|pistol|shrimp)\b[^.]*\bsquat\b[^.]*\b(bench|box|step|chair|elevated|platform)\b|\b(bench|box|step|chair|elevated|platform)\b[^.]*\b(single leg|one leg|pistol|shrimp)\b[^.]*\bsquat\b/i;
 
 /**
  * Circus / gymnastic complexity the coach never wants programmed. Smarty Gym
@@ -136,11 +199,16 @@ const FORBIDDEN_RE =
  * flags, muscle-ups, handstands or pistols, at any level.
  */
 const COMPLEXITY_RE =
-  /\b(front lever|back lever|lever(?: reps| hold)?|planche|human flag|flag hold|muscle[- ]?up|handstand|pistol|iron cross|dragon flag|maltese|victorian|one[- ]arm (?:pull[- ]?up|push[- ]?up)|90 degree push[- ]?up|tiger bend|hefesto|impossible dip)\b/i;
+  /\b(front lever|back lever|lever (?:reps|hold|raise|pull)|planche|human flag|flag hold|muscle[- ]?up|handstand|pistol|shrimp squat|iron cross|dragon flag|maltese|victorian|skin the cat|stalder|archer push[- ]?up|clock push[- ]?up|single arm (?:pull[- ]?up|push[- ]?up)|one[- ]arm (?:pull[- ]?up|push[- ]?up)|90 degree push[- ]?up|tiger bend|hefesto|impossible dip)\b/i;
 
-/** Movements that must never be programmed (bosu squats, gymnastic skills). */
+/** Movements that must never be programmed. */
 export function isForbiddenName(name: string): boolean {
-  return FORBIDDEN_RE.test(name) || COMPLEXITY_RE.test(name);
+  if (COMPLEXITY_RE.test(name) || FORBIDDEN_RE.test(name)) return true;
+  if (ELEVATED_SINGLE_LEG_SQUAT_RE.test(canonical(name))) return true;
+  // Unstable-surface variations are banned unless the reference list asks for
+  // that exact item (e.g. the stability-ball Pilates exercises).
+  if (UNSTABLE_RE.test(name) && !(REFERENCE_UNSTABLE_RE.test(name) && matchesReference(name))) return true;
+  return false;
 }
 
 /** Legal, but never promoted as a coach priority. */
@@ -148,24 +216,76 @@ export function isDeprioritisedName(name: string): boolean {
   return DEPRIORITISED_RE.test(name);
 }
 
-/**
- * True when a library exercise name is (or clearly means) one of the coach's
- * priority movements — "lever chest press", "cable crossover (high to low)",
- * "seated leg curl machine", "farmers walk" and "lying triceps extension" all
- * resolve to their priority entry even though the library wording differs.
- */
-export function isPriorityName(name: string): boolean {
+/** Pure semantic match against the reference list, ignoring the ban lists. */
+function matchesReference(name: string): boolean {
   const n = canonical(name);
   if (!n) return false;
-  if (isDeprioritisedName(name) || isForbiddenName(name)) return false;
   if (PRIORITY_NORMALISED.some((p) => n === p || n.includes(p))) return true;
-  // Fuzzy fallback: every meaningful word of a priority entry present in the
-  // library name, in any order ("squat barbell full" -> "barbell squat").
   const words = new Set(n.split(" "));
   return PRIORITY_TOKENS.some((tokens) => tokens.length > 1 && tokens.every((t) => words.has(t)));
 }
 
-/** Resolves the ids in a library/pool that match the coach's priority list. */
+/**
+ * True when a library exercise name is (or clearly means) one of the coach's
+ * reference movements — "lever chest press", "cable crossover (high to low)",
+ * "seated leg curl machine", "farmers walk" and "lying triceps extension" all
+ * resolve even though the library wording differs.
+ */
+export function isPriorityName(name: string): boolean {
+  if (isDeprioritisedName(name) || isForbiddenName(name)) return false;
+  return matchesReference(name);
+}
+
+/**
+ * "Simplest wins" tie-break. When several library entries mean the same
+ * movement, the plainest standard version must be chosen. Lower = simpler.
+ */
+const COMPLEXITY_PENALTIES: [RegExp, number][] = [
+  [/\blever\b|\bleverage\b|\bplate[- ]loaded\b|\bsled\b/i, 6],
+  [/\bstability ball\b|\bswiss ball\b|\bexercise ball\b|\bbosu\b|\bwobble\b|\bbalance (board|disc|pad)\b/i, 6],
+  [/\bsingle[- ](arm|leg)\b|\bone[- ](arm|leg)\b|\bunilateral\b|\balternating\b/i, 3],
+  [/\bdeficit\b|\bpause\b|\btempo\b|\bpin\b|\bchain\b|\bband[- ]resisted\b|\bsuspended\b|\btrx\b|\bsuspension\b/i, 4],
+  [/\barcher\b|\bexplosive\b|\bplyo\b|\bjumping\b(?!\s*jack)|\bclapping\b|\bspiderman\b|\bcossack\b|\bsissy\b/i, 4],
+  [/\bbehind the neck\b|\bzercher\b|\bsafety bar\b|\blandmine\b|\bhex bar\b|\btrap bar\b|\bsafety squat\b/i, 5],
+  [/\bon (a )?(bench|box|step|chair|ball)\b|\belevated\b|\bdeclined?\b(?!\s*(bench press|push))/i, 2],
+  [/\bcable\b|\bsmith\b/i, 1],
+];
+
+export function simplicityPenalty(name: string): number {
+  let score = 0;
+  for (const [re, pts] of COMPLEXITY_PENALTIES) if (re.test(name)) score += pts;
+  // Longer, wordier names are almost always the fancier variation.
+  score += Math.max(0, name.trim().split(/\s+/).length - 3) * 0.5;
+  return score;
+}
+
+/** Movement family key used to compare "the same movement, different variation". */
+export function movementKey(name: string): string {
+  const n = canonical(name);
+  const words = n.split(" ").filter(Boolean);
+  return words.slice(-2).join(" ") || n;
+}
+
+/**
+ * Keeps, for each movement family, only the simplest variation available —
+ * preferring reference-list matches. Everything else is returned after it, so
+ * nothing is lost, the plain version is simply first.
+ */
+export function simplestFirst<T extends { name: string }>(list: T[]): T[] {
+  const score = (e: T) => (isPriorityName(e.name) ? 0 : 10) + simplicityPenalty(e.name);
+  const best = new Map<string, T>();
+  for (const e of list) {
+    const key = movementKey(e.name);
+    const current = best.get(key);
+    if (!current || score(e) < score(current)) best.set(key, e);
+  }
+  const chosen = new Set(best.values());
+  const winners = [...chosen].sort((a, b) => score(a) - score(b));
+  const rest = list.filter((e) => !chosen.has(e)).sort((a, b) => score(a) - score(b));
+  return [...winners, ...rest];
+}
+
+/** Resolves the ids in a library/pool that match the coach's reference list. */
 export function priorityIds(list: { id: string; name: string }[]): Set<string> {
   return new Set(list.filter((e) => isPriorityName(e.name)).map((e) => e.id));
 }

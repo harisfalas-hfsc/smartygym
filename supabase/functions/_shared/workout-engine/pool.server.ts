@@ -16,7 +16,7 @@ import {
   STRETCH_RE,
   type BodyRegion,
 } from "./doctrine.ts";
-import { isDeprioritisedName, isForbiddenName, isPriorityName } from "./priority.ts";
+import { isDeprioritisedName, isForbiddenName, isPriorityName, simplestFirst } from "./priority.ts";
 
 // STRETCH_RE stays exported from here for existing importers (enforcement).
 export { STRETCH_RE };
@@ -577,9 +577,11 @@ export function samplePool(
   const out: PoolExercise[] = [];
   const rank = (e: PoolExercise) =>
     isPriorityName(e.name) ? 2 : isDeprioritisedName(e.name) ? 0 : 1;
+  // Within each rank, the simplest variation of a movement comes first.
+  const simplest = (list: PoolExercise[]) => simplestFirst(shuffle(list));
   for (const list of byPart.values()) {
-    const priority = shuffle(list.filter((e) => rank(e) === 2));
-    const others = shuffle(list.filter((e) => rank(e) === 1));
+    const priority = simplest(list.filter((e) => rank(e) === 2));
+    const others = simplest(list.filter((e) => rank(e) === 1));
     const last = shuffle(list.filter((e) => rank(e) === 0));
     out.push(...[...priority, ...others, ...last].slice(0, per));
   }
