@@ -32,6 +32,7 @@ function log(step: string, details?: any) {
 }
 
 interface WizardBody {
+  job_id?: string;
   category: string;
   equipment: string;            // "Bodyweight" | "Equipment"
   difficulty_stars: number;     // 0..6
@@ -161,6 +162,8 @@ serve(async (req) => {
   const unauthorized = await requireAdminOrServiceRole(req, corsHeaders);
   if (unauthorized) return unauthorized;
 
+  let jobId = "";
+  let db: ReturnType<typeof createClient> | null = null;
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -168,7 +171,9 @@ serve(async (req) => {
     if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+    db = supabase;
     const body = (await req.json()) as WizardBody;
+    jobId = String(body.job_id ?? "");
     if (!body?.category) throw new Error("category is required");
 
     const equipment = body.equipment || "Equipment";
@@ -279,12 +284,26 @@ serve(async (req) => {
     };
 
     log("✅ Drafted (not saved)", { name, scheduleChars: fullSchedule.length });
+    if (jobId) {
+      await supabase.from("admin_generation_jobs").update({
+        status: "completed",
+        draft_payload: draft,
+        completed_at: new Date().toISOString(),
+      }).eq("id", jobId).eq("content_type", "program");
+    }
     return new Response(JSON.stringify({ ok: true, draft }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
     log("Fatal", { err: e.message });
+    if (jobId && db) {
+      await db.from("admin_generation_jobs").update({
+        status: "failed",
+        error_message: e.message,
+        completed_at: new Date().toISOString(),
+      }).eq("id", jobId).eq("content_type", "program");
+    }
     return new Response(JSON.stringify({ ok: false, error: e.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
