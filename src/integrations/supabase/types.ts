@@ -2934,7 +2934,6 @@ export type Database = {
           equipment: string[]
           focus: string | null
           format: string | null
-          generation_request: Json | null
           has_viewed: boolean
           id: string
           image_url: string | null
@@ -2970,7 +2969,6 @@ export type Database = {
           equipment?: string[]
           focus?: string | null
           format?: string | null
-          generation_request?: Json | null
           has_viewed?: boolean
           id?: string
           image_url?: string | null
@@ -3006,7 +3004,6 @@ export type Database = {
           equipment?: string[]
           focus?: string | null
           format?: string | null
-          generation_request?: Json | null
           has_viewed?: boolean
           id?: string
           image_url?: string | null
@@ -4226,6 +4223,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      start_admin_generation: {
+        Args: { _content_type: string; _request_payload: Json }
+        Returns: string
       }
       sync_cron_metadata_from_live_scheduler: { Args: never; Returns: number }
       user_has_active_premium_access: {

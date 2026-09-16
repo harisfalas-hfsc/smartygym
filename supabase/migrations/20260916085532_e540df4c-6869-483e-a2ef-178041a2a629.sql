@@ -1,0 +1,1 @@
+ALTER TABLE public.user_custom_workouts DROP COLUMN generation_request;
