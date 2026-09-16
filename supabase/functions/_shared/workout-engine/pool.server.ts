@@ -399,6 +399,9 @@ export function filterPool(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
     pool = pool.filter((e) => !f.bannedTerms!.some((t) => text(e).includes(t)));
   }
 
+  // 7b. Coach's permanent bans — e.g. loaded squats/presses on a bosu.
+  pool = pool.filter((e) => !isForbiddenName(e.name));
+
 
 
 
