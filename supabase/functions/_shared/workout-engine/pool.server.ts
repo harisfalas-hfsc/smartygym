@@ -560,6 +560,7 @@ export function samplePool(
   max = 260,
   favoriteIds: string[] = [],
   recentIds: string[] = [],
+  category?: string | null,
 ): PoolExercise[] {
   if (recentIds.length && pool.length > max) {
     const recent = new Set(recentIds);
@@ -582,9 +583,9 @@ export function samplePool(
   const out: PoolExercise[] = [];
   // Shared selection policy: reference-list movements first, simplest variation
   // of each movement first, never-promoted equipment last.
-  const rank = (e: PoolExercise) => 3 - selectionTier(e.name);
+  const rank = (e: PoolExercise) => 3 - selectionTier(e.name, category);
   for (const list of byPart.values()) {
-    out.push(...orderBySelectionPolicy(shuffle(list)).slice(0, per));
+    out.push(...orderBySelectionPolicy(shuffle(list), category).slice(0, per));
   }
 
   const sampled = shuffle(out).slice(0, budget);
