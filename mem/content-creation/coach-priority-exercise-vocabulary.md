@@ -19,3 +19,12 @@ bodyweight, Pilates, recovery/mobility). Rules:
   bosu, roller, weighted, medicine ball, plates, rope, suspension).
 - Applies to user-created workouts, admin workouts and admin programs — all use
   the shared engine.
+
+Bosu rule (coach): bosu is never a priority. Loaded/dynamic work on a bosu
+(squat, deadlift, lunge, press, row, clean, snatch, jump) is permanently banned
+and filtered out of the pool; other bosu exercises stay legal but sort last and
+are never marked PREFERRED.
+
+Name matching is synonym + fuzzy: library wording that differs from the coach's
+wording still resolves (lever chest press, knee extension, farmers walk, lying
+triceps extension, hyperextension, front pulldown, etc.).
