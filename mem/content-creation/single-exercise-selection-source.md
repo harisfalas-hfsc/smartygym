@@ -3,6 +3,7 @@ name: Single exercise-selection source of truth
 description: All workout/program generation (member, Smarty Coach, admin workouts, admin programs, batch generators) selects exercises through one shared file
 type: feature
 ---
+
 ## Trainer Mindset — first instruction, always
 
 `COACH_MINDSET` is exported from the top of `exercise-selection.ts` and injected as the
