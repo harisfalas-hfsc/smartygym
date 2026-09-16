@@ -1,4 +1,18 @@
 /**
+ * ════════════════════════════════════════════════════════════════════════════
+ * EXERCISE SELECTION — SINGLE SOURCE OF TRUTH
+ * ════════════════════════════════════════════════════════════════════════════
+ * EVERY exercise selection in the platform goes through this one file:
+ *   • member "Create Your Own Workout"  (create-custom-workout)
+ *   • Smarty Coach workout creation     (same generator)
+ *   • Admin workout generator           (generate-admin-workout)
+ *   • Admin training program generator  (generate-admin-program, restructure)
+ *   • Every other generator that builds an exercise reference list
+ *
+ * There is ONE ban list, ONE priority order and ONE "simplest wins" rule.
+ * Consumers must call isSelectable / selectionTier / applySelectionPolicy —
+ * never re-implement their own bans or ordering.
+ *
  * PRIORITY VOCABULARY (Haris Falas coaching reference list).
  *
  * The master reference for what a "normal, common, recognizable" exercise looks
@@ -288,4 +302,40 @@ export function simplestFirst<T extends { name: string }>(list: T[]): T[] {
 /** Resolves the ids in a library/pool that match the coach's reference list. */
 export function priorityIds(list: { id: string; name: string }[]): Set<string> {
   return new Set(list.filter((e) => isPriorityName(e.name)).map((e) => e.id));
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UNIFIED SELECTION POLICY — the only API consumers should use.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Hard gate: false means the exercise may never be programmed, anywhere. */
+export function isSelectable(name: string): boolean {
+  return !isForbiddenName(name || "");
+}
+
+/**
+ * Coach preference order for a legal exercise (lower = offered first):
+ *   0 simplest reference-list movement
+ *   1 reference-list movement, fancier variation
+ *   2 everything else that is legal
+ *   3 legal but never promoted (bosu / wobble / balance boards)
+ */
+export function selectionTier(name: string): 0 | 1 | 2 | 3 {
+  const n = name || "";
+  if (isDeprioritisedName(n)) return 3;
+  if (!isPriorityName(n)) return 2;
+  return simplicityPenalty(n) <= 2 ? 0 : 1;
+}
+
+/** Orders any list of library rows by the one shared selection policy. */
+export function orderBySelectionPolicy<T extends { name: string }>(list: T[]): T[] {
+  return [0, 1, 2, 3].flatMap((t) =>
+    simplestFirst(list.filter((e) => selectionTier(e.name) === t)),
+  );
+}
+
+/** Removes everything banned, then orders by the shared selection policy. */
+export function applySelectionPolicy<T extends { name: string }>(list: T[]): T[] {
+  return orderBySelectionPolicy(list.filter((e) => isSelectable(e.name)));
 }
