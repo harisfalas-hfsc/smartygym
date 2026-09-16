@@ -187,6 +187,9 @@ const FORBIDDEN_RE =
 const UNSTABLE_RE =
   /\b(bosu|wobble board|balance board|balance disc|balance cushion|stability disc|slackline|airex)\b/i;
 
+/** The only unstable tool the reference list itself uses (Pilates entries). */
+const REFERENCE_UNSTABLE_RE = /\bstability ball\b/i;
+
 const ELEVATED_SINGLE_LEG_SQUAT_RE =
   /\b(single leg|one leg|pistol|shrimp)\b[^.]*\bsquat\b[^.]*\b(bench|box|step|chair|elevated|platform)\b|\b(bench|box|step|chair|elevated|platform)\b[^.]*\b(single leg|one leg|pistol|shrimp)\b[^.]*\bsquat\b/i;
 
@@ -196,7 +199,7 @@ const ELEVATED_SINGLE_LEG_SQUAT_RE =
  * flags, muscle-ups, handstands or pistols, at any level.
  */
 const COMPLEXITY_RE =
-  /\b(front lever|back lever|lever(?: reps| hold)?|planche|human flag|flag hold|muscle[- ]?up|handstand|pistol|shrimp squat|iron cross|dragon flag|maltese|victorian|skin the cat|stalder|archer push[- ]?up|clock push[- ]?up|single arm (?:pull[- ]?up|push[- ]?up)|one[- ]arm (?:pull[- ]?up|push[- ]?up)|90 degree push[- ]?up|tiger bend|hefesto|impossible dip)\b/i;
+  /\b(front lever|back lever|lever (?:reps|hold|raise|pull)|planche|human flag|flag hold|muscle[- ]?up|handstand|pistol|shrimp squat|iron cross|dragon flag|maltese|victorian|skin the cat|stalder|archer push[- ]?up|clock push[- ]?up|single arm (?:pull[- ]?up|push[- ]?up)|one[- ]arm (?:pull[- ]?up|push[- ]?up)|90 degree push[- ]?up|tiger bend|hefesto|impossible dip)\b/i;
 
 /** Movements that must never be programmed. */
 export function isForbiddenName(name: string): boolean {
@@ -204,7 +207,7 @@ export function isForbiddenName(name: string): boolean {
   if (ELEVATED_SINGLE_LEG_SQUAT_RE.test(canonical(name))) return true;
   // Unstable-surface variations are banned unless the reference list asks for
   // that exact item (e.g. the stability-ball Pilates exercises).
-  if (UNSTABLE_RE.test(name) && !matchesReference(name)) return true;
+  if (UNSTABLE_RE.test(name) && !(REFERENCE_UNSTABLE_RE.test(name) && matchesReference(name))) return true;
   return false;
 }
 
