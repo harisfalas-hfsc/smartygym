@@ -2934,6 +2934,7 @@ export type Database = {
           equipment: string[]
           focus: string | null
           format: string | null
+          generation_request: Json | null
           has_viewed: boolean
           id: string
           image_url: string | null
@@ -2969,6 +2970,7 @@ export type Database = {
           equipment?: string[]
           focus?: string | null
           format?: string | null
+          generation_request?: Json | null
           has_viewed?: boolean
           id?: string
           image_url?: string | null
@@ -3004,6 +3006,7 @@ export type Database = {
           equipment?: string[]
           focus?: string | null
           format?: string | null
+          generation_request?: Json | null
           has_viewed?: boolean
           id?: string
           image_url?: string | null
