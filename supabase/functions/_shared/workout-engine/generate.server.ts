@@ -315,6 +315,7 @@ export async function generateWorkoutContent(
     const enforcedSplit = classifyIssues(enforced.errors);
     if (enforcedSplit.structural.length) {
       lastError = enforcedSplit.structural.join(" ");
+      console.log(`[ENGINE] attempt ${attempt} enforce-structural: ${lastError.slice(0, 500)}`);
       continue;
     }
 
