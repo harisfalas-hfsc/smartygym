@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_generation_jobs: {
+        Row: {
+          completed_at: string | null
+          content_type: string
+          created_at: string
+          draft_payload: Json | null
+          error_message: string | null
+          id: string
+          request_payload: Json
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          content_type: string
+          created_at?: string
+          draft_payload?: Json | null
+          error_message?: string | null
+          id?: string
+          request_payload?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          content_type?: string
+          created_at?: string
+          draft_payload?: Json | null
+          error_message?: string | null
+          id?: string
+          request_payload?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_training_programs: {
         Row: {
           category: string
