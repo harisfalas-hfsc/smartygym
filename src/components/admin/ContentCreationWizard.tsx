@@ -305,20 +305,13 @@ export const ContentCreationWizard = ({
             tier_required: access === "premium" ? "premium" : undefined,
           };
 
-      const { data: job, error: jobError } = await supabase
-        .from("admin_generation_jobs")
-        .insert({ user_id: userId, content_type: type, request_payload: request })
-        .select("id")
-        .single();
-      if (jobError || !job) throw jobError ?? new Error("Could not start generation.");
-
-      // Do not hold the mobile screen open on the function response. The
-      // function writes its result to this job even if the HTTP connection is
-      // closed, and the wizard polls that durable result.
-      void supabase.functions.invoke(
-        type === "workout" ? "generate-admin-workout" : "generate-admin-program",
-        { body: { ...request, job_id: job.id } },
-      );
+      // The database starts the long-running function independently, so a
+      // browser or mobile connection closing cannot cancel the generation.
+      const { data: jobId, error: jobError } = await supabase.rpc("start_admin_generation", {
+        _content_type: type,
+        _request_payload: request,
+      });
+      if (jobError || !jobId) throw jobError ?? new Error("Could not start generation.");
 
       const deadline = Date.now() + 4 * 60 * 1000;
       let draft: Record<string, any> | null = null;
@@ -327,13 +320,13 @@ export const ContentCreationWizard = ({
         const { data: current, error: pollError } = await supabase
           .from("admin_generation_jobs")
           .select("status,draft_payload,error_message")
-          .eq("id", job.id)
+          .eq("id", jobId)
           .single();
         if (pollError) throw pollError;
         if (current.status === "failed") throw new Error(current.error_message || "Generation failed");
         if (current.status === "completed") {
           draft = current.draft_payload as Record<string, any> | null;
-          await supabase.from("admin_generation_jobs").delete().eq("id", job.id);
+          await supabase.from("admin_generation_jobs").delete().eq("id", jobId);
           break;
         }
       }
