@@ -117,7 +117,8 @@ async function askModel(system: string, user: string): Promise<Record<string, un
     body: JSON.stringify({
       model: MODEL,
       service_tier: "priority",
-      reasoning_effort: "low",
+      reasoning_effort: "medium",
+      max_completion_tokens: 16000,
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
@@ -271,7 +272,7 @@ export async function generateWorkoutContent(
   // quality score is below the ideal threshold; deterministic enforcement and
   // the template fallback preserve safety without holding the request open for
   // several expensive full regenerations.
-  for (let attempt = 0; attempt < 1; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     let payload: Record<string, unknown>;
     try {
       const { system, user } = buildWorkoutPrompt({
@@ -305,12 +306,16 @@ export async function generateWorkoutContent(
     }
 
     const html = String(payload["main_workout"] ?? "");
+    console.log(
+      `[ENGINE] attempt ${attempt} raw keys=${Object.keys(payload).join(",")} len=${html.length} head=${html.slice(0, 400)}`,
+    );
     const enforced = enforceWorkout(html, pool, enforceOpts);
 
     // Only structural faults block delivery — drift becomes a caution note.
     const enforcedSplit = classifyIssues(enforced.errors);
     if (enforcedSplit.structural.length) {
       lastError = enforcedSplit.structural.join(" ");
+      console.log(`[ENGINE] attempt ${attempt} enforce-structural: ${lastError.slice(0, 500)}`);
       continue;
     }
 
