@@ -16,6 +16,7 @@ import {
 } from "../_shared/exercise-matching.ts";
 import { normalizeWorkoutHtml } from "../_shared/html-normalizer.ts";
 import { requireAdminOrServiceRole } from "../_shared/admin-or-service-auth.ts";
+import { COACH_MINDSET } from "../_shared/exercise-selection.ts";
 import { buildProgramSkeleton, buildPhaseInstructions, buildDefaultTips } from "../_shared/program-template.ts";
 import { buildDayBullets, filterLibraryForProgram, type LibExercise } from "../_shared/program-exercise-picker.ts";
 
@@ -139,7 +140,7 @@ async function generateProse(
   if (field === "name") {
     const r = await callAI(
       apiKey,
-      "You name training programs. Output ONLY the 2-4 word name — no quotes, no punctuation.",
+      `${COACH_MINDSET}\n\nYou name training programs. You only name something you would be proud to put your own name on. Output ONLY the 2-4 word name — no quotes, no punctuation.`,
       `Invent a unique, premium 2-4 word program name for:\n${ctx}\nAvoid overused words: Inferno, Blaze, Storm, Beast, Warrior, Elite, Ultimate, Foundation, Engine, Catalyst, Flow, Restore, Gauntlet, Summit, Crucible.`,
       80,
     );
@@ -153,7 +154,7 @@ async function generateProse(
   } as const;
   const r = await callAI(
     apiKey,
-    "You are an expert fitness coach writing program copy. Output HTML using <p class=\"tiptap-paragraph\"> tags only.",
+    `${COACH_MINDSET}\n\nYou are an expert fitness coach writing program copy for real people — parents, workers, people managing health conditions. Output HTML using <p class=\"tiptap-paragraph\"> tags only.`,
     `Write a ${titles[field]}\n${ctx}`,
     1500,
   );
