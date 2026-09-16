@@ -479,7 +479,16 @@ export function pickExercisesForDay(
   const pool = matched.length > 0 ? matched : fallbackPool;
   // Deterministic rotation so weeks vary but stay stable for the same input
   const seed = (weekIndex * 31 + dayIndex * 7) % Math.max(pool.length, 1);
-  const candidates = Array.from({ length: pool.length }, (_, i) => pool[(seed + i) % pool.length]);
+  const rotated = Array.from({ length: pool.length }, (_, i) => pool[(seed + i) % pool.length]);
+  // Coach priority: reference-list matches first (simplest variation of each
+  // movement first), then everything else, then never-promoted equipment.
+  const tier = (ex: LibExercise) => {
+    const name = ex.name || "";
+    if (isDeprioritisedName(name)) return 3;
+    if (!isPriorityName(name)) return 2;
+    return simplicityPenalty(name) <= 2 ? 0 : 1;
+  };
+  const candidates = [0, 1, 2, 3].flatMap((t) => rotated.filter((ex) => tier(ex) === t));
   const movementFamily = (ex: LibExercise): string => {
     const name = (ex.name || "").toLowerCase();
     if (/burpee|jack|jump|hop|bound/.test(name)) return "plyometric";
