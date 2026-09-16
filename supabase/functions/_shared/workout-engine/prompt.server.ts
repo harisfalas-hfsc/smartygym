@@ -341,8 +341,8 @@ QUALITY GATE (your workout is rejected if it fails)
 NAMES ALREADY USED (never reuse):
 ${input.bannedNames.slice(0, 120).join(", ") || "none"}
 
-APPROVED EXERCISE LIBRARY for 💪 Main Workout and ⚡ Finisher — the ONLY allowed vocabulary there (id|name|body part|target|equipment|difficulty|technique cue)
-- A ★ in front of the id marks the coach's PREFERRED vocabulary (the stations and movements Haris Falas programmes first). ${priorityCount ? `There are ${priorityCount} of them below.` : ""} Build the session from ★ entries whenever they fit the category, focus, difficulty and equipment, and only reach for the rest when the ★ vocabulary cannot cover a pattern the session needs.
+APPROVED EXERCISE LIBRARY for 💪 Main Workout and ⚡ Finisher — the ONLY allowed vocabulary there (id|name|body part|target|equipment|difficulty|preference|technique cue)
+- Rows marked PREFERRED are the coach's priority vocabulary (the stations and movements Haris Falas programmes first). ${priorityCount ? `There are ${priorityCount} of them below.` : ""} Build the session from PREFERRED rows whenever they fit the category, focus, difficulty and equipment, and only reach for the rest when they cannot cover a pattern the session needs.
 - The technique cue is the coaching point of that exercise. Use it to choose the right movement and to write accurate tempo and execution language — never copy it verbatim into the workout.
 ${poolText}
 
