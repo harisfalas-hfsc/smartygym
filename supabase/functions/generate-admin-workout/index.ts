@@ -35,6 +35,7 @@ function log(step: string, details?: unknown) {
 }
 
 interface WizardBody {
+  job_id?: string;
   category: string;
   equipment: "BODYWEIGHT" | "EQUIPMENT" | string;
   difficulty_stars: number; // 0..6
@@ -110,14 +111,18 @@ serve(async (req) => {
   const unauthorizedResponse = await requireAdminOrServiceRole(req, corsHeaders);
   if (unauthorizedResponse) return unauthorizedResponse;
 
+  let jobId = "";
+  let db: ReturnType<typeof createClient> | null = null;
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     if (!Deno.env.get("LOVABLE_API_KEY")) throw new Error("LOVABLE_API_KEY not configured");
 
     const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+    db = supabase;
 
     const body = (await req.json().catch(() => ({}))) as WizardBody;
+    jobId = String(body.job_id ?? "");
     if (!body?.category || !body?.equipment) {
       return json({ ok: false, error: "category and equipment are required" }, 400);
     }
@@ -204,6 +209,14 @@ serve(async (req) => {
 
     log("✅ Drafted (not saved)", { name: built.name, warnings: reviewWarnings.length });
 
+    if (jobId) {
+      await supabase.from("admin_generation_jobs").update({
+        status: "completed",
+        draft_payload: draft,
+        completed_at: new Date().toISOString(),
+      }).eq("id", jobId).eq("content_type", "workout");
+    }
+
     return json({
       ok: true,
       draft,
@@ -213,6 +226,13 @@ serve(async (req) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error("[generate-admin-workout]", message);
+    if (jobId && db) {
+      await db.from("admin_generation_jobs").update({
+        status: "failed",
+        error_message: message,
+        completed_at: new Date().toISOString(),
+      }).eq("id", jobId).eq("content_type", "workout");
+    }
     return json({ ok: false, error: message }, 500);
   }
 });

@@ -278,9 +278,12 @@ export const ContentCreationWizard = ({
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      if (type === "workout") {
-        const { data, error } = await supabase.functions.invoke("generate-admin-workout", {
-          body: {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user?.id;
+      if (!userId) throw new Error("Please sign in again before generating content.");
+
+      const request = type === "workout"
+        ? {
             category,
             equipment,
             difficulty_stars: difficultyStars,
@@ -290,30 +293,8 @@ export const ContentCreationWizard = ({
             access,
             price: access === "standalone" ? price : undefined,
             tier_required: access === "premium" ? "premium" : undefined,
-          },
-        });
-        if (error) throw error;
-        if (!data?.ok || !data?.draft) throw new Error(data?.error || "Generation failed");
-
-        toast({
-          title: "Workout drafted",
-          description: `"${data.draft.name}" is ready — review and click Save to publish.`,
-        });
-        onComplete({
-          type: "workout",
-          payload: {
-            ...data.draft,
-            category: data.draft.category || category,
-            equipment: data.draft.equipment || equipment,
-            difficulty_stars: data.draft.difficulty_stars ?? difficultyStars,
-            duration: data.draft.duration || duration,
-            format: data.draft.format || format,
-            focus: isStrength ? (data.draft.focus || focus) : "",
-          },
-        });
-      } else {
-        const { data, error } = await supabase.functions.invoke("generate-admin-program", {
-          body: {
+          }
+        : {
             category,
             equipment,
             difficulty_stars: difficultyStars,
@@ -322,24 +303,74 @@ export const ContentCreationWizard = ({
             access,
             price: access === "standalone" ? price : undefined,
             tier_required: access === "premium" ? "premium" : undefined,
-          },
-        });
-        if (error) throw error;
-        if (!data?.ok || !data?.draft) throw new Error(data?.error || "Generation failed");
+          };
+
+      const { data: job, error: jobError } = await supabase
+        .from("admin_generation_jobs")
+        .insert({ user_id: userId, content_type: type, request_payload: request })
+        .select("id")
+        .single();
+      if (jobError || !job) throw jobError ?? new Error("Could not start generation.");
+
+      // Do not hold the mobile screen open on the function response. The
+      // function writes its result to this job even if the HTTP connection is
+      // closed, and the wizard polls that durable result.
+      void supabase.functions.invoke(
+        type === "workout" ? "generate-admin-workout" : "generate-admin-program",
+        { body: { ...request, job_id: job.id } },
+      );
+
+      const deadline = Date.now() + 4 * 60 * 1000;
+      let draft: Record<string, any> | null = null;
+      while (Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+        const { data: current, error: pollError } = await supabase
+          .from("admin_generation_jobs")
+          .select("status,draft_payload,error_message")
+          .eq("id", job.id)
+          .single();
+        if (pollError) throw pollError;
+        if (current.status === "failed") throw new Error(current.error_message || "Generation failed");
+        if (current.status === "completed") {
+          draft = current.draft_payload as Record<string, any> | null;
+          await supabase.from("admin_generation_jobs").delete().eq("id", job.id);
+          break;
+        }
+      }
+      if (!draft) throw new Error(`The ${type} is still being prepared. Please try again in a moment.`);
+
+      if (type === "workout") {
 
         toast({
+          title: "Workout drafted",
+          description: `"${draft.name}" is ready — review and click Save to publish.`,
+        });
+        onComplete({
+          type: "workout",
+          payload: {
+            ...draft,
+            category: draft.category || category,
+            equipment: draft.equipment || equipment,
+            difficulty_stars: draft.difficulty_stars ?? difficultyStars,
+            duration: draft.duration || duration,
+            format: draft.format || format,
+            focus: isStrength ? (draft.focus || focus) : "",
+          },
+        });
+      } else {
+        toast({
           title: "Program drafted",
-          description: `"${data.draft.name}" is ready — review and click Save to publish.`,
+          description: `"${draft.name}" is ready — review and click Save to publish.`,
         });
         onComplete({
           type: "program",
           payload: {
-            ...data.draft,
-            category: data.draft.category || category,
-            equipment: data.draft.equipment || equipment,
-            difficulty_stars: data.draft.difficulty_stars ?? difficultyStars,
-            weeks: data.draft.weeks ?? weeks,
-            days_per_week: data.draft.days_per_week ?? daysPerWeek,
+            ...draft,
+            category: draft.category || category,
+            equipment: draft.equipment || equipment,
+            difficulty_stars: draft.difficulty_stars ?? difficultyStars,
+            weeks: draft.weeks ?? weeks,
+            days_per_week: draft.days_per_week ?? daysPerWeek,
           },
         });
       }
@@ -668,34 +699,44 @@ export const ContentCreationWizard = ({
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-2 pt-4 mt-4 border-t">
-          <Button variant="outline" onClick={goBack} disabled={step === 0 || generating}>
-            <ArrowLeft className="w-4 h-4 mr-1" /> Back
-          </Button>
-          <Badge variant="outline" className="text-xs">
-            {step + 1} / {totalSteps}
-          </Badge>
+        <div className="pt-4 mt-4 border-t">
           {currentKey === "review" ? (
-            <div className="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
-              <Button variant="outline" className="min-w-0 flex-1 sm:flex-none" onClick={handleFinish} disabled={generating}>
-                <span className="truncate sm:hidden">Editor</span><span className="hidden sm:inline">Open Editor</span>
-              </Button>
-              <Button className="min-w-0 flex-1 sm:flex-none" onClick={handleGenerate} disabled={generating}>
+            <div className="space-y-3">
+              <Button className="h-12 w-full text-base font-semibold" onClick={handleGenerate} disabled={generating}>
                 {generating ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-1 shrink-0 animate-spin" /> <span className="truncate sm:hidden">Generating</span><span className="hidden sm:inline">Generating…</span>
+                    <Loader2 className="w-5 h-5 mr-2 shrink-0 animate-spin" /> Generating workout…
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 mr-1 shrink-0" /> <span className="truncate sm:hidden">Generate</span><span className="hidden sm:inline">Generate &amp; Review</span>
+                    <Sparkles className="w-5 h-5 mr-2 shrink-0" /> Generate &amp; Review
                   </>
                 )}
               </Button>
+              <div className="flex items-center justify-between gap-2">
+                <Button variant="outline" onClick={goBack} disabled={generating}>
+                  <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                </Button>
+                <Badge variant="outline" className="text-xs">
+                  {step + 1} / {totalSteps}
+                </Badge>
+                <Button variant="ghost" size="sm" onClick={handleFinish} disabled={generating}>
+                  Write manually
+                </Button>
+              </div>
             </div>
           ) : (
-            <Button onClick={goNext} disabled={!canContinue()}>
-              Next <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
+            <div className="flex items-center justify-between gap-2">
+              <Button variant="outline" onClick={goBack} disabled={step === 0 || generating}>
+                <ArrowLeft className="w-4 h-4 mr-1" /> Back
+              </Button>
+              <Badge variant="outline" className="text-xs">
+                {step + 1} / {totalSteps}
+              </Badge>
+              <Button onClick={goNext} disabled={!canContinue()}>
+                Next <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
           )}
         </div>
       </DialogContent>

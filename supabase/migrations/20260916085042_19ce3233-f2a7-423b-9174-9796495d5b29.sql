@@ -1,0 +1,1 @@
+DELETE FROM public.admin_generation_jobs WHERE id = '4a501e57-9420-4735-84a4-7b7404c0ff87';

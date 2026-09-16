@@ -29,7 +29,7 @@ import {
   type StrengthFocus,
 } from "./spec.ts";
 
-const MODELS = ["google/gemini-3.1-pro-preview", "google/gemini-3.8-flash"];
+const MODEL = "openai/gpt-6-astra";
 
 export type GenerateInput = {
   category: Category;
@@ -108,30 +108,25 @@ function extractJson(text: string): Record<string, unknown> {
 async function askModel(system: string, user: string): Promise<Record<string, unknown>> {
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey) throw new Error("AI is not configured.");
-  let res: Response | null = null;
-  for (const model of MODELS) {
-    res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model,
+      model: MODEL,
       service_tier: "priority",
-      temperature: 0.85,
+      reasoning_effort: "low",
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
       ],
     }),
-    });
-    // Only an unknown/unavailable model justifies trying the next one.
-    if (res.ok || (res.status !== 400 && res.status !== 404)) break;
-  }
-  if (!res || !res.ok) {
-    const body = res ? await res.text() : "no response";
-    throw new Error(`AI gateway ${res?.status ?? 0}: ${body.slice(0, 300)}`);
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`AI gateway ${res.status}: ${body.slice(0, 300)}`);
   }
   const json = await res.json();
   const text = String(json?.choices?.[0]?.message?.content ?? "");
@@ -272,7 +267,11 @@ export async function generateWorkoutContent(
   type Candidate = GeneratedWorkout & { score: number };
   let best: Candidate | null = null;
   let lastError = "";
-  for (let attempt = 0; attempt < 3; attempt++) {
+  // One model call only. A valid draft is returned for review even when its
+  // quality score is below the ideal threshold; deterministic enforcement and
+  // the template fallback preserve safety without holding the request open for
+  // several expensive full regenerations.
+  for (let attempt = 0; attempt < 1; attempt++) {
     let payload: Record<string, unknown>;
     try {
       const { system, user } = buildWorkoutPrompt({
@@ -355,11 +354,6 @@ export async function generateWorkoutContent(
       score: quality.score,
     };
     if (!best || candidate.score > best.score) best = candidate;
-
-    if (candidate.score < 80 && attempt < 2) {
-      lastError = `Session quality ${candidate.score}/100. Fix: ${quality.issues.slice(0, 4).join(" ")}`;
-      continue;
-    }
 
     return { ...best, format, pool, duration };
   }
