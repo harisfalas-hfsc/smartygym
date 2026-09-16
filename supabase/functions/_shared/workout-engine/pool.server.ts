@@ -575,13 +575,16 @@ export function samplePool(
   const budget = Math.max(0, max - favourites.length);
   const per = Math.max(8, Math.ceil(budget / Math.max(1, byPart.size)));
   const out: PoolExercise[] = [];
+  const rank = (e: PoolExercise) =>
+    isPriorityName(e.name) ? 2 : isDeprioritisedName(e.name) ? 0 : 1;
   for (const list of byPart.values()) {
-    const priority = shuffle(list.filter((e) => isPriorityName(e.name)));
-    const others = shuffle(list.filter((e) => !isPriorityName(e.name)));
-    out.push(...[...priority, ...others].slice(0, per));
+    const priority = shuffle(list.filter((e) => rank(e) === 2));
+    const others = shuffle(list.filter((e) => rank(e) === 1));
+    const last = shuffle(list.filter((e) => rank(e) === 0));
+    out.push(...[...priority, ...others, ...last].slice(0, per));
   }
 
   const sampled = shuffle(out).slice(0, budget);
-  sampled.sort((a, b) => Number(isPriorityName(b.name)) - Number(isPriorityName(a.name)));
+  sampled.sort((a, b) => rank(b) - rank(a));
   return [...favourites, ...sampled];
 }
