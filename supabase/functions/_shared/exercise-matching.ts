@@ -2,6 +2,8 @@
 // SHARED EXERCISE MATCHING UTILITIES
 // Used by generate-workout-of-day and generate-fitness-plan to link exercises
 // ═══════════════════════════════════════════════════════════════════════════════
+// ONE selection policy for the whole platform — see ./exercise-selection.ts
+import { applySelectionPolicy } from "./exercise-selection.ts";
 
 export interface ExerciseBasic {
   id: string;
@@ -1479,7 +1481,11 @@ export async function fetchAndBuildExerciseReference(
     from += pageSize;
   }
   
-  let referenceSource = allExercises;
+  // Single source of truth: drop every banned movement and offer the coach's
+  // priority vocabulary (simplest variation first) before anything else.
+  const beforePolicy = allExercises.length;
+  let referenceSource = applySelectionPolicy(allExercises);
+  console.log(`${logPrefix} Selection policy removed ${beforePolicy - referenceSource.length} banned exercises`);
   if ((workoutCategory || "").toUpperCase() === "CHALLENGE") {
     const before = referenceSource.length;
     referenceSource = filterOutChallengeIncompatibleExercises(referenceSource);
