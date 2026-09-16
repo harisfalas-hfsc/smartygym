@@ -16,7 +16,12 @@ import {
   STRETCH_RE,
   type BodyRegion,
 } from "./doctrine.ts";
-import { isDeprioritisedName, isForbiddenName, isPriorityName, simplestFirst } from "./priority.ts";
+// ONE selection policy for the whole platform — see ../exercise-selection.ts
+import {
+  isSelectable,
+  orderBySelectionPolicy,
+  selectionTier,
+} from "../exercise-selection.ts";
 
 // STRETCH_RE stays exported from here for existing importers (enforcement).
 export { STRETCH_RE };
@@ -400,7 +405,7 @@ export function filterPool(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   }
 
   // 7b. Coach's permanent bans — e.g. loaded squats/presses on a bosu.
-  pool = pool.filter((e) => !isForbiddenName(e.name));
+  pool = pool.filter((e) => isSelectable(e.name));
 
 
 
@@ -575,15 +580,11 @@ export function samplePool(
   const budget = Math.max(0, max - favourites.length);
   const per = Math.max(8, Math.ceil(budget / Math.max(1, byPart.size)));
   const out: PoolExercise[] = [];
-  const rank = (e: PoolExercise) =>
-    isPriorityName(e.name) ? 2 : isDeprioritisedName(e.name) ? 0 : 1;
-  // Within each rank, the simplest variation of a movement comes first.
-  const simplest = (list: PoolExercise[]) => simplestFirst(shuffle(list));
+  // Shared selection policy: reference-list movements first, simplest variation
+  // of each movement first, never-promoted equipment last.
+  const rank = (e: PoolExercise) => 3 - selectionTier(e.name);
   for (const list of byPart.values()) {
-    const priority = simplest(list.filter((e) => rank(e) === 2));
-    const others = simplest(list.filter((e) => rank(e) === 1));
-    const last = shuffle(list.filter((e) => rank(e) === 0));
-    out.push(...[...priority, ...others, ...last].slice(0, per));
+    out.push(...orderBySelectionPolicy(shuffle(list)).slice(0, per));
   }
 
   const sampled = shuffle(out).slice(0, budget);
