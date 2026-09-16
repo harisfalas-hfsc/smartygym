@@ -1,4 +1,5 @@
 import type { PoolExercise } from "./pool.server.ts";
+import { isPriorityName } from "./priority.ts";
 import { planPrompt, type SessionPlan } from "./programming.ts";
 import { ageDirective } from "./doctrine.ts";
 import {
