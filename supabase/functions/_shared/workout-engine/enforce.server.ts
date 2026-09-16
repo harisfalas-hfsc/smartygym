@@ -386,10 +386,12 @@ function protocolBudget(html: string, sections: string[]): { fixedSeconds: numbe
     const mins = Number(declared[1]);
     if (mins >= 4 && mins <= 90) return { fixedSeconds: mins * 60, rounds: 1 };
   }
-  const rounds = text.match(/\b(\d+)\s*rounds?\b/i);
-  if (rounds) {
+  // "8 rounds of 20 sec work / 10 sec rest" is a Tabata protocol already priced
+  // into each line — it must never multiply the block again.
+  const rounds = text.match(/\b(\d+)\s*rounds?\b(?!\s*of\s*\d+\s*(?:sec|second))/i);
+  if (rounds && !/tabata/i.test(text)) {
     const n = Number(rounds[1]);
-    if (n >= 2 && n <= 10 && !/20\s*sec/i.test(text.slice(0, 0))) return { fixedSeconds: null, rounds: n };
+    if (n >= 2 && n <= 10) return { fixedSeconds: null, rounds: n };
   }
   return { fixedSeconds: null, rounds: 1 };
 }
