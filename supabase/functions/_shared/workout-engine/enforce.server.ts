@@ -402,10 +402,13 @@ function estimateMinutes(html: string, sections: string[], transitionSec: number
   let seconds = 0;
   for (const step of steps) {
     const timing = parseStepTiming(step);
+    // A declared round count belongs to the main block only — the finisher
+    // carries its own dose and must never be multiplied by it.
+    const rounds = step.section === "Main Workout" ? budget.rounds : 1;
     if (timing.mode === "tabata") seconds += timing.rounds * (timing.work + timing.rest);
-    else if (timing.mode === "timed") seconds += (timing.seconds + 20) * budget.rounds;
+    else if (timing.mode === "timed") seconds += (timing.seconds + 20) * rounds;
     else if (!/\d+\s*sets?/i.test(step.prescription)) {
-      seconds += (Number(step.prescription.match(/(\d+)\s*reps?/i)?.[1] ?? 12) * 4 + 25) * budget.rounds;
+      seconds += (Number(step.prescription.match(/(\d+)\s*reps?/i)?.[1] ?? 12) * 4 + 25) * rounds;
     } else {
       const line = step.prescription;
       const sets = Number(line.match(/(\d+)\s*sets?/i)?.[1] ?? 1);
