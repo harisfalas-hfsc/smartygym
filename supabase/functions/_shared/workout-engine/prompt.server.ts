@@ -1,4 +1,5 @@
 import type { PoolExercise } from "./pool.server.ts";
+import { isPriorityName } from "./priority.ts";
 import { planPrompt, type SessionPlan } from "./programming.ts";
 import { ageDirective } from "./doctrine.ts";
 import {
@@ -184,13 +185,16 @@ export type PromptInput = {
   plan?: SessionPlan;
 };
 
-const poolTable = (list: PoolExercise[]) =>
+const poolTable = (list: PoolExercise[], withCue = false) =>
   list
-    .map(
-      (e) =>
-        `${e.id}|${e.name}|${e.body_part ?? "-"}|${e.target_muscle ?? "-"}|${e.equipment ?? "-"}|${e.difficulty ?? "-"}`,
-    )
+    .map((e) => {
+      const base = `${e.id}|${e.name}|${e.body_part ?? "-"}|${e.target_muscle ?? "-"}|${e.equipment ?? "-"}|${e.difficulty ?? "-"}`;
+      if (!withCue) return base;
+      return `${base}|${isPriorityName(e.name) ? "PREFERRED" : "-"}|${e.cue ?? "-"}`;
+    })
     .join("\n");
+
+
 
 /** Keeps prompt size sane while covering every body part. */
 function trimPrep(list: PoolExercise[], max: number): PoolExercise[] {
@@ -237,7 +241,8 @@ NO 🧽 Soft Tissue Preparation. NO 🔥 Activation. NO ⚡ Finisher. NO 🧘 Co
 4. ⚡ Finisher — library exercises, minimum 3
 5. 🧘 Cool Down — 3 lines, EVERY line a token from the COOL DOWN LIST, then one breathing line`;
 
-  const poolText = poolTable(input.pool);
+  const poolText = poolTable(input.pool, true);
+  const priorityCount = input.pool.filter((e) => isPriorityName(e.name)).length;
   const activationText = poolTable(trimPrep(input.activationPool ?? [], 90));
   const cooldownText = poolTable(trimPrep(input.cooldownPool ?? [], 70));
 
@@ -336,7 +341,9 @@ QUALITY GATE (your workout is rejected if it fails)
 NAMES ALREADY USED (never reuse):
 ${input.bannedNames.slice(0, 120).join(", ") || "none"}
 
-APPROVED EXERCISE LIBRARY for 💪 Main Workout and ⚡ Finisher — the ONLY allowed vocabulary there (id|name|body part|target|equipment|difficulty)
+APPROVED EXERCISE LIBRARY for 💪 Main Workout and ⚡ Finisher — the ONLY allowed vocabulary there (id|name|body part|target|equipment|difficulty|preference|technique cue)
+- Rows marked PREFERRED are the coach's priority vocabulary (the stations and movements Haris Falas programmes first). ${priorityCount ? `There are ${priorityCount} of them below.` : ""} Build the session from PREFERRED rows whenever they fit the category, focus, difficulty and equipment, and only reach for the rest when they cannot cover a pattern the session needs.
+- The technique cue is the coaching point of that exercise. Use it to choose the right movement and to write accurate tempo and execution language — never copy it verbatim into the workout.
 ${poolText}
 
 ACTIVATION LIST — the ONLY allowed vocabulary for 🔥 Activation

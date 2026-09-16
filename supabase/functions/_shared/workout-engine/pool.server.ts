@@ -16,6 +16,7 @@ import {
   STRETCH_RE,
   type BodyRegion,
 } from "./doctrine.ts";
+import { isPriorityName } from "./priority.ts";
 
 // STRETCH_RE stays exported from here for existing importers (enforcement).
 export { STRETCH_RE };
@@ -34,6 +35,8 @@ export type PoolExercise = {
   movement_pattern: string | null;
   body_region: string | null;
   gif_path: string | null;
+  /** One-line technique cue built from the library description/instructions. */
+  cue: string | null;
 };
 
 /**
@@ -41,7 +44,8 @@ export type PoolExercise = {
  * `target` and `gif_url` and has no `movement_pattern`, `body_region` or
  * `is_active` columns, so the rows are normalised into the doctrine shape.
  */
-const SELECT = "id,name,body_part,target,secondary_muscles,equipment,category,difficulty,gif_url";
+const SELECT =
+  "id,name,body_part,target,secondary_muscles,equipment,category,difficulty,gif_url,description,instructions";
 
 type LibraryRow = {
   id: string;
@@ -53,7 +57,18 @@ type LibraryRow = {
   category: string | null;
   difficulty: string | null;
   gif_url: string | null;
+  description: string | null;
+  instructions: string[] | null;
 };
+
+/** Shortest useful technique cue for the prompt: one sentence, never a paragraph. */
+function buildCue(row: LibraryRow): string | null {
+  const from = (row.instructions ?? []).find((s) => s && s.trim().length > 20)
+    ?? (row.description ?? "").split(/(?<=\.)\s+/).find((s) => s.trim().length > 20);
+  if (!from) return null;
+  const cue = from.replace(/\s+/g, " ").trim();
+  return cue.length > 120 ? `${cue.slice(0, 117)}...` : cue;
+}
 
 function toPoolExercise(row: LibraryRow): PoolExercise {
   return {
@@ -68,8 +83,10 @@ function toPoolExercise(row: LibraryRow): PoolExercise {
     movement_pattern: null,
     body_region: null,
     gif_path: row.gif_url,
+    cue: buildCue(row),
   };
 }
+
 
 /** Loads the whole exercises table, paginated 1000 rows at a time. */
 // deno-lint-ignore no-explicit-any
@@ -190,12 +207,13 @@ export function filterByLocation(pool: PoolExercise[], location?: string | null)
 const isBodyweight = (e: PoolExercise) => (e.equipment ?? "").toLowerCase().includes("body weight");
 
 const EQUIPMENT_LABELS: Record<string, string[]> = {
-  bodyweight: ["body weight"],
-  dumbbells: ["dumbbell"],
+  // Bodyweight covers the simple props a living room already has.
+  bodyweight: ["body weight", "bodyweight", "weighted", "stability ball", "bosu ball", "roller"],
+  dumbbells: ["dumbbell", "medicine ball"],
   kettlebells: ["kettlebell"],
-  barbell: ["barbell", "ez barbell", "olympic barbell", "trap bar"],
-  bands: ["band", "resistance band"],
-  trx: ["assisted"],
+  barbell: ["barbell", "ez barbell", "olympic barbell", "trap bar", "weight plate", "hammer"],
+  bands: ["band", "resistance band", "elastic band", "rope"],
+  trx: ["assisted", "suspension", "trx"],
   machines: [
     "cable",
     "leverage machine",
@@ -209,29 +227,41 @@ const EQUIPMENT_LABELS: Record<string, string[]> = {
   ],
 };
 
-/** Requires every apparatus named by the library row to be explicitly selected. */
+/** Library equipment strings that carry no apparatus of their own. */
+const NEUTRAL_EQUIPMENT = new Set(["", "none", "n/a", "no equipment", "mat", "pilates mat"]);
+
+/**
+ * Requires every apparatus named by the library row to be explicitly selected.
+ * Combined values ("dumbbell, bench", "barbell / rack") are split so a row is
+ * legal when EVERY listed apparatus is covered by the athlete's selection.
+ */
 export function matchesSelectedEquipment(
   e: PoolExercise,
   selected: string[],
   custom: string[] = [],
 ): boolean {
   if (selected.includes("fullgym")) return true;
-  const equipment = (e.equipment ?? "").toLowerCase().trim();
-  if (!equipment) return false;
-  const known = selected.some((id) =>
-    (EQUIPMENT_LABELS[id] ?? []).some(
-      (label) => equipment === label || equipment.startsWith(`${label} (`),
-    ),
-  );
-  if (known) return true;
-  // "Other" free-text: only honoured when the library actually has that apparatus.
-  if (selected.includes("other") && custom.length) {
-    return custom.some(
-      (term) => term.length > 2 && (equipment.includes(term) || term.includes(equipment)),
-    );
-  }
-  return false;
+  const raw = (e.equipment ?? "").toLowerCase().trim();
+  if (!raw) return false;
+  if (NEUTRAL_EQUIPMENT.has(raw)) return selected.includes("bodyweight");
+
+  const labels = selected.flatMap((id) => EQUIPMENT_LABELS[id] ?? []);
+  const customTerms = selected.includes("other") ? custom.filter((t) => t.length > 2) : [];
+
+  const parts = raw
+    .split(/\s*(?:,|\/|\+|\band\b)\s*/)
+    .map((p) => p.replace(/\(.*?\)/g, "").trim())
+    .filter(Boolean);
+  const pieces = parts.length ? parts : [raw];
+
+  return pieces.every((piece) => {
+    if (NEUTRAL_EQUIPMENT.has(piece)) return true;
+    if (labels.some((label) => piece === label || piece.startsWith(`${label} `) || piece.includes(label)))
+      return true;
+    return customTerms.some((term) => piece.includes(term) || term.includes(piece));
+  });
 }
+
 
 /** Keeps only the free-text apparatus that really exists in the exercise library. */
 export function resolveCustomEquipment(all: PoolExercise[], raw: string): string[] {
@@ -317,10 +347,31 @@ export function filterPool(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   if (momentum.includes(f.category)) pool = pool.filter((e) => !STATIC_HOLD_RE.test(e.name));
 
   // 5. Body focus (§15) — a HARD filter for EVERY category that carries one.
-  //    A focus is never widened because fewer than N exercises survive.
+  //    The focus is never dropped. When a narrow focus (e.g. SHOULDERS) leaves
+  //    too little vocabulary to build a real session, it is widened ONLY to the
+  //    same body region (upper / lower / core) so the session still trains what
+  //    the athlete asked for, with neighbouring support work allowed.
   if (f.focus) {
-    pool = pool.filter((e) => !focusViolation(e, f.focus!));
+    const strictFocus = pool.filter((e) => !focusViolation(e, f.focus!));
+    if (strictFocus.length >= 10) {
+      pool = strictFocus;
+    } else {
+      const region = focusRegion(f.focus);
+      const regional =
+        region === "full"
+          ? pool
+          : pool.filter((e) => {
+              const r = regionOf(e);
+              return r === region || r === "full";
+            });
+      const widened = [
+        ...strictFocus,
+        ...regional.filter((e) => !strictFocus.some((s) => s.id === e.id)),
+      ];
+      pool = widened.length >= strictFocus.length ? widened : strictFocus;
+    }
   }
+
 
 
 
@@ -492,7 +543,9 @@ function shuffle<T>(arr: T[]): T[] {
 
 /**
  * Balanced sample so every body part is represented in the prompt vocabulary.
- * Favourite ids are always carried through, whatever the sample size.
+ * Favourite ids are always carried through, whatever the sample size, and the
+ * coach's PRIORITY vocabulary is sorted to the front of every body part so the
+ * model sees the preferred stations and movements first.
  */
 export function samplePool(
   pool: PoolExercise[],
@@ -519,6 +572,13 @@ export function samplePool(
   const budget = Math.max(0, max - favourites.length);
   const per = Math.max(8, Math.ceil(budget / Math.max(1, byPart.size)));
   const out: PoolExercise[] = [];
-  for (const list of byPart.values()) out.push(...shuffle(list).slice(0, per));
-  return [...favourites, ...shuffle(out).slice(0, budget)];
+  for (const list of byPart.values()) {
+    const priority = shuffle(list.filter((e) => isPriorityName(e.name)));
+    const others = shuffle(list.filter((e) => !isPriorityName(e.name)));
+    out.push(...[...priority, ...others].slice(0, per));
+  }
+
+  const sampled = shuffle(out).slice(0, budget);
+  sampled.sort((a, b) => Number(isPriorityName(b.name)) - Number(isPriorityName(a.name)));
+  return [...favourites, ...sampled];
 }
