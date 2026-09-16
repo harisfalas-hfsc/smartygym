@@ -130,9 +130,17 @@ const DEPRIORITISED_RE = /\bbosu\b/i;
 const FORBIDDEN_RE =
   /\bbosu\b.*\b(squat|deadlift|lunge|press|row|clean|snatch|jump)\b|\b(squat|deadlift|lunge|press|row|clean|snatch|jump)\b.*\bbosu\b/i;
 
-/** Movements that must never be programmed (e.g. squatting on a bosu). */
+/**
+ * Circus / gymnastic complexity the coach never wants programmed. Smarty Gym
+ * trains simple, common, understandable movements — no levers, planches,
+ * flags, muscle-ups, handstands or pistols, at any level.
+ */
+const COMPLEXITY_RE =
+  /\b(front lever|back lever|lever(?: reps| hold)?|planche|human flag|flag hold|muscle[- ]?up|handstand|pistol|iron cross|dragon flag|maltese|victorian|one[- ]arm (?:pull[- ]?up|push[- ]?up)|90 degree push[- ]?up|tiger bend|hefesto|impossible dip)\b/i;
+
+/** Movements that must never be programmed (bosu squats, gymnastic skills). */
 export function isForbiddenName(name: string): boolean {
-  return FORBIDDEN_RE.test(name);
+  return FORBIDDEN_RE.test(name) || COMPLEXITY_RE.test(name);
 }
 
 /** Legal, but never promoted as a coach priority. */
