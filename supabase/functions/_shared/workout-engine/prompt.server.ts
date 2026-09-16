@@ -184,13 +184,15 @@ export type PromptInput = {
   plan?: SessionPlan;
 };
 
-const poolTable = (list: PoolExercise[]) =>
+const poolTable = (list: PoolExercise[], withCue = false) =>
   list
-    .map(
-      (e) =>
-        `${e.id}|${e.name}|${e.body_part ?? "-"}|${e.target_muscle ?? "-"}|${e.equipment ?? "-"}|${e.difficulty ?? "-"}`,
-    )
+    .map((e) => {
+      const star = isPriorityName(e.name) ? "★" : "";
+      const base = `${star}${e.id}|${e.name}|${e.body_part ?? "-"}|${e.target_muscle ?? "-"}|${e.equipment ?? "-"}|${e.difficulty ?? "-"}`;
+      return withCue && e.cue ? `${base}|${e.cue}` : base;
+    })
     .join("\n");
+
 
 /** Keeps prompt size sane while covering every body part. */
 function trimPrep(list: PoolExercise[], max: number): PoolExercise[] {
