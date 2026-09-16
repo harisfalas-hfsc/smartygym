@@ -5,6 +5,7 @@
 // every bullet uses a real {{exercise:ID:Name}} token (eye icon preserved) and
 // to enforce equipment + difficulty constraints WITHOUT relying on the model.
 // ═══════════════════════════════════════════════════════════════════════════════
+import { isDeprioritisedName, isForbiddenName, isPriorityName, simplicityPenalty } from "./workout-engine/priority.ts";
 
 export interface LibExercise {
   id: string;
@@ -15,7 +16,6 @@ export interface LibExercise {
   difficulty?: string | null;
   description?: string | null;
 }
-import { isDeprioritisedName, isForbiddenName, isPriorityName, simplicityPenalty } from "./workout-engine/priority.ts";
 
 const BODYWEIGHT_EQUIPMENT = new Set(["body weight", "bodyweight"]);
 
