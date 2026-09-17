@@ -71,7 +71,7 @@ serve(async (req) => {
     const { error: updateError } = await supabaseAdmin
       .from('user_subscriptions')
       .update({ 
-        status: 'expired',
+        status: 'canceled',
         plan_type: 'free',
         updated_at: now
       })
