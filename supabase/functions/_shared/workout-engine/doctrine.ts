@@ -306,6 +306,25 @@ export function sequenceViolation(
 }
 
 /**
+ * Orders a block so the sequence rule above can never be broken: under a clock,
+ * technical movements are placed BEFORE high-fatigue ones. Any other order is
+ * preserved, so this only moves what has to move.
+ */
+export function orderForSequence<T extends ExerciseLike>(exercises: T[], format: Format): T[] {
+  if (!isDynamicFormat(format)) return exercises;
+  const rank = (e: T) => {
+    const n = e.name.toLowerCase();
+    if (TECHNICAL_AFTER_FATIGUE_RE.test(n)) return 0;
+    if (HIGH_FATIGUE_RE.test(n)) return 2;
+    return 1;
+  };
+  return exercises
+    .map((e, i) => ({ e, i, r: rank(e) }))
+    .sort((a, b) => a.r - b.r || a.i - b.i)
+    .map((x) => x.e);
+}
+
+/**
  * The clock-driven contract. Whenever the FORMAT is AMRAP, EMOM, CIRCUIT,
  * TABATA or FOR TIME — whatever the category — every movement must start
  * immediately and repeat safely. Machines, racks, benches, cables, spotter- or

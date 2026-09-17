@@ -4,7 +4,15 @@
 // workout that passes enforcement + validation.
 import type { PoolExercise } from "./pool.server.ts";
 import { pickPrep, STRETCH_RE } from "./pool.server.ts";
-import { dominantRegion, regionOf } from "./doctrine.ts";
+import {
+  dominantRegion,
+  equipmentFamilyLimit,
+  equipmentFamilyOf,
+  focusRegion,
+  orderForSequence,
+  focusViolation,
+  regionOf,
+} from "./doctrine.ts";
 import type { Category, DifficultyLevel, Format, StrengthFocus } from "./spec.ts";
 
 export type PackInput = {
@@ -68,15 +76,39 @@ function shuffle<T>(arr: T[], seed = 1): T[] {
   return a;
 }
 
-/** Picks `count` exercises, rotating body parts and honouring favourites first. */
+/**
+ * Picks `count` exercises, rotating body parts and honouring favourites first.
+ *
+ * `familyBudget` keeps the deterministic session runnable: bodyweight is free,
+ * but only `limit` implement families may appear across the whole session
+ * (§12), so the template engine never builds a block the validator rejects.
+ */
 export function pickBalanced(
   pool: PoolExercise[],
   count: number,
-  opts: { favoriteIds?: string[]; exclude?: Set<string>; filter?: (e: PoolExercise) => boolean } = {},
+  opts: {
+    favoriteIds?: string[];
+    exclude?: Set<string>;
+    filter?: (e: PoolExercise) => boolean;
+    familyBudget?: { limit: number; used: Set<string> };
+  } = {},
 ): PoolExercise[] {
   const exclude = opts.exclude ?? new Set<string>();
   const candidates = pool.filter((e) => !exclude.has(e.id) && (opts.filter ? opts.filter(e) : true));
   if (!candidates.length) return [];
+
+  const budget = opts.familyBudget;
+  const familyAllowed = (e: PoolExercise) => {
+    if (!budget) return true;
+    const fam = equipmentFamilyOf(e.equipment);
+    if (fam === "bodyweight") return true;
+    return budget.used.has(fam) || budget.used.size < budget.limit;
+  };
+  const takeFamily = (e: PoolExercise) => {
+    if (!budget) return;
+    const fam = equipmentFamilyOf(e.equipment);
+    if (fam !== "bodyweight") budget.used.add(fam);
+  };
 
   const favourites = (opts.favoriteIds ?? []).length
     ? candidates.filter((e) => opts.favoriteIds!.includes(e.id))
@@ -94,7 +126,9 @@ export function pickBalanced(
   const seen = new Set<string>();
   for (const fav of favourites) {
     if (picked.length >= count) break;
+    if (!familyAllowed(fav)) continue;
     picked.push(fav);
+    takeFamily(fav);
     seen.add(fav.id);
   }
 
@@ -102,16 +136,19 @@ export function pickBalanced(
   let guard = 0;
   while (picked.length < count && guard < count * 12) {
     guard += 1;
+    let progressed = false;
     for (const part of parts) {
       const list = byPart.get(part);
       if (!list?.length) continue;
       const next = list.shift()!;
-      if (seen.has(next.id)) continue;
+      progressed = true;
+      if (seen.has(next.id) || !familyAllowed(next)) continue;
       picked.push(next);
+      takeFamily(next);
       seen.add(next.id);
       if (picked.length >= count) break;
     }
-    if (parts.every((p) => !byPart.get(p)?.length)) break;
+    if (!progressed || parts.every((p) => !byPart.get(p)?.length)) break;
   }
   return picked;
 }
@@ -221,15 +258,68 @@ export function buildPackWorkout(
     const available = Math.max(120, input.minutes * 60 - finisherSeconds);
     return Math.max(3, Math.min(6, Math.round(available / secondsPerExercise)));
   })();
-  const mainCount = budgetCount;
-  const mainPicks = pickBalanced(pool, mainCount, { favoriteIds: favouriteIds, exclude: used });
+  // §15 — the chosen body focus is a hard rule for the template engine too.
+  // On-focus movements first. When the library cannot cover the whole block
+  // with them, the BLOCK SHRINKS rather than drifting off target; only if even
+  // the minimum cannot be met does support work from the SAME body region get
+  // added — never work from another region (no chest press in CORE & GLUTES).
+  const focus = input.focus ?? null;
+  const onFocus = focus ? pool.filter((e) => !focusViolation(e, focus)) : pool;
+  const finisherSlots = noFinisher ? 0 : 3;
+  const minMain = isMicro ? 3 : 4;
+
+  let workPool = onFocus;
+  let mainCount = budgetCount;
+  if (focus) {
+    const affordable = onFocus.length - finisherSlots;
+    if (affordable < budgetCount) {
+      if (affordable >= minMain) {
+        mainCount = affordable; // shrink the block, stay strictly on focus
+      } else {
+        const region = focusRegion(focus);
+        const onFocusIds = new Set(onFocus.map((e) => e.id));
+        const regional = pool.filter((e) => {
+          if (onFocusIds.has(e.id)) return false;
+          const r = regionOf(e);
+          return region === "full" || r === region || r === "full";
+        });
+        workPool = [...onFocus, ...regional];
+        mainCount = Math.max(minMain, Math.min(budgetCount, workPool.length - finisherSlots));
+      }
+    }
+  }
+  if (!workPool.length) workPool = pool;
+  mainCount = Math.max(3, mainCount);
+
+  // §12 — one shared implement budget for the whole session so the finisher
+  // can never push the workout over the equipment-family ceiling.
+  const familyBudget = {
+    limit: equipmentFamilyLimit(input.category, input.format),
+    used: new Set<string>(),
+  };
+
+  // §11 — under a clock, technical work is placed before high-fatigue work.
+  const mainPicks = orderForSequence(
+    pickBalanced(workPool, mainCount, {
+      favoriteIds: favouriteIds,
+      exclude: used,
+      familyBudget,
+    }),
+    input.format,
+  );
   mainPicks.forEach((e) => used.add(e.id));
 
-  const finisherPicks = noFinisher
+  const finisherCandidates = noFinisher
     ? []
-    : pickBalanced(pool, 3, { exclude: used }).length >= 3
-      ? pickBalanced(pool, 3, { exclude: used })
-      : mainPicks.slice(0, 3);
+    : pickBalanced(workPool, 3, { exclude: used, familyBudget });
+  const finisherPicks = orderForSequence(
+    noFinisher
+      ? []
+      : finisherCandidates.length >= 3
+        ? finisherCandidates
+        : mainPicks.slice(0, 3),
+    input.format,
+  );
   finisherPicks.forEach((e) => used.add(e.id));
 
   const seed = input.seed ?? (mainPicks[0]?.id.length ?? 5) * 31 + input.minutes;
