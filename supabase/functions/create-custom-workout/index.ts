@@ -133,6 +133,10 @@ serve(async (req) => {
     const equipmentOther = String(body.equipmentOther ?? "").slice(0, 200);
     const note = String(body.note ?? "").slice(0, 500);
 
+    if (equipmentIds.includes("other") && !equipmentOther.trim()) {
+      return json({ error: "Tell Smarty Coach what other equipment you have." }, 400);
+    }
+
     let category: Category = GOAL_TO_CATEGORY[goal] ?? "STRENGTH";
     if (minutes <= 5) category = "MICRO-WORKOUTS";
 

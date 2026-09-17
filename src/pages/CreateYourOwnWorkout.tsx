@@ -180,7 +180,14 @@ const CreateYourOwnWorkout = () => {
   }
 
   const canGenerate = Boolean(
-    goal && mood && minutes && location && equipment.length > 0 && level && (!showFocus || focus),
+    goal &&
+      mood &&
+      minutes &&
+      location &&
+      equipment.length > 0 &&
+      level &&
+      (!showFocus || focus) &&
+      (!equipment.includes("other") || otherEquipment.trim().length > 0),
   );
 
   /** Polls the reserved session row until the background build finishes. */
@@ -268,7 +275,10 @@ const CreateYourOwnWorkout = () => {
     if (!canGenerate) {
       toast({
         title: "Almost there",
-        description: "Please answer all required questions first.",
+        description:
+          equipment.includes("other") && !otherEquipment.trim()
+            ? "Tell Smarty Coach what other equipment you have."
+            : "Please answer all required questions first.",
         variant: "destructive",
       });
       return;
