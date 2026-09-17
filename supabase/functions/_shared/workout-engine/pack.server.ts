@@ -271,21 +271,23 @@ export function buildPackWorkout(
   let workPool = onFocus;
   let mainCount = budgetCount;
   if (focus) {
-    const affordable = onFocus.length - finisherSlots;
-    if (affordable < budgetCount) {
-      if (affordable >= minMain) {
-        mainCount = affordable; // shrink the block, stay strictly on focus
-      } else {
-        const region = focusRegion(focus);
-        const onFocusIds = new Set(onFocus.map((e) => e.id));
-        const regional = pool.filter((e) => {
-          if (onFocusIds.has(e.id)) return false;
-          const r = regionOf(e);
-          return region === "full" || r === region || r === "full";
-        });
-        workPool = [...onFocus, ...regional];
-        mainCount = Math.max(minMain, Math.min(budgetCount, workPool.length - finisherSlots));
-      }
+    if (onFocus.length >= minMain) {
+      // Enough on-focus vocabulary for a legitimate block: stay strictly on
+      // focus and let the block SHRINK (the finisher reuses main movements
+      // when there is nothing left over) rather than drift off target.
+      mainCount = Math.min(budgetCount, Math.max(minMain, onFocus.length - finisherSlots));
+    } else {
+      // Not even the minimum exists on focus — support work from the SAME body
+      // region is added, never work from another region.
+      const region = focusRegion(focus);
+      const onFocusIds = new Set(onFocus.map((e) => e.id));
+      const regional = pool.filter((e) => {
+        if (onFocusIds.has(e.id)) return false;
+        const r = regionOf(e);
+        return region === "full" || r === region || r === "full";
+      });
+      workPool = [...onFocus, ...regional];
+      mainCount = Math.max(minMain, Math.min(budgetCount, workPool.length - finisherSlots));
     }
   }
   if (!workPool.length) workPool = pool;
