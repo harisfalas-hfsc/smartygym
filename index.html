@@ -3,8 +3,20 @@
   <head>
     <script>
       document.documentElement.classList.add("js-enabled");
+      try {
+        var ua = navigator.userAgent || "";
+        var isAndroidWebView = /;\s?wv\)/i.test(ua) || /Version\/\d+\.\d+.*Chrome\//i.test(ua);
+        var isIOSWebView = /iPhone|iPad|iPod/i.test(ua) && /AppleWebKit/i.test(ua) && !/Safari/i.test(ua);
+        if (isAndroidWebView || isIOSWebView) document.documentElement.classList.add("native-shell");
+      } catch (e) {}
     </script>
     <style>
+      html.native-shell,
+      html.native-shell body,
+      html.native-shell #root {
+        min-height: 100%;
+        background-color: #0F172A;
+      }
       .js-enabled #root > .seo-prerender {
         position: fixed !important;
         left: -10000px !important;
@@ -591,6 +603,9 @@
         gap: 22px;
         background: #0F172A;
         transition: opacity 260ms ease;
+      }
+      html.native-shell #boot-splash {
+        transition-duration: 180ms;
       }
       #boot-splash img {
         width: 104px;
