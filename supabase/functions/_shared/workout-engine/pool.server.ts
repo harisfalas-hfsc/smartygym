@@ -292,22 +292,55 @@ export function resolveCustomEquipment(all: PoolExercise[], raw: string): string
 export function filterPool(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   const strict = filterPoolAtLevel(all, f);
   if (strict.length >= 12 || f.level === "all") return strict;
-  const easier: DifficultyLevel[] =
-    f.level === "advanced" ? ["intermediate", "beginner"] : f.level === "intermediate" ? ["beginner"] : [];
-  if (!easier.length) return strict;
+
   const seen = new Set(strict.map((e) => e.id));
   const widened = strict.slice();
-  for (const lvl of easier) {
-    for (const e of filterPoolAtLevel(all, { ...f, level: lvl })) {
+  const add = (list: PoolExercise[]) => {
+    for (const e of list) {
       if (!seen.has(e.id)) {
         seen.add(e.id);
         widened.push(e);
       }
     }
+  };
+
+  // 1. Refill from EASIER material only — never harder (§16).
+  const easier: DifficultyLevel[] =
+    f.level === "advanced" ? ["intermediate", "beginner"] : f.level === "intermediate" ? ["beginner"] : [];
+  for (const lvl of easier) {
     if (widened.length >= 12) break;
+    add(filterPoolAtLevel(all, { ...f, level: lvl }));
+  }
+  if (widened.length >= 12) return widened;
+
+  // 2. Widen the body focus to its whole region rather than refusing to build
+  //    a session at all. The category, format, equipment and location rules
+  //    are still fully applied — only the narrow body-part preference relaxes.
+  if (f.focus) {
+    for (const lvl of [f.level, ...easier]) {
+      if (widened.length >= 12) break;
+      add(filterPoolAtLevel(all, { ...f, level: lvl, focus: null }));
+    }
+    if (widened.length >= 12) return widened;
+  }
+
+  // 3. Last resort — bodyweight. Every athlete always has their own body, so a
+  //    legal session can always be built even when the chosen apparatus is thin
+  //    for this category/format. All other doctrine still applies.
+  for (const lvl of [f.level, ...easier, "all" as DifficultyLevel]) {
+    if (widened.length >= 12) break;
+    add(
+      filterPoolAtLevel(all, {
+        ...f,
+        level: lvl,
+        focus: null,
+        selectedEquipment: [...new Set([...f.selectedEquipment, "bodyweight"])],
+      }).filter((e) => isBodyweight(e)),
+    );
   }
   return widened;
 }
+
 
 function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   let pool = all.slice();
