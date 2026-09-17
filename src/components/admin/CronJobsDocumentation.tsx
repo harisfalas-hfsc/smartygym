@@ -27,6 +27,11 @@ function describeSchedule(cron: string): string {
     '* * * * *': 'Every minute',
     '*/5 * * * *': 'Every 5 minutes',
     '*/10 * * * *': 'Every 10 minutes',
+    '*/15 * * * *': 'Every 15 minutes',
+    '*/30 * * * *': 'Every 30 minutes',
+    '0 * * * *': 'Every hour',
+    '0 */4 * * *': 'Every 4 hours',
+    '0 */6 * * *': 'Every 6 hours',
   };
   if (map[cron]) return map[cron];
   const parts = cron.split(' ');
