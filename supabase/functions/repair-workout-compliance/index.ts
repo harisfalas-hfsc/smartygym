@@ -332,7 +332,17 @@ serve(async (req) => {
       processed < MAX_ITEMS_PER_PASS &&
       Date.now() - started < PASS_MS
     ) {
+      // Respect a pause pressed while this pass is still running: stop before
+      // spending another AI call, not after the whole batch.
+      const { data: liveStatus } = await db
+        .from("workout_repair_jobs")
+        .select("status")
+        .eq("id", job.id)
+        .maybeSingle();
+      if (liveStatus && liveStatus.status !== "running") break;
+
       const workoutId = queue[cursor]!;
+
       const { data: rowData } = await db
         .from("admin_workouts")
         .select(WORKOUT_COLUMNS)
@@ -424,15 +434,30 @@ serve(async (req) => {
     }
 
     const done = cursor >= queue.length;
-    const status = pauseReason ? "paused" : done ? "completed" : "running";
+    // An administrator may have paused or cancelled DURING this pass. Their
+    // decision always wins — never write "running" back over it.
+    const { data: latest } = await db
+      .from("workout_repair_jobs")
+      .select("status,pause_reason")
+      .eq("id", job.id)
+      .maybeSingle();
+    const interrupted = latest && latest.status !== "running";
+    const status = interrupted
+      ? latest!.status
+      : pauseReason
+      ? "paused"
+      : done
+      ? "completed"
+      : "running";
     await db.from("workout_repair_jobs").update({
       cursor,
       ...counters,
       failures: failures.slice(-200),
       status,
-      pause_reason: pauseReason,
+      pause_reason: interrupted ? latest!.pause_reason : pauseReason,
       locked_until: null,
     }).eq("id", job.id);
+
 
     log("pass", { cursor, total: queue.length, processed, aiCalls, status });
     return json({ ok: true, cursor, total: queue.length, processed, status, counters });
