@@ -85,6 +85,79 @@ const DAYS_PER_WEEK_OPTIONS = [3, 4, 5, 6];
 
 type AccessChoice = "free" | "premium" | "standalone";
 
+/** Where an in-flight generation job id is parked so a refresh can resume it. */
+const JOB_KEY = "admin_generation_job";
+
+const rememberJob = (jobId: string, type: WizardContentType) => {
+  try {
+    localStorage.setItem(JOB_KEY, JSON.stringify({ jobId, type }));
+  } catch { /* storage unavailable — polling still works in this tab */ }
+};
+
+const forgetJob = () => {
+  try {
+    localStorage.removeItem(JOB_KEY);
+  } catch { /* ignore */ }
+};
+
+const readRememberedJob = (): { jobId: string; type: WizardContentType } | null => {
+  try {
+    const raw = localStorage.getItem(JOB_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.jobId ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Waits for a backend generation job to finish. The job runs in the database
+ * and edge function independently of this browser, so there is no deadline
+ * here — a finished workout is never thrown away because the page stopped
+ * waiting. The job id is stored, so a refresh or a reopened wizard picks the
+ * same generation back up.
+ */
+const awaitJobDraft = async (
+  jobId: string,
+  type: WizardContentType,
+): Promise<Record<string, any>> => {
+  rememberJob(jobId, type);
+  // The job row itself is the failure signal; a row that never resolves is
+  // still visible and resumable rather than silently discarded.
+  for (;;) {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    const { data: current, error: pollError } = await supabase
+      .from("admin_generation_jobs")
+      .select("status,draft_payload,error_message,created_at")
+      .eq("id", jobId)
+      .maybeSingle();
+    if (pollError) throw pollError;
+    if (!current) {
+      forgetJob();
+      throw new Error("That generation is no longer available. Please start it again.");
+    }
+    if (current.status === "failed") {
+      forgetJob();
+      await supabase.from("admin_generation_jobs").delete().eq("id", jobId);
+      throw new Error(current.error_message || "Generation failed");
+    }
+    if (current.status === "completed") {
+      const draft = current.draft_payload as Record<string, any> | null;
+      forgetJob();
+      await supabase.from("admin_generation_jobs").delete().eq("id", jobId);
+      if (!draft) throw new Error(`The ${type} finished without a draft. Please start it again.`);
+      return draft;
+    }
+    // Stall guard, not a waiting limit: the server process itself is gone.
+    if (Date.now() - new Date(current.created_at as string).getTime() > 20 * 60 * 1000) {
+      forgetJob();
+      await supabase.from("admin_generation_jobs").delete().eq("id", jobId);
+      throw new Error("The server stopped working on this generation. Please start it again.");
+    }
+  }
+};
+
 export const ContentCreationWizard = ({
   open,
   onOpenChange,
@@ -124,6 +197,39 @@ export const ContentCreationWizard = ({
       setGenerating(false);
     }
   }, [open, initialType]);
+
+  // A generation started earlier keeps running on the server. If the page was
+  // refreshed or the wizard closed, pick it back up instead of losing it.
+  useEffect(() => {
+    if (!open) return;
+    const pending = readRememberedJob();
+    if (!pending) return;
+    let cancelled = false;
+    setGenerating(true);
+    toast({
+      title: "Picking up your generation",
+      description: "It kept running in the background — this will open as soon as it is ready.",
+    });
+    awaitJobDraft(pending.jobId, pending.type)
+      .then((draft) => {
+        if (!cancelled) deliverDraft(draft, pending.type);
+      })
+      .catch((e: any) => {
+        if (cancelled) return;
+        toast({
+          title: "Generation failed",
+          description: e?.message || "Please start it again.",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        if (!cancelled) setGenerating(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Auto-lock micro-workouts to their fixed rules
   useEffect(() => {
@@ -275,6 +381,45 @@ export const ContentCreationWizard = ({
    * database. On success the wizard closes and tells the manager to
    * refresh — no manual editing required.
    */
+  /** Hands a finished draft to the editor — shared by a fresh run and a resumed one. */
+  const deliverDraft = (draft: Record<string, any>, draftType: WizardContentType) => {
+    if (draftType === "workout") {
+      toast({
+        title: "Workout drafted",
+        description: `"${draft.name}" is ready — review and click Save to publish.`,
+      });
+      onComplete({
+        type: "workout",
+        payload: {
+          ...draft,
+          category: draft.category || category,
+          equipment: draft.equipment || equipment,
+          difficulty_stars: draft.difficulty_stars ?? difficultyStars,
+          duration: draft.duration || duration,
+          format: draft.format || format,
+          focus: isStrength ? (draft.focus || focus) : "",
+        },
+      });
+    } else {
+      toast({
+        title: "Program drafted",
+        description: `"${draft.name}" is ready — review and click Save to publish.`,
+      });
+      onComplete({
+        type: "program",
+        payload: {
+          ...draft,
+          category: draft.category || category,
+          equipment: draft.equipment || equipment,
+          difficulty_stars: draft.difficulty_stars ?? difficultyStars,
+          weeks: draft.weeks ?? weeks,
+          days_per_week: draft.days_per_week ?? daysPerWeek,
+        },
+      });
+    }
+    onOpenChange(false);
+  };
+
   const handleGenerate = async () => {
     setGenerating(true);
     try {
@@ -313,61 +458,9 @@ export const ContentCreationWizard = ({
       });
       if (jobError || !jobId) throw jobError ?? new Error("Could not start generation.");
 
-      const deadline = Date.now() + 4 * 60 * 1000;
-      let draft: Record<string, any> | null = null;
-      while (Date.now() < deadline) {
-        await new Promise((resolve) => setTimeout(resolve, 2500));
-        const { data: current, error: pollError } = await supabase
-          .from("admin_generation_jobs")
-          .select("status,draft_payload,error_message")
-          .eq("id", jobId)
-          .single();
-        if (pollError) throw pollError;
-        if (current.status === "failed") throw new Error(current.error_message || "Generation failed");
-        if (current.status === "completed") {
-          draft = current.draft_payload as Record<string, any> | null;
-          await supabase.from("admin_generation_jobs").delete().eq("id", jobId);
-          break;
-        }
-      }
-      if (!draft) throw new Error(`The ${type} is still being prepared. Please try again in a moment.`);
+      const draft = await awaitJobDraft(String(jobId), type);
 
-      if (type === "workout") {
-
-        toast({
-          title: "Workout drafted",
-          description: `"${draft.name}" is ready — review and click Save to publish.`,
-        });
-        onComplete({
-          type: "workout",
-          payload: {
-            ...draft,
-            category: draft.category || category,
-            equipment: draft.equipment || equipment,
-            difficulty_stars: draft.difficulty_stars ?? difficultyStars,
-            duration: draft.duration || duration,
-            format: draft.format || format,
-            focus: isStrength ? (draft.focus || focus) : "",
-          },
-        });
-      } else {
-        toast({
-          title: "Program drafted",
-          description: `"${draft.name}" is ready — review and click Save to publish.`,
-        });
-        onComplete({
-          type: "program",
-          payload: {
-            ...draft,
-            category: draft.category || category,
-            equipment: draft.equipment || equipment,
-            difficulty_stars: draft.difficulty_stars ?? difficultyStars,
-            weeks: draft.weeks ?? weeks,
-            days_per_week: draft.days_per_week ?? daysPerWeek,
-          },
-        });
-      }
-      onOpenChange(false);
+      deliverDraft(draft, type);
     } catch (e: any) {
       console.error(`[Wizard] generate-${type} failed`, e);
       let message = e?.message || `Could not generate the ${type}. Please adjust the settings and try again.`;
