@@ -328,9 +328,9 @@ OUTPUT — pure JSON, no markdown fences, exactly:
 The "main_workout" field contains ALL sections joined in order.`;
 
   const user = `WORKOUT REQUEST
-Category: ${input.category}
-Available equipment (strict allowlist): ${[...input.selectedEquipment.filter((x) => x !== "other"), ...(input.customEquipment ?? [])].join(", ")}
-Never use any apparatus outside this list, even during Activation or Cool Down.
+Category (DECIDE THE SESSION FROM THIS FIRST): ${input.category}
+Equipment the athlete HAS today (a ceiling, not a shopping list): ${[...input.selectedEquipment.filter((x) => x !== "other"), ...(input.customEquipment ?? [])].join(", ")}
+Never use any apparatus outside this list, even during Activation or Cool Down. You are never obliged to use all of it — use only what the category genuinely calls for, and use the athlete's own bodyweight freely wherever it serves the session better.
 Difficulty: ${input.stars} of 3 stars (${input.level.toUpperCase()}) — one star is one level, do not mix levels
 Intensity within the level: ${intensityNote(input.stars)}
 Format: ${input.format}
