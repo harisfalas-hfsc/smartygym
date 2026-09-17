@@ -220,12 +220,20 @@ export const useAdvancedActivityLog = (
           });
         } else if (primaryFilter === 'measurement') {
           bucketActivities.forEach(activity => {
-            const input = activity.tool_input as any;
-            if (input?.weight !== undefined) pieData['Weight'] = (pieData['Weight'] || 0) + 1;
-            if (input?.body_fat !== undefined) pieData['Body Fat %'] = (pieData['Body Fat %'] || 0) + 1;
-            if (input?.chest !== undefined || input?.waist !== undefined) {
+            const input = (activity.tool_result ?? activity.tool_input) as any;
+            const has = (k: string) => input?.[k] !== undefined && input?.[k] !== null;
+            if (has('weight')) pieData['Weight'] = (pieData['Weight'] || 0) + 1;
+            if (has('body_fat')) pieData['Body Fat %'] = (pieData['Body Fat %'] || 0) + 1;
+            if (['chest', 'waist', 'hips', 'arms', 'thighs', 'neck', 'shoulders', 'calves'].some(has)) {
               pieData['Body Measurements'] = (pieData['Body Measurements'] || 0) + 1;
             }
+          });
+        } else if (primaryFilter === 'checkin') {
+          bucketActivities.forEach(activity => {
+            const name = (activity.item_name || '').toLowerCase().includes('night')
+              ? 'Night Check-in'
+              : 'Morning Check-in';
+            pieData[name] = (pieData[name] || 0) + 1;
           });
         }
       }
