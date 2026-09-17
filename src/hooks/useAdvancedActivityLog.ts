@@ -115,12 +115,21 @@ export const useAdvancedActivityLog = (
 
     if (primaryFilter === 'measurement' && secondaryFilter !== 'all') {
       filteredActivities = filteredActivities.filter(a => {
-        const input = a.tool_input as any;
-        if (secondaryFilter === 'weight') return input?.weight !== undefined;
-        if (secondaryFilter === 'body_fat') return input?.body_fat !== undefined;
-        if (secondaryFilter === 'measurements') return input?.chest !== undefined || input?.waist !== undefined;
+        const input = (a.tool_result ?? a.tool_input) as any;
+        if (secondaryFilter === 'weight') return input?.weight !== undefined && input?.weight !== null;
+        if (secondaryFilter === 'body_fat') return input?.body_fat !== undefined && input?.body_fat !== null;
+        if (secondaryFilter === 'measurements') {
+          return ['chest', 'waist', 'hips', 'arms', 'thighs', 'neck', 'shoulders', 'calves']
+            .some(k => input?.[k] !== undefined && input?.[k] !== null);
+        }
         return true;
       });
+    }
+
+    if (primaryFilter === 'checkin' && secondaryFilter !== 'all') {
+      filteredActivities = filteredActivities.filter(a =>
+        (a.item_name || '').toLowerCase().includes(secondaryFilter.toLowerCase())
+      );
     }
 
     // Generate time buckets based on time filter
