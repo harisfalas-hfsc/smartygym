@@ -586,6 +586,30 @@
       ]
     }
     </script>
+    <!-- Native shell first-paint fix.
+         The main stylesheet (~200KB) is render-blocking, so a WebView shows its
+         own empty white surface until that CSS arrives — the white flash between
+         the native splash and the branded boot splash. Inside the submitted apps
+         we release that block so the navy boot splash paints immediately; the
+         stylesheet is re-applied the moment it finishes downloading, and the
+         splash stays on top until window load, so nothing appears unstyled.
+         Browsers and the installed web app are untouched. -->
+    <script>
+      (function () {
+        try {
+          if (!document.documentElement.classList.contains("native-shell")) return;
+          var links = document.querySelectorAll('link[rel="stylesheet"]');
+          for (var i = 0; i < links.length; i++) {
+            (function (link) {
+              if (link.media === "print") return;
+              link.media = "print";
+              link.addEventListener("load", function () { link.media = "all"; }, { once: true });
+              link.addEventListener("error", function () { link.media = "all"; }, { once: true });
+            })(links[i]);
+          }
+        } catch (e) {}
+      })();
+    </script>
 </head>
 
   <body>
