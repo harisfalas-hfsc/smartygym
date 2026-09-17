@@ -14,18 +14,25 @@ function computeIsMobile() {
 }
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined);
+  // Read the viewport during the first render. Starting as `undefined` and
+  // coercing it to false briefly rendered the desktop layout in native shells
+  // before the effect corrected it to mobile.
+  const [isMobile, setIsMobile] = React.useState<boolean>(() =>
+    typeof window === "undefined" ? true : computeIsMobile(),
+  );
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const onChange = () => setIsMobile(computeIsMobile());
     onChange();
     window.addEventListener("resize", onChange);
     window.addEventListener("orientationchange", onChange);
+    window.visualViewport?.addEventListener("resize", onChange);
     return () => {
       window.removeEventListener("resize", onChange);
       window.removeEventListener("orientationchange", onChange);
+      window.visualViewport?.removeEventListener("resize", onChange);
     };
   }, []);
 
-  return !!isMobile;
+  return isMobile;
 }
