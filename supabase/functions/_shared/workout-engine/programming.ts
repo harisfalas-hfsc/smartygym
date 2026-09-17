@@ -871,7 +871,11 @@ export function scoreWorkout(
   const disliked = new Set(opts.dislikedIds ?? []);
   const hits = workIds.filter((id) => disliked.has(id)).length;
   if (hits) penalise(20, `${hits} excluded exercises made it into the session.`);
-  const favourites = opts.favoriteIds ?? [];
+  // A favourite is only expected when it is legal vocabulary for TODAY'S
+  // category and session. Liking running never makes running belong in a
+  // Muscle Building workout — the category decides, the preference only
+  // breaks ties inside what the category already allows.
+  const favourites = (opts.favoriteIds ?? []).filter((id) => opts.library.has(id));
   if (favourites.length && !workIds.some((id) => favourites.includes(id)))
     penalise(3, "None of the athlete's favourite exercises were programmed.");
 
