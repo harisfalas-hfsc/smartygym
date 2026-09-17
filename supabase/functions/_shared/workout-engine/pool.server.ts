@@ -267,6 +267,35 @@ export function matchesSelectedEquipment(
   });
 }
 
+/**
+ * THE equipment rule for a session — used by the pool filter AND the validator
+ * so selection and checking can never disagree.
+ *
+ * The athlete's apparatus choices are never widened to apparatus they do not
+ * own. Their own bodyweight, however, is always with them, so pure bodyweight
+ * vocabulary is legal ALONGSIDE the chosen kit in every category except the
+ * load-dependent ones (STRENGTH / MUSCLE BUILDING), where progressive external
+ * resistance is the stimulus. Props the athlete never chose (ball, bosu,
+ * roller) are NOT bodyweight.
+ */
+export function equipmentLegalForSession(
+  e: PoolExercise,
+  opts: {
+    category: Category;
+    equipmentMode: EquipmentMode;
+    selectedEquipment: string[];
+    customEquipment?: string[];
+  },
+): boolean {
+  if (matchesSelectedEquipment(e, opts.selectedEquipment, opts.customEquipment ?? [])) return true;
+  const loadDependent = opts.category === "STRENGTH" || opts.category === "MUSCLE BUILDING";
+  if (loadDependent || opts.equipmentMode === "BODYWEIGHT") return false;
+  const raw = (e.equipment ?? "").toLowerCase().trim();
+  return isBodyweight(e) || NEUTRAL_EQUIPMENT.has(raw);
+}
+
+
+
 
 /** Keeps only the free-text apparatus that really exists in the exercise library. */
 export function resolveCustomEquipment(all: PoolExercise[], raw: string): string[] {
@@ -362,21 +391,15 @@ function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   if (isMicro) pool = pool.filter((e) => isBodyweight(e) && !microExerciseViolation(e));
 
 
-  // 2. Equipment allowlist. The athlete's apparatus choices are never widened to
-  //    apparatus they do not own. Their own bodyweight, however, is always with
-  //    them, so bodyweight vocabulary stays legal ALONGSIDE the chosen kit for
-  //    every category except the load-dependent ones (STRENGTH / MUSCLE
-  //    BUILDING), where progressive external resistance is the stimulus.
+  // 2. Equipment allowlist — ONE definition, shared with the validator.
   if (!isMicro) {
-    const loadDependent = f.category === "STRENGTH" || f.category === "MUSCLE BUILDING";
-    // Pure bodyweight only — no props (ball, bosu, roller) the athlete never chose.
-    const bodyOnly = (e: PoolExercise) =>
-      isBodyweight(e) || NEUTRAL_EQUIPMENT.has((e.equipment ?? "").toLowerCase().trim());
-    const allowBodyweight = !loadDependent && f.equipmentMode !== "BODYWEIGHT";
-    pool = pool.filter(
-      (e) =>
-        matchesSelectedEquipment(e, f.selectedEquipment, f.customEquipment ?? []) ||
-        (allowBodyweight && bodyOnly(e)),
+    pool = pool.filter((e) =>
+      equipmentLegalForSession(e, {
+        category: f.category,
+        equipmentMode: f.equipmentMode,
+        selectedEquipment: f.selectedEquipment,
+        customEquipment: f.customEquipment ?? [],
+      }),
     );
     if (f.equipmentMode === "BODYWEIGHT")
       pool = pool.filter((e) => isBodyweight(e) && !HOME_APPARATUS_RE.test(text(e)));

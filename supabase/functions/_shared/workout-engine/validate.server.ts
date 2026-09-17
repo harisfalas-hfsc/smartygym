@@ -2,7 +2,7 @@
 // Runs AFTER enforceWorkout and re-checks the finished HTML against the hard
 // contract: real library ids, the exact equipment allowlist, banned exercises,
 // section shape and dose hygiene. Nothing here trusts the model.
-import { matchesSelectedEquipment, nameStem, type PoolExercise } from "./pool.server.ts";
+import { equipmentLegalForSession, matchesSelectedEquipment, nameStem, type PoolExercise } from "./pool.server.ts";
 import { findTokens, isLibraryId, stripHtml } from "./tokens.ts";
 import { parseWorkoutSteps } from "./parse-steps.ts";
 import {
@@ -22,6 +22,8 @@ import {
   dynamicExerciseViolation,
   equipmentFamilyViolation,
   focusViolation,
+  focusRegion,
+  regionOf,
   humanRealismViolation,
   locationEquipmentViolation,
   moodDoseViolation,
@@ -90,6 +92,13 @@ export function validateWorkout(html: string, opts: ValidateOptions): Validation
   const poolIds = new Set(opts.pool.map((e) => e.id));
   const prepIds = new Set(opts.prepIds ?? []);
   const libraryById = new Map(opts.library.map((e) => [e.id, e]));
+  // Does the legal pool hold enough strictly on-focus vocabulary to fill the
+  // session? If yes, the focus is absolute; if not, §15 regional support work
+  // is legitimate (see the focus check below).
+  const focusVocabularySufficient = opts.focus
+    ? opts.pool.filter((e) => !focusViolation(e, opts.focus!)).length >=
+      (opts.mainMin ?? 4) + (opts.requireFinisher ? (opts.finisherMin ?? 3) : 0)
+    : true;
   const banned = new Set(opts.dislikedIds ?? []);
   const bannedStems = new Set(
     (opts.dislikedIds ?? [])
@@ -129,8 +138,16 @@ export function validateWorkout(html: string, opts: ValidateOptions): Validation
       if (!poolIds.has(token.id)) {
         errors.push(`"${row.name}" is outside the approved pool for this session.`);
       }
-      // 2. Equipment allowlist — checked against the library row, not the text.
-      if (!matchesSelectedEquipment(row, opts.selectedEquipment, opts.customEquipment ?? [])) {
+      // 2. Equipment allowlist — ONE shared rule with the pool filter, so the
+      //    athlete's own bodyweight is legal alongside their chosen kit.
+      if (
+        !equipmentLegalForSession(row, {
+          category: opts.category,
+          equipmentMode: opts.equipmentMode,
+          selectedEquipment: opts.selectedEquipment,
+          customEquipment: opts.customEquipment ?? [],
+        })
+      ) {
         errors.push(`"${row.name}" needs ${row.equipment ?? "unlisted"} equipment, which is not available.`);
       }
       if (
@@ -156,10 +173,22 @@ export function validateWorkout(html: string, opts: ValidateOptions): Validation
       if (opts.category === "MICRO-WORKOUTS" && microExerciseViolation(row)) {
         errors.push(`"${row.name}" needs equipment or a special setup, which a micro-workout never uses.`);
       }
-      // 2d. Focus legality — a focus is a hard gate, not a preference.
+      // 2d. Focus legality — a focus is a hard gate whenever the legal pool
+      //     really can cover the session with on-focus vocabulary. When a
+      //     narrow focus (e.g. CORE & GLUTES with only dumbbells) has too few
+      //     legal movements, §15 allows neighbouring support work from the SAME
+      //     body region — the same widening the pool filter applies — so the
+      //     validator must not reject what the selection rules legitimately
+      //     handed the session. Work outside the region stays an error.
       if (opts.focus) {
         const fv = focusViolation(row, opts.focus);
-        if (fv) errors.push(`"${row.name}" does not train the ${opts.focus} focus.`);
+        if (fv) {
+          const region = focusRegion(opts.focus);
+          const rowRegion = regionOf(row);
+          const regionalSupport =
+            !focusVocabularySufficient && (rowRegion === region || rowRegion === "full" || region === "full");
+          if (!regionalSupport) errors.push(`"${row.name}" does not train the ${opts.focus} focus.`);
+        }
       }
 
     }
