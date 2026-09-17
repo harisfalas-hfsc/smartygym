@@ -30,7 +30,7 @@ const CHART_COLORS = {
   program: 'hsl(142, 76%, 36%)',
   tool: 'hsl(24, 95%, 53%)',
   measurement: 'hsl(280, 100%, 70%)',
-  personal_training: 'hsl(340, 75%, 55%)',
+  
   checkin: 'hsl(172, 66%, 50%)',
   completed: 'hsl(142, 76%, 36%)',
   viewed: 'hsl(217, 91%, 60%)',
