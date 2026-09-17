@@ -1,9 +1,8 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { configureStatusBar } from "./utils/native";
+import { configureStatusBar, isNativePlatform } from "./utils/native";
 import { purgeAppServiceWorkers, startDeploymentUpdateWatcher } from "./utils/registerServiceWorker";
-import { Capacitor } from "@capacitor/core";
 
 // Configure native status bar on app launch
 configureStatusBar();
@@ -52,12 +51,29 @@ const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Application root element is missing");
 createRoot(rootElement).render(<App />);
 
-// Fade out the boot splash once the first frame of the app is painted.
+// Browsers can reveal the app after its first paint. Native shells must keep
+// the branded web splash over the WebView until the initial page and its
+// eager visual assets are ready, otherwise the WebView's empty surface flashes.
 const hideBootSplash = () => {
   const splash = document.getElementById("boot-splash");
   if (!splash) return;
   splash.classList.add("is-hidden");
   window.setTimeout(() => splash.remove(), 400);
 };
-requestAnimationFrame(() => requestAnimationFrame(hideBootSplash));
+
+const hideAfterPaint = () => {
+  requestAnimationFrame(() => requestAnimationFrame(hideBootSplash));
+};
+
+if (isNativePlatform()) {
+  if (document.readyState === "complete") {
+    hideAfterPaint();
+  } else {
+    window.addEventListener("load", hideAfterPaint, { once: true });
+  }
+} else {
+  hideAfterPaint();
+}
+
+// Never trap someone behind the splash if an external asset stalls.
 window.setTimeout(hideBootSplash, 8000);
