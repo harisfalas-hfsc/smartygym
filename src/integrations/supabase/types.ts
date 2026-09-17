@@ -4405,6 +4405,17 @@ export type Database = {
         | "payment_failed_attempt"
         | "payment_failed_final"
         | "announcement_new_article"
+        | "payment_failed"
+        | "first_purchase"
+        | "corporate_member_added"
+        | "corporate_subscription"
+        | "christmas_wishes"
+        | "new_year_wishes"
+        | "admin_alert"
+        | "purchase_ritual"
+        | "morning_notification"
+        | "status_update"
+        | "unified_announcement"
       plan_type:
         | "free"
         | "gold"
@@ -4583,6 +4594,17 @@ export const Constants = {
         "payment_failed_attempt",
         "payment_failed_final",
         "announcement_new_article",
+        "payment_failed",
+        "first_purchase",
+        "corporate_member_added",
+        "corporate_subscription",
+        "christmas_wishes",
+        "new_year_wishes",
+        "admin_alert",
+        "purchase_ritual",
+        "morning_notification",
+        "status_update",
+        "unified_announcement",
       ],
       plan_type: [
         "free",
