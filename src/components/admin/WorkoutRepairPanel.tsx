@@ -32,7 +32,7 @@ export default function WorkoutRepairPanel() {
       .in("status", ["running", "paused", "completed"])
       .order("created_at", { ascending: false })
       .limit(1);
-    setJob((data?.[0] as RepairJob | undefined) ?? null);
+    setJob(((data?.[0] as unknown) as RepairJob | undefined) ?? null);
   }, []);
 
   useEffect(() => {

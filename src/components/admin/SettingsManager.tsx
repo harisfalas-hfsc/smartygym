@@ -12,6 +12,7 @@ import { Settings, Bell, Mail, Database, Shield, Download, HeartPulse, Wrench, I
 import { SystemHealthAudit } from "./SystemHealthAudit";
 import { FormatIntegrityAudit } from "./FormatIntegrityAudit";
 import { WorkoutComplianceAudit } from "./WorkoutComplianceAudit";
+import WorkoutRepairPanel from "./WorkoutRepairPanel";
 
 export const SettingsManager = () => {
   const { toast } = useToast();
