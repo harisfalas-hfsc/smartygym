@@ -598,15 +598,24 @@
       (function () {
         try {
           if (!document.documentElement.classList.contains("native-shell")) return;
-          var links = document.querySelectorAll('link[rel="stylesheet"]');
-          for (var i = 0; i < links.length; i++) {
-            (function (link) {
-              if (link.media === "print") return;
-              link.media = "print";
-              link.addEventListener("load", function () { link.media = "all"; }, { once: true });
-              link.addEventListener("error", function () { link.media = "all"; }, { once: true });
-            })(links[i]);
-          }
+          var unblock = function (link) {
+            if (!link || link.rel !== "stylesheet" || link.media === "print") return;
+            if (link.dataset && link.dataset.bootUnblocked === "1") return;
+            if (link.dataset) link.dataset.bootUnblocked = "1";
+            link.media = "print";
+            var restore = function () { link.media = "all"; };
+            link.addEventListener("load", restore, { once: true });
+            link.addEventListener("error", restore, { once: true });
+          };
+          var scan = function () {
+            var links = document.querySelectorAll('link[rel="stylesheet"]');
+            for (var i = 0; i < links.length; i++) unblock(links[i]);
+          };
+          scan();
+          // The build injects the main stylesheet later in <head>, so watch for it.
+          var observer = new MutationObserver(scan);
+          observer.observe(document.documentElement, { childList: true, subtree: true });
+          document.addEventListener("DOMContentLoaded", function () { observer.disconnect(); }, { once: true });
         } catch (e) {}
       })();
     </script>
