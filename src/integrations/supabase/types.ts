@@ -3606,6 +3606,78 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_compliance_audit: {
+        Row: {
+          audited_at: string
+          category: string | null
+          errors: Json
+          format: string | null
+          name: string
+          repair_tier: number
+          session_minutes: number
+          status: string
+          target_minutes: number | null
+          warnings: Json
+          work_minutes: number
+          workout_id: string
+        }
+        Insert: {
+          audited_at?: string
+          category?: string | null
+          errors?: Json
+          format?: string | null
+          name?: string
+          repair_tier?: number
+          session_minutes?: number
+          status?: string
+          target_minutes?: number | null
+          warnings?: Json
+          work_minutes?: number
+          workout_id: string
+        }
+        Update: {
+          audited_at?: string
+          category?: string | null
+          errors?: Json
+          format?: string | null
+          name?: string
+          repair_tier?: number
+          session_minutes?: number
+          status?: string
+          target_minutes?: number | null
+          warnings?: Json
+          work_minutes?: number
+          workout_id?: string
+        }
+        Relationships: []
+      }
+      workout_content_backup: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string | null
+          main_workout: string | null
+          reason: string | null
+          workout_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          main_workout?: string | null
+          reason?: string | null
+          workout_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          main_workout?: string | null
+          reason?: string | null
+          workout_id?: string
+        }
+        Relationships: []
+      }
       workout_interactions: {
         Row: {
           created_at: string | null
