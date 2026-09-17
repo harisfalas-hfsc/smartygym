@@ -345,7 +345,7 @@ serve(async (req) => {
   }
 
   // Don't alert on the heartbeat itself — it would alert about its own absence
-  const filtered = (jobs ?? []).filter((j: CronSnapshotRow) => j.job_name !== "cron-heartbeat-hourly");
+  const filtered = (jobs ?? []).filter((j: CronSnapshotRow) => j.job_name !== "cron-heartbeat-daily");
 
   const overdueJobs: Array<{ job: CronRow; reason: string }> = [];
   const report = filtered.map((row: CronSnapshotRow) => {
@@ -365,7 +365,7 @@ serve(async (req) => {
 
   // Record the heartbeat itself
   await supabase.from("cron_job_runs").insert({
-    job_name: "cron-heartbeat-hourly",
+    job_name: "cron-heartbeat-daily",
     started_at: new Date(nowMs).toISOString(),
     finished_at: new Date().toISOString(),
     duration_ms: Date.now() - nowMs,
@@ -381,7 +381,7 @@ serve(async (req) => {
       last_run_duration_ms: Date.now() - nowMs,
       consecutive_failures: 0,
     })
-    .eq("job_name", "cron-heartbeat-hourly");
+    .eq("job_name", "cron-heartbeat-daily");
 
   // Build the 24h daily report sections
   const cutoffMs = nowMs - 24 * 60 * 60 * 1000;

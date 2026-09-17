@@ -159,7 +159,7 @@ serve(async (req) => {
     const frozen = await freezeGuard(corsHeaders, "send-morning-notifications");
     if (frozen) return frozen;
 
-    logStep("Starting combined morning notification delivery (7:00 AM Cyprus time)");
+    logStep("Starting combined morning notification delivery (05:00 UTC daily)");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

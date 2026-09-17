@@ -8,6 +8,17 @@ import { BrowserRouter } from 'react-router-dom';
 // Mock the useAccessControl hook
 vi.mock('@/hooks/useAccessControl');
 
+// Purchasing switches: these tests cover normal selling mode
+// (Free Access Mode off, platform payments enabled).
+vi.mock('@/hooks/useFreeAccessMode', () => ({
+  useFreeAccessMode: () => ({ freeAccessMode: false, loading: false }),
+  fetchFreeAccessMode: () => Promise.resolve(false),
+}));
+vi.mock('@/hooks/usePaymentsEnabled', () => ({
+  usePaymentsEnabled: () => ({ platform: 'web', paymentsEnabled: true, loading: false }),
+  getPaymentPlatform: () => 'web',
+}));
+
 // Mock NavigationHistory (PurchaseButton uses useNavigationHistory)
 vi.mock('@/contexts/NavigationHistoryContext', () => ({
   useNavigationHistory: () => ({
