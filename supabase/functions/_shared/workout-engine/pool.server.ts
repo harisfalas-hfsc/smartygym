@@ -283,9 +283,35 @@ export function resolveCustomEquipment(all: PoolExercise[], raw: string): string
 /**
  * Applies the documented filter order: category ban -> equipment -> difficulty
  * -> guardrails. The result is the only vocabulary the model ever sees.
+ *
+ * Difficulty widening (§16) is judged on the FINAL pool, not on the difficulty
+ * step alone: an advanced tier that looks big enough before the format and
+ * focus filters can still collapse below a workable session afterwards. In
+ * that case the tier is refilled from EASIER material only — never harder.
  */
 export function filterPool(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
+  const strict = filterPoolAtLevel(all, f);
+  if (strict.length >= 12 || f.level === "all") return strict;
+  const easier: DifficultyLevel[] =
+    f.level === "advanced" ? ["intermediate", "beginner"] : f.level === "intermediate" ? ["beginner"] : [];
+  if (!easier.length) return strict;
+  const seen = new Set(strict.map((e) => e.id));
+  const widened = strict.slice();
+  for (const lvl of easier) {
+    for (const e of filterPoolAtLevel(all, { ...f, level: lvl })) {
+      if (!seen.has(e.id)) {
+        seen.add(e.id);
+        widened.push(e);
+      }
+    }
+    if (widened.length >= 12) break;
+  }
+  return widened;
+}
+
+function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   let pool = all.slice();
+
 
   // 0. HUMAN REALISM — before anything else. Circus gymnastics, levers,
   //    Turkish get-ups, pistol squats and technical Olympic lifting are never
