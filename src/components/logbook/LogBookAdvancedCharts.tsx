@@ -169,49 +169,59 @@ export const LogBookAdvancedCharts = ({
   return (
     <div className="space-y-6">
       {/* Filter Controls */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:flex-wrap sm:items-center">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:flex-wrap sm:items-end">
         {/* Primary Filter */}
-        <Select value={primaryFilter} onValueChange={onPrimaryFilterChange}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Activity Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Activity</SelectItem>
-            <SelectItem value="workout">Workouts</SelectItem>
-            <SelectItem value="program">Training Programs</SelectItem>
-            <SelectItem value="tool">Tools</SelectItem>
-            <SelectItem value="measurement">Measurements</SelectItem>
-            <SelectItem value="checkin">Check-ins</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-1 w-full sm:w-48">
+          <label className="text-xs font-medium text-muted-foreground">Activity type</label>
+          <Select value={primaryFilter} onValueChange={onPrimaryFilterChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Activity Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Activity</SelectItem>
+              <SelectItem value="workout">Workouts</SelectItem>
+              <SelectItem value="program">Training Programs</SelectItem>
+              <SelectItem value="tool">Tools</SelectItem>
+              <SelectItem value="measurement">Measurements</SelectItem>
+              <SelectItem value="checkin">Check-ins</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Secondary Filter */}
         {getSecondaryFilters().length > 0 && (
-          <Select value={secondaryFilter} onValueChange={onSecondaryFilterChange}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Filter by..." />
-            </SelectTrigger>
-            <SelectContent>
-              {getSecondaryFilters().map((filter) => (
-                <SelectItem key={filter.value} value={filter.value}>
-                  {filter.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col gap-1 w-full sm:w-48">
+            <label className="text-xs font-medium text-muted-foreground">Show</label>
+            <Select value={secondaryFilter} onValueChange={onSecondaryFilterChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filter by..." />
+              </SelectTrigger>
+              <SelectContent>
+                {getSecondaryFilters().map((filter) => (
+                  <SelectItem key={filter.value} value={filter.value}>
+                    {filter.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         )}
 
         {/* Time Filter */}
-        <Select value={timeFilter} onValueChange={(value: any) => onTimeFilterChange(value)}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Time period" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="weekly">Last 12 Weeks</SelectItem>
-            <SelectItem value="monthly">Last 6 Months</SelectItem>
-            <SelectItem value="custom">Custom Period</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-1 w-full sm:w-48">
+          <label className="text-xs font-medium text-muted-foreground">Time period</label>
+          <Select value={timeFilter} onValueChange={(value: any) => onTimeFilterChange(value)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Time period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="last_month">Last Month</SelectItem>
+              <SelectItem value="last_6_months">Last 6 Months</SelectItem>
+              <SelectItem value="last_12_months">Last 12 Months</SelectItem>
+              <SelectItem value="custom">Custom Period</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Custom Date Range */}
         {timeFilter === 'custom' && (
