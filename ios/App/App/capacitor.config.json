@@ -23,7 +23,7 @@
 	},
 	"packageClassList": [
 		"CAPBrowserPlugin",
-		"CAPNetworkPlugin",
+		"SplashScreenPlugin",
 		"StatusBarPlugin"
 	]
 }
