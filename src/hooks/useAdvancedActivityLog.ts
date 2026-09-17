@@ -9,7 +9,7 @@ const CHART_COLORS = {
   program: 'hsl(142, 76%, 36%)',
   tool: 'hsl(24, 95%, 53%)',
   measurement: 'hsl(280, 100%, 70%)',
-  personal_training: 'hsl(340, 75%, 55%)',
+  
   checkin: 'hsl(172, 66%, 50%)',
   completed: 'hsl(142, 76%, 36%)',
   viewed: 'hsl(217, 91%, 60%)',
@@ -115,12 +115,21 @@ export const useAdvancedActivityLog = (
 
     if (primaryFilter === 'measurement' && secondaryFilter !== 'all') {
       filteredActivities = filteredActivities.filter(a => {
-        const input = a.tool_input as any;
-        if (secondaryFilter === 'weight') return input?.weight !== undefined;
-        if (secondaryFilter === 'body_fat') return input?.body_fat !== undefined;
-        if (secondaryFilter === 'measurements') return input?.chest !== undefined || input?.waist !== undefined;
+        const input = (a.tool_result ?? a.tool_input) as any;
+        if (secondaryFilter === 'weight') return input?.weight !== undefined && input?.weight !== null;
+        if (secondaryFilter === 'body_fat') return input?.body_fat !== undefined && input?.body_fat !== null;
+        if (secondaryFilter === 'measurements') {
+          return ['chest', 'waist', 'hips', 'arms', 'thighs', 'neck', 'shoulders', 'calves']
+            .some(k => input?.[k] !== undefined && input?.[k] !== null);
+        }
         return true;
       });
+    }
+
+    if (primaryFilter === 'checkin' && secondaryFilter !== 'all') {
+      filteredActivities = filteredActivities.filter(a =>
+        (a.item_name || '').toLowerCase().includes(secondaryFilter.toLowerCase())
+      );
     }
 
     // Generate time buckets based on time filter
@@ -211,12 +220,20 @@ export const useAdvancedActivityLog = (
           });
         } else if (primaryFilter === 'measurement') {
           bucketActivities.forEach(activity => {
-            const input = activity.tool_input as any;
-            if (input?.weight !== undefined) pieData['Weight'] = (pieData['Weight'] || 0) + 1;
-            if (input?.body_fat !== undefined) pieData['Body Fat %'] = (pieData['Body Fat %'] || 0) + 1;
-            if (input?.chest !== undefined || input?.waist !== undefined) {
+            const input = (activity.tool_result ?? activity.tool_input) as any;
+            const has = (k: string) => input?.[k] !== undefined && input?.[k] !== null;
+            if (has('weight')) pieData['Weight'] = (pieData['Weight'] || 0) + 1;
+            if (has('body_fat')) pieData['Body Fat %'] = (pieData['Body Fat %'] || 0) + 1;
+            if (['chest', 'waist', 'hips', 'arms', 'thighs', 'neck', 'shoulders', 'calves'].some(has)) {
               pieData['Body Measurements'] = (pieData['Body Measurements'] || 0) + 1;
             }
+          });
+        } else if (primaryFilter === 'checkin') {
+          bucketActivities.forEach(activity => {
+            const name = (activity.item_name || '').toLowerCase().includes('night')
+              ? 'Night Check-in'
+              : 'Morning Check-in';
+            pieData[name] = (pieData[name] || 0) + 1;
           });
         }
       }

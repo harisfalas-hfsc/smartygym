@@ -51,8 +51,9 @@ export const LogBookCharts = ({ userId, filter }: LogBookChartsProps) => {
   const COLORS = {
     'Workout': '#10B981',
     'Program': '#3B82F6',
-    'Personal Training': '#F97316',
     'Tool': '#A855F7',
+    'Measurement': '#F97316',
+    'Checkin': '#14B8A6',
   };
 
   // Prepare data for bar chart - weekly activity count

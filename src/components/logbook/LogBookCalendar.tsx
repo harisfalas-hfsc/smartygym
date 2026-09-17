@@ -100,14 +100,6 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
         } else {
           badges.add('program-viewed');
         }
-      } else if (activity.content_type === 'personal_training') {
-        if (actionType === 'pt_started') {
-          badges.add('pt-ongoing');
-        } else if (actionType === 'pt_day_completed') {
-          badges.add('pt-completed');
-        } else {
-          badges.add('pt-viewed');
-        }
       } else if (activity.content_type === 'tool') {
         badges.add('tool');
       } else if (activity.content_type === 'measurement') {
@@ -130,9 +122,6 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
       'program-ongoing': 'bg-orange-500',
       'program-completed': 'bg-sky-500',
       'program-purchased': 'bg-amber-600',
-      'pt-viewed': 'bg-slate-400',
-      'pt-ongoing': 'bg-rose-400',
-      'pt-completed': 'bg-violet-600',
       'tool': 'bg-fuchsia-500',
       'measurement': 'bg-indigo-500',
       'checkin': 'bg-cyan-500',
@@ -341,14 +330,6 @@ export const LogBookCalendar = ({ userId, filter }: LogBookCalendarProps) => {
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-sky-500" />
                 <span>Program Completed</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-400" />
-                <span>PT Ongoing</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-violet-600" />
-                <span>PT Completed</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-fuchsia-500" />

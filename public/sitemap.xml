@@ -403,14 +403,14 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://smartygym.com/workout/strength/foundation-forge-drive.html</loc>
-    <lastmod>2026-06-21</lastmod>
+    <loc>https://smartygym.com/workout/cardio/sustained-tempo.html</loc>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://smartygym.com/workout/cardio/sustained-tempo.html</loc>
-    <lastmod>2026-06-27</lastmod>
+    <loc>https://smartygym.com/workout/strength/foundation-forge-drive.html</loc>
+    <lastmod>2026-06-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -434,7 +434,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/cardio/phantom-sprint-assault.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -470,7 +470,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/calorie-burning/arcane-circuit.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -615,12 +615,6 @@
   <url>
     <loc>https://smartygym.com/workout/strength/ironclad-core-and-power.html</loc>
     <lastmod>2026-07-11</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://smartygym.com/workout/cardio/dumbbell-hurricane-rush.html</loc>
-    <lastmod>2026-07-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1035,6 +1029,12 @@
   <url>
     <loc>https://smartygym.com/workout/calorie-burning/kinetic-flow-circuit.html</loc>
     <lastmod>2026-06-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://smartygym.com/workout/cardio/dumbbell-hurricane-rush.html</loc>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1640,7 +1640,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/calorie-burning/calorie-melt-catalyst.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1742,7 +1742,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/cardio/cardio-overdrive.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1976,7 +1976,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/strength/iron-bloom.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2036,7 +2036,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/calorie-burning/kinetic-pulse.html</loc>
-    <lastmod>2026-06-21</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2461,6 +2461,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://smartygym.com/workout/metabolic/cadence-shift.html</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://smartygym.com/workout/strength/helix-integration.html</loc>
     <lastmod>2026-06-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -2468,12 +2474,6 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/strength/cadence-ground-press.html</loc>
-    <lastmod>2026-06-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://smartygym.com/workout/metabolic/cadence-shift.html</loc>
     <lastmod>2026-06-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -2606,7 +2606,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/strength/press-and-pull-command.html</loc>
-    <lastmod>2026-06-21</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2900,7 +2900,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/calorie-burning/arcane-velocity.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3488,7 +3488,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/cardio/cardio-power.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
