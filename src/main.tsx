@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { SplashScreen } from "@capacitor/splash-screen";
 import App from "./App.tsx";
 import "./index.css";
 import { configureStatusBar, isNativePlatform } from "./utils/native";
@@ -54,15 +55,29 @@ createRoot(rootElement).render(<App />);
 // Browsers can reveal the app after its first paint. Native shells must keep
 // the branded web splash over the WebView until the initial page and its
 // eager visual assets are ready, otherwise the WebView's empty surface flashes.
-const hideBootSplash = () => {
+let startupSplashHidden = false;
+
+const hideBootSplash = async () => {
+  if (startupSplashHidden) return;
+  startupSplashHidden = true;
+
   const splash = document.getElementById("boot-splash");
-  if (!splash) return;
-  splash.classList.add("is-hidden");
-  window.setTimeout(() => splash.remove(), 400);
+  if (splash) {
+    splash.classList.add("is-hidden");
+    window.setTimeout(() => splash.remove(), 400);
+  }
+
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await SplashScreen.hide({ fadeOutDuration: 180 });
+    } catch {
+      // Older shells without the plugin still fall back to the web splash.
+    }
+  }
 };
 
 const hideAfterPaint = () => {
-  requestAnimationFrame(() => requestAnimationFrame(hideBootSplash));
+  requestAnimationFrame(() => requestAnimationFrame(() => void hideBootSplash()));
 };
 
 if (isNativePlatform()) {
@@ -76,4 +91,4 @@ if (isNativePlatform()) {
 }
 
 // Never trap someone behind the splash if an external asset stalls.
-window.setTimeout(hideBootSplash, 8000);
+window.setTimeout(() => void hideBootSplash(), 8000);
