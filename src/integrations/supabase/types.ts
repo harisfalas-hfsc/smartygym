@@ -3768,6 +3768,57 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_repair_jobs: {
+        Row: {
+          ai_fixed: number
+          auto_fixed: number
+          created_at: string
+          cursor: number
+          failures: Json
+          id: string
+          locked_until: string | null
+          needs_review: number
+          pause_reason: string | null
+          queue: string[]
+          status: string
+          total: number
+          unchanged: number
+          updated_at: string
+        }
+        Insert: {
+          ai_fixed?: number
+          auto_fixed?: number
+          created_at?: string
+          cursor?: number
+          failures?: Json
+          id?: string
+          locked_until?: string | null
+          needs_review?: number
+          pause_reason?: string | null
+          queue?: string[]
+          status?: string
+          total?: number
+          unchanged?: number
+          updated_at?: string
+        }
+        Update: {
+          ai_fixed?: number
+          auto_fixed?: number
+          created_at?: string
+          cursor?: number
+          failures?: Json
+          id?: string
+          locked_until?: string | null
+          needs_review?: number
+          pause_reason?: string | null
+          queue?: string[]
+          status?: string
+          total?: number
+          unchanged?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       workout_repair_log: {
         Row: {
           bugs_found: Json
