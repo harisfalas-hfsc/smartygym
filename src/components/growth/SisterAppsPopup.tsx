@@ -3,12 +3,9 @@ import { ExternalLink, Sparkles, X } from "lucide-react";
 import { useSisterAnnouncement } from "@/hooks/useSisterAnnouncement";
 import logoMove from "@/assets/smartymove-logo.png";
 import logoDiet from "@/assets/smartydiet-logo.png";
-import logoWorkout from "@/assets/smartyworkout-logo.png";
-
-const CURRENT_APP: "workout" | "gym" | "move" | "diet" | "logbook" = "gym";
 
 type SisterApp = {
-  id: "workout" | "gym" | "move" | "diet" | "logbook";
+  id: "move" | "diet";
   name: string;
   tagline: string;
   url: string;
@@ -29,13 +26,6 @@ const SISTER_APPS: SisterApp[] = [
     tagline: "Check your posture. Correct your movement. Live better.",
     url: "https://smartymove.com",
     image: logoMove,
-  },
-  {
-    id: "workout",
-    name: "SmartyWorkout",
-    tagline: "Your daily workout, built around you.",
-    url: "https://smartyworkout.com",
-    image: logoWorkout,
   },
 ];
 
@@ -69,8 +59,6 @@ export const SisterAppsPopup = () => {
     return () => window.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  const others = SISTER_APPS.filter((a) => a.id !== CURRENT_APP);
-
   if (!enabled || !mounted) return null;
 
   return (
@@ -99,7 +87,7 @@ export const SisterAppsPopup = () => {
           </div>
 
           <div className="flex flex-col gap-4">
-            {others.map((app) => (
+            {SISTER_APPS.map((app) => (
               <a
                 key={app.id}
                 href={app.url}
