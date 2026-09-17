@@ -1,0 +1,11 @@
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'payment_failed';
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'first_purchase';
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'corporate_member_added';
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'corporate_subscription';
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'christmas_wishes';
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'new_year_wishes';
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'admin_alert';
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'purchase_ritual';
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'morning_notification';
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'status_update';
+ALTER TYPE public.message_type ADD VALUE IF NOT EXISTS 'unified_announcement';

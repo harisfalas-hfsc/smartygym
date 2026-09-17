@@ -162,11 +162,9 @@ serve(async (req) => {
           .from('user_system_messages')
           .insert({
             user_id: user.user_id,
-            title: content.subject.replace(/🎊|🎄/g, '').trim(),
+            subject: content.subject.replace(/🎊|🎄/g, '').trim(),
             content: content.message,
             message_type: messageType,
-            category: 'announcement',
-            priority: 'normal',
             is_read: false
           });
 
