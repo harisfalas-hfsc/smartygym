@@ -228,6 +228,14 @@ serve(async (req: Request) => {
 
     // LIST - Get all cron jobs with metadata AND real scheduler jobs
     if (action === 'list') {
+      // Pull the real last-run times / schedules from the live scheduler first,
+      // so the panel never shows stale information.
+      try {
+        await serviceClient.rpc('sync_cron_metadata_from_live_scheduler');
+      } catch (e) {
+        console.log('Could not sync metadata from live scheduler:', e);
+      }
+
       // Get metadata from our table
       const { data: metadata, error: metaError } = await serviceClient
         .from('cron_job_metadata')
