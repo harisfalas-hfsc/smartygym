@@ -85,9 +85,6 @@ export const DailyActivityModal = ({ date, isOpen, onClose, userId }: DailyActiv
       'program_started': '🔥 Started',
       'program_day_viewed': 'Day Viewed',
       'program_day_completed': 'Day Completed',
-      'pt_started': '🔥 Started',
-      'pt_day_viewed': 'Day Viewed',
-      'pt_day_completed': 'Day Completed',
     };
     return labels[actionType] || actionType;
   };
