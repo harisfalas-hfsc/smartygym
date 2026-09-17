@@ -369,12 +369,14 @@ function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   //    BUILDING), where progressive external resistance is the stimulus.
   if (!isMicro) {
     const loadDependent = f.category === "STRENGTH" || f.category === "MUSCLE BUILDING";
-    const withBodyweight =
-      !loadDependent && f.equipmentMode !== "BODYWEIGHT"
-        ? [...new Set([...f.selectedEquipment, "bodyweight"])]
-        : f.selectedEquipment;
-    pool = pool.filter((e) =>
-      matchesSelectedEquipment(e, withBodyweight, f.customEquipment ?? []),
+    // Pure bodyweight only — no props (ball, bosu, roller) the athlete never chose.
+    const bodyOnly = (e: PoolExercise) =>
+      isBodyweight(e) || NEUTRAL_EQUIPMENT.has((e.equipment ?? "").toLowerCase().trim());
+    const allowBodyweight = !loadDependent && f.equipmentMode !== "BODYWEIGHT";
+    pool = pool.filter(
+      (e) =>
+        matchesSelectedEquipment(e, f.selectedEquipment, f.customEquipment ?? []) ||
+        (allowBodyweight && bodyOnly(e)),
     );
     if (f.equipmentMode === "BODYWEIGHT")
       pool = pool.filter((e) => isBodyweight(e) && !HOME_APPARATUS_RE.test(text(e)));
