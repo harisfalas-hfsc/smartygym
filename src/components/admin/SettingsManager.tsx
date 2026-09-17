@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Settings, Bell, Mail, Database, Shield, Download, HeartPulse, Wrench, Image, RefreshCw, Search, ImagePlus, Send, Trash2, ShoppingCart, HelpCircle, ClipboardCheck, Tag, FileCheck2 } from "lucide-react";
 import { SystemHealthAudit } from "./SystemHealthAudit";
 import { FormatIntegrityAudit } from "./FormatIntegrityAudit";
+import { WorkoutComplianceAudit } from "./WorkoutComplianceAudit";
 
 export const SettingsManager = () => {
   const { toast } = useToast();
@@ -715,6 +716,9 @@ export const SettingsManager = () => {
 
             {/* Format Integrity Audit */}
             <FormatIntegrityAudit />
+
+            {/* Workout Compliance Audit */}
+            <WorkoutComplianceAudit />
 
             {/* Stripe Product Cleanup */}
             <Card>
