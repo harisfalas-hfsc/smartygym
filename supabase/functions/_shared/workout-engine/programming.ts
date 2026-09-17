@@ -752,6 +752,9 @@ export function planPrompt(plan: SessionPlan): string {
       : `- TIME MATH: ${plan.minutes} min of advertised work counts 💪 + ⚡ only. Before writing, add up the cost of every 💪 and ⚡ line: the total must land between ${Math.max(4, plan.minutes - 4)} and ${plan.minutes + 3} minutes. Below that, add rounds, sets or one more exercise; above it, cut rounds, sets or rest.
 - ROUNDS MULTIPLY: a declared "N rounds" repeats every line in the block N times, and a declared AMRAP/EMOM/cap window costs that whole window. Count that multiplication in your arithmetic — ${plan.minutes} min means, for example, 5 stations × 45 sec work + 15 sec rest × ${Math.max(2, Math.round((plan.minutes * 60) / (5 * 60)))} rounds, not 5 stations repeated until the clock happens to fill. Never declare a window longer than ${plan.minutes} min.
 - PREP BUDGET: 🧽 under 3 min, 🔥 under ${Math.max(3, Math.min(6, Math.round(plan.minutes / 5)))} min and 🧘 under 5 min. The whole session (prep + training + cool down) must stay close to ${plan.minutes} min plus that short allowance — an over-long session is rejected exactly like a short one.`,
+    !lifting
+      ? `- ROUND COUNT: with ${plan.mainCount[0]} stations in 💪, declare about ${Math.max(2, Math.min(8, Math.round((plan.minutes * 60 * 0.8) / (Math.max(3, plan.mainCount[0]) * 60))))} rounds (or an equivalent window) — that is what fills ${plan.minutes} min. More rounds than that is an over-long session and is rejected.`
+      : ``,
     plan.activationCount > 0
       ? `- ACTIVATION REGION: the 🔥 drills must prepare the same region the 💪 Main Workout trains. Lower-body main work → mostly hip, glute, knee and ankle drills; upper-body main work → mostly shoulder, scapula, thoracic and arm drills; core-dominant main work → mostly trunk, pelvis and breathing drills; full-body → cover both hips and shoulders.`
       : ``,
