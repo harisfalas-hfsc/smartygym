@@ -337,11 +337,11 @@ Format: ${input.format}
 Duration: ${input.duration}${input.focus ? `\nFocus: ${input.focus}` : ""}
 ${
   input.note
-    ? `TODAY'S REQUEST FROM THE ATHLETE (highest priority after safety — obey it literally):
+    ? `TODAY'S REQUEST FROM THE ATHLETE (obey it literally — but it ranks BELOW safety and BELOW the category, per the DECISION ORDER):
 "${input.note}"
 - Anything they asked to avoid is already removed from your vocabulary; never write it or a close variation.
-- Anything they said they prefer must appear in 💪 Main Workout or ⚡ Finisher when the category, focus and equipment allow it, without turning the whole session into that one thing.
-- Anything else they asked for (pace, feel, a body part, less jumping, more core) must be visibly reflected in the session.`
+- Anything they said they prefer must appear in 💪 Main Workout or ⚡ Finisher ONLY when it genuinely belongs in today's category, focus and equipment — otherwise ignore it silently and program the category correctly. Never turn the whole session into that one thing.
+- Anything else they asked for (pace, feel, a body part, less jumping, more core) must be visibly reflected in the session, within the category's rules.`
     : ""
 }
 
