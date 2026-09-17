@@ -721,6 +721,9 @@ export const SettingsManager = () => {
             {/* Workout Compliance Audit */}
             <WorkoutComplianceAudit />
 
+            {/* Workout Library Repair */}
+            <WorkoutRepairPanel />
+
             {/* Stripe Product Cleanup */}
             <Card>
               <CardHeader>
