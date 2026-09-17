@@ -324,11 +324,13 @@ const WorkoutFlow = () => {
             <p className="font-bold text-foreground">
               <span className="text-primary font-semibold">Smarty Workouts</span> are single-session training routines designed to fit your lifestyle and goals. Whether you're targeting strength, calorie burning, metabolic conditioning, cardio endurance, mobility & stability, or looking for a challenge — we have you covered. At the gym, at home, or on the go — <span className="text-primary font-semibold">Smarty Workouts</span> deliver results in any setting.
             </p>
-            {!freeAccessMode && (
-              <p className="font-semibold text-foreground">
-                Unlock all <span className="text-primary font-bold">{totalWorkoutCount} workouts</span> with a Premium plan or grab one standalone session whenever you need it.
-              </p>
-            )}
+            <p className="font-semibold text-foreground">
+              {freeAccessMode ? (
+                <>Browse all <span className="text-primary font-bold">{totalWorkoutCount} workouts</span> — everything is currently free to access.</>
+              ) : (
+                <>Unlock all <span className="text-primary font-bold">{totalWorkoutCount} workouts</span> with a Premium plan or grab one standalone session whenever you need it.</>
+              )}
+            </p>
             <p className="text-sm">
               (Our coach, <Link to="/coach-profile" className="text-primary font-semibold hover:underline">Haris Falas</Link>, suggests following the <span className="text-primary font-semibold">WOD</span> for science-based periodization, ensuring safety and optimal results)
             </p>
@@ -341,7 +343,7 @@ const WorkoutFlow = () => {
                 {isMobile ? (
                   <>
                     <p className="text-sm text-center">
-                      <span className="text-primary font-semibold">Smarty Workouts</span> are single-session routines for any goal.{!freeAccessMode && <> Unlock all <span className="text-primary font-bold">{totalWorkoutCount}</span> with Premium or grab one standalone.</>}
+                      <span className="text-primary font-semibold">Smarty Workouts</span> are single-session routines for any goal. {freeAccessMode ? <>Browse all <span className="text-primary font-bold">{totalWorkoutCount}</span> — everything is currently free.</> : <>Unlock all <span className="text-primary font-bold">{totalWorkoutCount}</span> with Premium or grab one standalone.</>}
                     </p>
                   </>
                 ) : (
@@ -350,11 +352,13 @@ const WorkoutFlow = () => {
                       <span className="text-primary font-semibold">Smarty Workouts</span> are single-session training routines designed to fit your lifestyle and goals. Whether you're targeting strength, calorie burning, metabolic conditioning, cardio endurance, mobility & stability, or looking for a challenge — we have you covered. At the gym, at home, or on the go — <span className="text-primary font-semibold">Smarty Workouts</span> deliver results in any setting.
                     </p>
                     
-                    {!freeAccessMode && (
-                      <p className="text-sm sm:text-base font-semibold text-foreground text-center mt-6">
-                        Unlock all <span className="text-primary font-bold">{totalWorkoutCount} workouts</span> with a Premium plan or grab one standalone session whenever you need it.
-                      </p>
-                    )}
+                    <p className="text-sm sm:text-base font-semibold text-foreground text-center mt-6">
+                      {freeAccessMode ? (
+                        <>Browse all <span className="text-primary font-bold">{totalWorkoutCount} workouts</span> — everything is currently free to access.</>
+                      ) : (
+                        <>Unlock all <span className="text-primary font-bold">{totalWorkoutCount} workouts</span> with a Premium plan or grab one standalone session whenever you need it.</>
+                      )}
+                    </p>
                     
                     <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                       (Our coach, <Link to="/coach-profile" className="text-primary font-semibold hover:underline">Haris Falas</Link>, suggests following the <span className="text-primary font-semibold">WOD</span> for science-based periodization, ensuring safety and optimal results)
