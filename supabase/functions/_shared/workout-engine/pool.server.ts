@@ -362,10 +362,19 @@ function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   if (isMicro) pool = pool.filter((e) => isBodyweight(e) && !microExerciseViolation(e));
 
 
-  // 2. Exact equipment allowlist. Never widen a user's choices to all equipment.
+  // 2. Equipment allowlist. The athlete's apparatus choices are never widened to
+  //    apparatus they do not own. Their own bodyweight, however, is always with
+  //    them, so bodyweight vocabulary stays legal ALONGSIDE the chosen kit for
+  //    every category except the load-dependent ones (STRENGTH / MUSCLE
+  //    BUILDING), where progressive external resistance is the stimulus.
   if (!isMicro) {
+    const loadDependent = f.category === "STRENGTH" || f.category === "MUSCLE BUILDING";
+    const withBodyweight =
+      !loadDependent && f.equipmentMode !== "BODYWEIGHT"
+        ? [...new Set([...f.selectedEquipment, "bodyweight"])]
+        : f.selectedEquipment;
     pool = pool.filter((e) =>
-      matchesSelectedEquipment(e, f.selectedEquipment, f.customEquipment ?? []),
+      matchesSelectedEquipment(e, withBodyweight, f.customEquipment ?? []),
     );
     if (f.equipmentMode === "BODYWEIGHT")
       pool = pool.filter((e) => isBodyweight(e) && !HOME_APPARATUS_RE.test(text(e)));
