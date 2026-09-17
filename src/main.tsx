@@ -67,7 +67,7 @@ const hideBootSplash = async () => {
     window.setTimeout(() => splash.remove(), 400);
   }
 
-  if (Capacitor.isNativePlatform()) {
+  if (isNativePlatform()) {
     try {
       await SplashScreen.hide({ fadeOutDuration: 180 });
     } catch {
