@@ -302,6 +302,10 @@ export async function generateWorkoutContent(
       );
     } catch (err) {
       lastError = err instanceof Error ? err.message : "model call failed";
+      // 400/401/402/403 are terminal per the gateway contract — repeating the
+      // call returns the same error and only multiplies the wait. Go straight
+      // to the deterministic fallback instead of burning two more attempts.
+      if (/AI gateway (400|401|402|403)/.test(lastError)) break;
       continue;
     }
 
