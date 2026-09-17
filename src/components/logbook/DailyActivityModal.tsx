@@ -284,39 +284,6 @@ export const DailyActivityModal = ({ date, isOpen, onClose, userId }: DailyActiv
                   </div>
                 )}
 
-                {/* Personal Training Section */}
-                {personalTraining.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <User className="h-4 w-4 text-orange-500" />
-                      Personal Training ({personalTraining.length})
-                    </h3>
-                    <div className="space-y-2">
-                      {personalTraining.map(activity => (
-                        <Card key={activity.id}>
-                          <CardContent className="p-3">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="font-medium">{activity.item_name}</p>
-                                {activity.program_week && activity.program_day && (
-                                  <p className="text-sm text-muted-foreground">
-                                    Week {activity.program_week}, Day {activity.program_day}
-                                  </p>
-                                )}
-                                <p className="text-xs text-muted-foreground">
-                                  {format(new Date(activity.created_at), 'h:mm a')}
-                                </p>
-                              </div>
-                              <Badge variant={getBadgeVariant(activity.action_type)}>
-                                {getActionLabel(activity.action_type)}
-                              </Badge>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 {/* Tools Section */}
                 {tools.length > 0 && (
