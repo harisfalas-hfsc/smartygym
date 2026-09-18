@@ -506,7 +506,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/cardio/cardio-tempo-circuit.html</loc>
-    <lastmod>2026-09-11</lastmod>
+    <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -561,12 +561,6 @@
   <url>
     <loc>https://smartygym.com/workout/strength/foundation-full-body-builder.html</loc>
     <lastmod>2026-06-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://smartygym.com/workout/metabolic/engine-builder-max.html</loc>
-    <lastmod>2026-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1381,12 +1375,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://smartygym.com/workout/mobility/flow-and-restore.html</loc>
-    <lastmod>2026-06-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://smartygym.com/workout/strength/bodyweight-force.html</loc>
     <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
@@ -1567,6 +1555,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://smartygym.com/workout/mobility/flow-and-restore.html</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://smartygym.com/workout/pilates/align-and-anchor.html</loc>
     <lastmod>2026-08-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -1587,6 +1581,12 @@
   <url>
     <loc>https://smartygym.com/workout/strength/axial-synthesis.html</loc>
     <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://smartygym.com/workout/metabolic/engine-builder-max.html</loc>
+    <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2126,7 +2126,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/mobility/granite-cadence-lock.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2918,7 +2918,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/metabolic/engine-drive-catalyst-shift.html</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2960,7 +2960,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/cardio/endurance-flow.html</loc>
-    <lastmod>2026-09-11</lastmod>
+    <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3032,7 +3032,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/cardio/bodyweight-cardio-session.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
