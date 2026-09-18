@@ -170,7 +170,7 @@ export const ScheduledListPanel = ({ userId }: { userId: string }) => {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-            ))}
+            );})}
           </div>
         )}
       </CardContent>
