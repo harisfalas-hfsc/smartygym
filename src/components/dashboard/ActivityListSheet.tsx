@@ -54,6 +54,14 @@ const matchesFilter = (item: ActivityItem, filter: ActivityFilter) => {
   }
 };
 
+const isPastScheduledDate = (scheduledDate?: string | null) => {
+  if (!scheduledDate) return false;
+  const scheduled = new Date(`${scheduledDate}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return scheduled < today;
+};
+
 export function ActivityListSheet({
   open,
   onOpenChange,
@@ -146,16 +154,22 @@ export function ActivityListSheet({
             </p>
           ) : (
             <div className="space-y-2">
-              {visible.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    onItemClick(item);
-                    onOpenChange(false);
-                  }}
-                  className="w-full text-left p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors min-h-[44px]"
-                >
+              {visible.map((item) => {
+                const isMissed = item.is_scheduled && isPastScheduledDate(item.scheduled_date);
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      onItemClick(item);
+                      onOpenChange(false);
+                    }}
+                    className={`w-full text-left p-3 rounded-lg transition-colors min-h-[44px] border ${
+                      isMissed
+                        ? "bg-destructive/10 border-destructive/30 hover:bg-destructive/15"
+                        : "bg-muted border-transparent hover:bg-muted/80"
+                    }`}
+                  >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm line-clamp-2 break-words">{item.name}</p>
@@ -168,11 +182,12 @@ export function ActivityListSheet({
                           </span>
                         ) : null}
                         {item.is_scheduled && item.scheduled_date ? (
-                          <span className="inline-flex items-center gap-1 text-xs text-purple-500">
+                          <span className={`inline-flex items-center gap-1 text-xs ${isMissed ? "text-destructive" : "text-purple-500"}`}>
                             <CalendarClock className="h-3 w-3" />
-                            {new Date(item.scheduled_date).toLocaleDateString()}
+                            {new Date(`${item.scheduled_date}T00:00:00`).toLocaleDateString()}
                           </span>
                         ) : null}
+                        {isMissed ? <Badge variant="destructive" className="text-[10px]">Missed</Badge> : null}
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
@@ -180,8 +195,9 @@ export function ActivityListSheet({
                       {item.is_favorite && <Heart className="h-4 w-4 fill-red-500 text-red-500" />}
                     </div>
                   </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
