@@ -164,11 +164,7 @@ export function ActivityListSheet({
                       onItemClick(item);
                       onOpenChange(false);
                     }}
-                    className={`w-full text-left p-3 rounded-lg transition-colors min-h-[44px] border ${
-                      isMissed
-                        ? "bg-destructive/10 border-destructive/30 hover:bg-destructive/15"
-                        : "bg-muted border-transparent hover:bg-muted/80"
-                    }`}
+                    className="w-full text-left p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors min-h-[44px]"
                   >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -182,7 +178,7 @@ export function ActivityListSheet({
                           </span>
                         ) : null}
                         {item.is_scheduled && item.scheduled_date ? (
-                          <span className={`inline-flex items-center gap-1 text-xs ${isMissed ? "text-destructive" : "text-purple-500"}`}>
+                          <span className="inline-flex items-center gap-1 text-xs text-purple-500">
                             <CalendarClock className="h-3 w-3" />
                             {new Date(`${item.scheduled_date}T00:00:00`).toLocaleDateString()}
                           </span>

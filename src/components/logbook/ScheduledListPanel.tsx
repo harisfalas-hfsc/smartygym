@@ -129,11 +129,7 @@ export const ScheduledListPanel = ({ userId }: { userId: string }) => {
               return (
               <div
                 key={s.id}
-                className={
-                  isMissed
-                    ? "flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30"
-                    : "flex items-center gap-2 p-3 rounded-lg bg-muted"
-                }
+                className="flex items-center gap-2 p-3 rounded-lg bg-muted"
               >
                 <button
                   type="button"
@@ -148,7 +144,7 @@ export const ScheduledListPanel = ({ userId }: { userId: string }) => {
                       </Badge>
                     )}
                   </p>
-                  <p className={`text-xs mt-0.5 ${isMissed ? "text-destructive" : "text-muted-foreground"}`}>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {new Date(`${s.scheduled_date}T00:00:00`).toLocaleDateString(undefined, {
                       weekday: "short",
                       day: "numeric",
