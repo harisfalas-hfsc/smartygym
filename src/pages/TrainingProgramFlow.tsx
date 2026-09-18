@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { PageBreadcrumbs } from "@/components/PageBreadcrumbs";
 import { DesktopPageIntro } from "@/components/DesktopPageIntro";
 import { InfoRibbon } from "@/components/InfoRibbon";
-import { Heart, Dumbbell, Activity, Flame, User, Move, Scale } from "lucide-react";
+import { Heart, Dumbbell, Activity, Flame, User, Move, Scale, Star } from "lucide-react";
 import { SEOEnhancer } from "@/components/SEOEnhancer";
 import { generateBreadcrumbSchema } from "@/utils/seoHelpers";
 import { useAccessControl } from "@/hooks/useAccessControl";
@@ -185,13 +185,13 @@ const TrainingProgramFlow = () => {
         type="button"
         onClick={() => navigate(`/trainingprogram/${slug}/${program.id}`)}
         className={cn(
-          "group flex h-[88px] items-stretch overflow-hidden rounded-xl bg-card text-left transition-all duration-300",
+          "group flex items-stretch overflow-hidden rounded-xl bg-card text-left transition-all duration-300",
           isDesktop
-            ? "border border-border hover:border-green-400 hover:shadow-lg"
-            : "border-2 border-primary/40 hover:border-primary hover:shadow-xl"
+            ? "border-2 border-green-500/60 hover:border-green-500 hover:shadow-lg"
+            : "h-[88px] border-2 border-primary/40 hover:border-primary hover:shadow-xl"
         )}
       >
-        <div className="relative h-full w-28 flex-shrink-0 overflow-hidden bg-muted">
+        <div className={cn("relative flex-shrink-0 overflow-hidden bg-muted", isDesktop ? "w-16" : "h-full w-28")}>
           <img
             src={image}
             alt={program.name}
@@ -199,16 +199,16 @@ const TrainingProgramFlow = () => {
             className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
           />
         </div>
-        <div className="flex min-w-0 flex-1 flex-col justify-center p-3">
+        <div className={cn("flex min-w-0 flex-1 flex-col justify-center", isDesktop ? "p-2" : "p-3")}>
           <span className={cn(
             "text-[10px] font-semibold uppercase tracking-wider",
-            isDesktop ? "text-green-400" : "text-primary"
+            "text-primary"
           )}>
             {program.category}
           </span>
-          <h3 className="mt-0.5 line-clamp-2 text-sm font-bold leading-tight text-foreground">{program.name}</h3>
+          <h3 className={cn("mt-0.5 font-bold leading-tight text-foreground", isDesktop ? "line-clamp-1 text-xs" : "line-clamp-2 text-sm")}>{program.name}</h3>
           {(program.weeks || program.difficulty) && (
-            <p className="mt-1 line-clamp-1 text-[11px] text-muted-foreground">
+            <p className={cn("line-clamp-1 text-muted-foreground", isDesktop ? "mt-0.5 text-[10px]" : "mt-1 text-[11px]")}>
               {[program.weeks ? `${program.weeks} weeks` : null, program.difficulty].filter(Boolean).join(" · ")}
             </p>
           )}
@@ -508,15 +508,20 @@ const TrainingProgramFlow = () => {
         {/* Desktop: Featured Training Programs (latest 3) — below the category grid */}
         {latestPrograms.length > 0 && (
           <div className="hidden lg:block mt-8">
-            <div className="rounded-xl border-2 border-green-500/60 bg-green-500/[0.05] p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-sm font-extrabold tracking-tight text-green-400 uppercase">Featured Training Programs</span>
-                <div className="h-px flex-1 bg-green-500/30" />
+            <Card className="overflow-hidden border-2 border-border bg-card transition-all duration-500 ease-out">
+              <div className="flex flex-col items-center space-y-3 p-5 text-center">
+                <div className="relative flex h-14 w-14 items-center justify-center rounded-full" aria-hidden="true">
+                  <div className="pointer-events-none absolute inset-0 rounded-full bg-primary/10" aria-hidden="true" />
+                  <Star className="relative h-7 w-7 text-primary" />
+                </div>
+                <div className="w-full">
+                  <h3 className="mb-3 text-lg font-semibold text-foreground">Featured Training Programs</h3>
+                  <div className="grid grid-cols-3 items-stretch gap-2">
+                    {latestPrograms.slice(0, 3).map((p) => renderFeaturedProgramCard(p, "desktop"))}
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-3 items-stretch gap-4">
-                {latestPrograms.slice(0, 3).map((p) => renderFeaturedProgramCard(p, "desktop"))}
-              </div>
-            </div>
+            </Card>
           </div>
         )}
 
