@@ -35,6 +35,7 @@ import {
   cooldownOverflowViolation,
   sessionOverflowViolation,
   sessionBudgetViolation,
+  workSlotPrepViolation,
 } from "./doctrine.ts";
 
 import {
