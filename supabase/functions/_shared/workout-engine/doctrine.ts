@@ -154,9 +154,9 @@ const MICRO_BAN_RE =
  * moving without lying on a bench, hanging from a bar or setting up a station.
  */
 const CALORIE_BURNING_MOVEMENT_RE =
-  /\b(run|jog|walk|march|bike|cycle|row|ski ?erg|elliptical|stepper|stair|jump rope|skip|shuttle|sprint|battle rope|burpee|jumping jack|high knee|skater|mountain climber|bear crawl|crab walk|squat|lunge|step-?up|carry|swing|thruster|slam|wall ball|push-?up|plank jack|toe tap)\b/i;
+  /\b(run|jog|walk|march|bike|cycle|row|ski ?erg|elliptical|stepper|stair|jump rope|skip|shuttle|sprint|battle rope|burpee|jumping jack|high knee|skater|mountain climber|bear crawl|crab walk|squat|lunge|step-?up|carry|swing|thruster|slam|wall ball|push-?up|push up|plank jack|toe tap|deadlift|romanian|clean|push press)\b/i;
 const CALORIE_BURNING_SETUP_RE =
-  /\b(lie|lying|lay|flat on (?:a |the )?bench|on (?:a |the )?bench|hang from|hanging|pull-?up bar|dip station|parallel bars|preacher|chest-supported|incline bench|decline bench)\b/i;
+  /\b(flat on (?:a |the )?bench|on (?:a |the )?bench|hang from|hanging|pull-?up bar|dip station|parallel bars|preacher|chest-supported|incline bench|decline bench)\b/i;
 const CALORIE_BURNING_ISOLATION_RE =
   /\b(curl|extension|lateral raise|front raise|fly|pullover|pull-over|shrug|kickback|skull crusher|triceps|biceps|calf raise|wrist|neck)\b/i;
 
@@ -166,6 +166,7 @@ const CALORIE_BURNING_ISOLATION_RE =
  */
 export function categoryExerciseViolation(e: ExerciseLike, category: Category): string | null {
   const t = textOf(e);
+  const name = e.name.toLowerCase();
   if (category === "CHALLENGE" && STRETCH_RE.test(t))
     return `"${e.name}" is stretching or mobility work, which is not Challenge main work.`;
   if (category === "PILATES" && PILATES_BAN_RE.test(t))
@@ -179,9 +180,9 @@ export function categoryExerciseViolation(e: ExerciseLike, category: Category): 
   if (category === "CALORIE BURNING") {
     if (CALORIE_BURNING_SETUP_RE.test(t))
       return `"${e.name}" requires a bench, hanging position or setup change, which breaks continuous movement in Calorie Burning.`;
-    if (CALORIE_BURNING_ISOLATION_RE.test(t))
+    if (CALORIE_BURNING_ISOLATION_RE.test(name))
       return `"${e.name}" is isolated strength work, not a continuous Calorie Burning movement.`;
-    if (!CALORIE_BURNING_MOVEMENT_RE.test(t))
+    if (!CALORIE_BURNING_MOVEMENT_RE.test(name))
       return `"${e.name}" is not a simple, continuously repeatable Calorie Burning movement.`;
   }
   return null;
