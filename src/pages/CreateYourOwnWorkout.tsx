@@ -641,23 +641,6 @@ const CreateYourOwnWorkout = () => {
               </Chip>
             ))}
           </Grid>
-          {equipment.includes("other") ? (
-            <div className="mt-3">
-              <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
-                What else do you have? Separate with commas.
-              </label>
-              <Textarea
-                value={otherEquipment}
-                onChange={(e) => setOtherEquipment(e.target.value)}
-                placeholder="e.g. sandbag, medicine ball, stability ball, rope"
-                rows={2}
-                className="rounded-2xl"
-              />
-              <p className="mt-1.5 text-xs text-muted-foreground">
-                Smarty Coach only uses it if a matching exercise exists in the library.
-              </p>
-            </div>
-          ) : null}
         </QuestionCard>
 
         <QuestionCard
