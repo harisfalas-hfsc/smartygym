@@ -17,6 +17,7 @@ import {
   equipmentFamilyViolation,
   focusViolation,
   humanRealismViolation,
+  isRepsAndSetsOnly,
   microExerciseViolation,
   sequenceViolation,
   sessionOverflowViolation,
