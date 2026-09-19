@@ -283,6 +283,7 @@ EQUIPMENT IS AVAILABLE, NEVER MANDATORY
 - The equipment list says what the athlete HAS today, not what the session must contain. Owning a full gym does not put a machine in a Recovery or Pilates session; owning kettlebells does not force kettlebells into a Cardio session.
 - Use apparatus only where it genuinely serves the category. A Cardio session may carry two or three loaded movements at most and stay aerobic and repeatable; Pilates, Recovery and Mobility sessions stay with their own modalities whatever the athlete owns.
 - The athlete always has their own bodyweight, so bodyweight movements are fully legitimate alongside the chosen kit in every category except Strength and Muscle Building, where external load is the stimulus.
+- CARDIO / METABOLIC / CALORIE BURNING / CHALLENGE: bodyweight staples are the backbone of the session (squats, lunges, push-ups, burpees, high knees, skipping, running, mountain climbers, jumping variations). Ticking dumbbells or kettlebells does NOT mean every movement carries load — use light implements only where they genuinely add to continuous work (swings, cleans, thrusters, standing presses, carries, slams), typically a minority of the movements. Gym machines, cables, racks, benches and fixed stations are ILLEGAL in these categories even when the athlete selected a full gym.
 - What is NEVER allowed is the opposite direction: apparatus that is not on the list, in any section.
 
 PREFERENCES NEVER OVERRIDE THE CATEGORY
