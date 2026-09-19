@@ -1,4 +1,5 @@
 ## Active tasks
+- [x] Read-only reliability review of Admin workout creation and member Create Your Own Workout; no live generations or AI-credit use
 - [x] Diagnose why category-incompatible exercises passed generation and compliance checks
 - [x] Harden Calorie Burning so only simple, continuous, low-setup movements pass
 - [x] Repair every workout exposed by the full category and section-aware re-audit
