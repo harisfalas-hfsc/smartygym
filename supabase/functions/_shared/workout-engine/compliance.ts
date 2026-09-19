@@ -233,7 +233,10 @@ export function auditWorkout(
       const fv = focusViolation(libRow, focus);
       if (fv) err("FOCUS_MISMATCH", `"${libRow.name}" does not train the ${focus} focus.`, section);
     }
-    if (!matchesCategoryPool(libRow.name, category)) {
+    if (
+      ["PILATES", "RECOVERY", "MOBILITY & STABILITY"].includes(category) &&
+      !matchesCategoryPool(libRow.name, category)
+    ) {
       err("OUT_OF_POOL", `"${libRow.name}" sits outside the approved ${category} pool.`, section);
     }
   }

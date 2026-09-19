@@ -171,7 +171,10 @@ export function validateWorkout(html: string, opts: ValidateOptions): Validation
       //     Challenge) — one shared definition with the pool filter.
       const cat = categoryExerciseViolation(row, opts.category);
       if (cat) errors.push(cat);
-      if (!matchesCategoryPool(row.name, opts.category)) {
+      if (
+        ["PILATES", "RECOVERY", "MOBILITY & STABILITY"].includes(opts.category) &&
+        !matchesCategoryPool(row.name, opts.category)
+      ) {
         errors.push(`"${row.name}" is outside the approved ${opts.category} exercise pool.`);
       }
       if (opts.category === "MICRO-WORKOUTS" && microExerciseViolation(row)) {

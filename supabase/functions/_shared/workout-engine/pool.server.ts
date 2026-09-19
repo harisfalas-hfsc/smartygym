@@ -9,6 +9,7 @@ import {
   focusViolation,
   microExerciseViolation,
   regionOf,
+  AEROBIC_RE,
   HIGH_FATIGUE_CONDITIONING_RE,
   HIGH_IMPACT_RE,
   HOME_APPARATUS_RE,
@@ -385,11 +386,12 @@ function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   //    applied before anything else.
   pool = pool.filter((e) => !categoryExerciseViolation(e, f.category));
 
-  // Category fit is mandatory. The semantic reference pools are broad enough
-  // to recognise normal library wording, but an exercise from another training
-  // discipline must never be offered merely because no name-level ban caught
-  // it (for example chin-ups or chest dips in Pilates).
-  pool = pool.filter((e) => matchesCategoryPool(e.name, f.category));
+  // These disciplines have exclusive movement vocabularies. Other categories
+  // legitimately combine bodyweight, free-weight and machine families, so the
+  // reference list remains an ordering preference for them.
+  if (["PILATES", "RECOVERY", "MOBILITY & STABILITY"].includes(f.category)) {
+    pool = pool.filter((e) => matchesCategoryPool(e.name, f.category));
+  }
 
   // MICRO WORKOUT: hard equipment-free rule. Bodyweight and everyday indoor
   // environment only (floor, wall, chair, desk, sofa) — never training
@@ -441,10 +443,8 @@ function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   //     legal but never dominant: the pool keeps a small minority of it so the
   //     session is built from repeatable aerobic work.
   if (f.category === "CARDIO") {
-    const hot = pool.filter((e) => HIGH_FATIGUE_CONDITIONING_RE.test(e.name));
-    const rest = pool.filter((e) => !HIGH_FATIGUE_CONDITIONING_RE.test(e.name));
-    if (rest.length >= 12)
-      pool = [...rest, ...hot.slice(0, Math.max(1, Math.ceil(rest.length * 0.05)))];
+    const aerobic = pool.filter((e) => AEROBIC_RE.test(`${e.name} ${e.equipment ?? ""}`));
+    if (aerobic.length >= 12) pool = aerobic;
   }
 
   // 4. Static-hold guardrail for momentum / conditioning categories.
