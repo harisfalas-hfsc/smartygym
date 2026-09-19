@@ -20,7 +20,7 @@ export type ExerciseLike = {
 };
 
 const textOf = (e: ExerciseLike) =>
-  `${e.name} ${e.target_muscle ?? ""} ${e.body_part ?? ""} ${e.equipment ?? ""} ${e.description ?? ""} ${(e.instructions ?? []).join(" ")}`.toLowerCase();
+  `${e.name} ${e.target_muscle ?? ""} ${e.body_part ?? ""} ${e.equipment ?? ""}`.toLowerCase();
 
 
 // --- 2. Category doctrine ---------------------------------------------------
@@ -178,7 +178,8 @@ export function categoryExerciseViolation(e: ExerciseLike, category: Category): 
   if (category === "MICRO-WORKOUTS" && (MICRO_BAN_RE.test(t) || HOME_APPARATUS_RE.test(t)))
     return `"${e.name}" needs equipment or a special setup, which a Micro Workout never uses.`;
   if (category === "CALORIE BURNING") {
-    if (CALORIE_BURNING_SETUP_RE.test(t))
+    const fullContext = `${t} ${e.description ?? ""} ${(e.instructions ?? []).join(" ")}`.toLowerCase();
+    if (CALORIE_BURNING_SETUP_RE.test(fullContext))
       return `"${e.name}" requires a bench, hanging position or setup change, which breaks continuous movement in Calorie Burning.`;
     if (CALORIE_BURNING_ISOLATION_RE.test(name))
       return `"${e.name}" is isolated strength work, not a continuous Calorie Burning movement.`;
