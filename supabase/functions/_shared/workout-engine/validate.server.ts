@@ -21,6 +21,7 @@ import {
   categoryFormatViolation,
   durationOverflowViolation,
   durationShortfallViolation,
+  finisherSizeViolation,
   dynamicExerciseViolation,
   equipmentFamilyViolation,
   focusViolation,
