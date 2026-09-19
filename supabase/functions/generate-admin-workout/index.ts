@@ -167,6 +167,7 @@ serve(async (req) => {
     log("Wizard request", {
       category,
       equipmentMode,
+      selectedEquipment,
       stars,
       minutes,
       format: requestedFormat,
