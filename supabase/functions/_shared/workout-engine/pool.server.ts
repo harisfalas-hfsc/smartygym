@@ -15,6 +15,7 @@ import {
   HOME_APPARATUS_RE,
   STATIC_HOLD_RE,
   STRETCH_RE,
+  workSlotPrepViolation,
   type BodyRegion,
 } from "./doctrine.ts";
 // ONE selection policy for the whole platform — see ../exercise-selection.ts
