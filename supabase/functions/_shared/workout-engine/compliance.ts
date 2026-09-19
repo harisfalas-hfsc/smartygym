@@ -330,6 +330,18 @@ export function auditWorkout(
     }
   }
 
+  // 4b. Finisher sizing — complementary, never a second main workout.
+  {
+    const plain = html.replace(/<[^>]+>/g, " ");
+    const finIdx = plain.indexOf("⚡");
+    if (finIdx !== -1) {
+      const coolIdx = plain.indexOf("🧘");
+      const body = plain.slice(finIdx, coolIdx === -1 ? plain.length : coolIdx);
+      const size = finisherSizeViolation(body);
+      if (size) err("FINISHER_OVERSIZED", size, "Finisher");
+    }
+  }
+
   // 5. Session-level doctrine.
   if (workRows.length && format) {
     const fam = equipmentFamilyViolation(workRows, category, format);
