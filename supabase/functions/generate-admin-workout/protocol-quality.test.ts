@@ -292,3 +292,23 @@ Deno.test("advertised duration is honoured within ten minutes in both directions
   assertEquals(durationShortfallViolation(32, 40), null);
   assertEquals(Boolean(durationShortfallViolation(25, 40)), true);
 });
+
+Deno.test("finisherSizeViolation: flags an oversized minute claim", () => {
+  const v = finisherSizeViolation("Set a 17-minute clock and repeat these intervals.");
+  if (!v) throw new Error("expected a violation for a 17-minute finisher");
+});
+
+Deno.test("finisherSizeViolation: flags too many rounds", () => {
+  const v = finisherSizeViolation("Complete 8 rounds of the three movements below.");
+  if (!v) throw new Error("expected a violation for 8 rounds");
+});
+
+Deno.test("finisherSizeViolation: accepts a short complementary finisher", () => {
+  const v = finisherSizeViolation("Set a 5-minute clock and complete 3 clean rounds.");
+  if (v) throw new Error("unexpected violation: " + v);
+});
+
+Deno.test("finisherSizeViolation: allows standard Tabata interval counts", () => {
+  const v = finisherSizeViolation("One 4-minute Tabata block: 8 rounds of 20 sec work / 10 sec rest.");
+  if (v) throw new Error("unexpected violation: " + v);
+});
