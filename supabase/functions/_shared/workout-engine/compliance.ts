@@ -220,14 +220,14 @@ export function auditWorkout(
           label,
         );
       }
-      const lines = body.split(/(?=\{\{exercise:)/).slice(1);
-      const unprescribed = lines.filter((line) => {
-        const tail = line.split("}}")[1] ?? "";
-        const head = line.slice(0, 0) + (body.slice(0, body.indexOf(line)) || "");
-        const context = line + tail;
-        return !/\d+\s*sets?\s*[x×]\s*\d+\s*reps?/i.test(context) &&
-          !/\d+\s*sets?\s*[x×]\s*\d+/i.test(context);
-      });
+      // The prescription is written BEFORE the token, so inspect the text that
+      // precedes each token occurrence.
+      const chunks = body.split(/\{\{exercise:/);
+      let unprescribed = 0;
+      for (let i = 1; i < chunks.length; i++) {
+        const before = chunks[i - 1]!.slice(-120);
+        if (!/\d+\s*sets?\s*[x×]\s*\d+/i.test(before)) unprescribed++;
+      }
       if (unprescribed.length) {
         err(
           "SECTION_MISSING_SETS_REPS",
