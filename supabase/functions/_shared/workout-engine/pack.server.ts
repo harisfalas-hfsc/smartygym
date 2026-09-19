@@ -415,8 +415,19 @@ export function buildPackWorkout(
   });
 
   if (finisherPicks.length) {
-    blocks.push(heading("⚡", "Finisher (For Time)"));
-    blocks.push(para("3 rounds for time. Move well, keep breathing, stop if form breaks."));
+    // The finisher protocol must obey the same category legality table as the
+    // main block: controlled categories (Strength, Muscle Building, …) never
+    // wear a clock-driven finisher.
+    const finisherFormat: Format = isRepsAndSetsOnly(input.category) ? "REPS & SETS" : "FOR TIME";
+    const label = finisherFormat === "REPS & SETS" ? "REPS &amp; SETS" : "For Time";
+    blocks.push(heading("⚡", `Finisher (${label})`));
+    blocks.push(
+      para(
+        finisherFormat === "REPS & SETS"
+          ? "3 sets of each exercise. Rest 60 sec between sets. Move well, keep breathing, stop if form breaks."
+          : "3 rounds for time. Move well, keep breathing, stop if form breaks.",
+      ),
+    );
     finisherPicks.forEach((e) => blocks.push(li(`12 reps ${token(e)}`)));
   }
 
