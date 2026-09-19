@@ -254,3 +254,41 @@ Deno.test("stretches and joint circles are never work-slot exercises outside the
   }
   assertEquals(workSlotPrepViolation({ name: "barbell back squat", equipment: "barbell" }, "STRENGTH"), null);
 });
+
+Deno.test("bar, dip-station and landing-dependent movements are illegal in conditioning and dynamic formats", () => {
+  const banned = [
+    { name: "gorilla chin", equipment: "body weight" },
+    { name: "chin-ups (narrow parallel grip)", equipment: "body weight" },
+    { name: "gironda sternum chin", equipment: "body weight" },
+    { name: "chest dip", equipment: "body weight" },
+    { name: "biceps narrow pull-ups", equipment: "body weight" },
+    { name: "hanging leg raise", equipment: "body weight" },
+    { name: "inverted row", equipment: "body weight" },
+    { name: "box jump down with one leg stabilization", equipment: "body weight" },
+  ];
+  for (const e of banned) {
+    for (const category of ["CARDIO", "METABOLIC", "CALORIE BURNING", "CHALLENGE"] as const) {
+      assertEquals(Boolean(categoryExerciseViolation(e, category)), true, `${e.name} / ${category}`);
+      assertEquals(Boolean(dynamicExerciseViolation(e, category, "AMRAP")), true, `${e.name} / AMRAP`);
+    }
+  }
+  // Standing dynamic work stays legal in the same formats.
+  for (const ok of [
+    { name: "kettlebell swing", equipment: "kettlebell" },
+    { name: "jump squat", equipment: "body weight" },
+    { name: "burpee", equipment: "body weight" },
+  ]) {
+    assertEquals(categoryExerciseViolation(ok, "METABOLIC"), null, ok.name);
+    assertEquals(dynamicExerciseViolation(ok, "METABOLIC", "AMRAP"), null, ok.name);
+  }
+});
+
+Deno.test("advertised duration is honoured within ten minutes in both directions", async () => {
+  const { durationOverflowViolation, durationShortfallViolation } = await import(
+    "../_shared/workout-engine/doctrine.ts"
+  );
+  assertEquals(durationOverflowViolation(45, 40), null);
+  assertEquals(Boolean(durationOverflowViolation(56, 40)), true);
+  assertEquals(durationShortfallViolation(32, 40), null);
+  assertEquals(Boolean(durationShortfallViolation(25, 40)), true);
+});
