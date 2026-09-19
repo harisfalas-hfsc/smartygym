@@ -276,7 +276,6 @@ const CreateYourOwnWorkout = () => {
       minutes: minutes ?? undefined,
       location,
       equipment: equipment.length ? equipment : ["bodyweight"],
-      equipmentOther: equipment.includes("other") ? otherEquipment.trim() : "",
       note: note.trim(),
       level: levelOverride ?? level,
     };
@@ -302,10 +301,7 @@ const CreateYourOwnWorkout = () => {
     if (!canGenerate) {
       toast({
         title: "Almost there",
-        description:
-          equipment.includes("other") && !otherEquipment.trim()
-            ? "Tell Smarty Coach what other equipment you have."
-            : "Please answer all required questions first.",
+        description: "Please answer all required questions first.",
         variant: "destructive",
       });
       return;
