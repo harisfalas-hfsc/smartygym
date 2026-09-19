@@ -228,10 +228,14 @@ export function auditWorkout(
       let unprescribed = 0;
       for (let i = 1; i < chunks.length; i++) {
         const before = chunks[i - 1]!.slice(-120);
-        const measurable =
-          /\d+\s*sets?\s*[x×]\s*\d+/i.test(before) ||
-          /\d+\s*reps?\b/i.test(before) ||
-          /\d+\s*(?:sec(?:onds?)?|min(?:utes?)?)\b/i.test(before);
+        const after = (chunks[i]!.split("}}")[1] ?? "").slice(0, 60);
+        const dose = (t: string) =>
+          /\d+\s*sets?\s*[x×]\s*\d+/i.test(t) ||
+          /\d+\s*[x×]\s*\d+/i.test(t) ||
+          /\d+\s*reps?\b/i.test(t) ||
+          /\d+\s*(?:sec(?:onds?)?|min(?:utes?)?|breaths?)\b/i.test(t);
+        const measurable = dose(before) || dose(after);
+
         if (!measurable) unprescribed++;
       }
       if (unprescribed) {
