@@ -428,7 +428,11 @@ export function dynamicExerciseViolation(
 
   if (SETUP_EQUIPMENT_RE.test(equipment))
     return `"${e.name}" uses ${e.equipment} — setup-dependent strength equipment is not legal in a ${format} ${category} session.`;
-  if (SETUP_MOVEMENT_RE.test(identity) || CALORIE_BURNING_SETUP_RE.test(`${identity} ${context}`))
+  if (
+    SETUP_MOVEMENT_RE.test(identity) ||
+    CALORIE_BURNING_SETUP_RE.test(`${identity} ${context}`) ||
+    (!STANDING_EXEMPT_RE.test(name) && FIXED_POSITION_SETUP_RE.test(name))
+  )
     return `"${e.name}" is a setup-, rack-, bench- or spotter-dependent movement and cannot be repeated inside a ${format}.`;
   if (MACHINE_STRENGTH_RE.test(identity))
     return `"${e.name}" is machine strength work, which is not legal in a ${format} ${category} session.`;
