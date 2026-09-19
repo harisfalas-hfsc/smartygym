@@ -5,6 +5,7 @@
 import type { PoolExercise } from "./pool.server.ts";
 import { pickPrep, STRETCH_RE } from "./pool.server.ts";
 import {
+  categoryAllowsFinisher,
   dominantRegion,
   equipmentFamilyLimit,
   equipmentFamilyOf,
@@ -238,8 +239,9 @@ export function buildPackWorkout(
 ): PackResult {
   const isMicro = input.category === "MICRO-WORKOUTS";
   const isRecovery = input.category === "RECOVERY";
-  // HARD RULE: Micro Workout and Pilates never get a finisher.
-  const noFinisher = isMicro || isRecovery || input.category === "PILATES";
+  // The shared doctrine is the sole authority for categories without a
+  // finisher (Pilates, Mobility & Stability, Recovery and Micro Workouts).
+  const noFinisher = !categoryAllowsFinisher(input.category);
   const favouriteIds = input.favoriteIds ?? [];
   const used = new Set<string>();
 

@@ -19,6 +19,7 @@ import {
 // ONE selection policy for the whole platform — see ../exercise-selection.ts
 import {
   isSelectable,
+  matchesCategoryPool,
   orderBySelectionPolicy,
   selectionTier,
 } from "../exercise-selection.ts";
@@ -383,6 +384,12 @@ function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   // 1. Category vocabulary legality (doctrine §3/§7/§8/§14) — one definition,
   //    applied before anything else.
   pool = pool.filter((e) => !categoryExerciseViolation(e, f.category));
+
+  // Category fit is mandatory. The semantic reference pools are broad enough
+  // to recognise normal library wording, but an exercise from another training
+  // discipline must never be offered merely because no name-level ban caught
+  // it (for example chin-ups or chest dips in Pilates).
+  pool = pool.filter((e) => matchesCategoryPool(e.name, f.category));
 
   // MICRO WORKOUT: hard equipment-free rule. Bodyweight and everyday indoor
   // environment only (floor, wall, chair, desk, sofa) — never training

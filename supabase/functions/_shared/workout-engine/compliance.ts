@@ -234,7 +234,7 @@ export function auditWorkout(
       if (fv) err("FOCUS_MISMATCH", `"${libRow.name}" does not train the ${focus} focus.`, section);
     }
     if (!matchesCategoryPool(libRow.name, category)) {
-      warn("OUT_OF_POOL", `"${libRow.name}" sits outside the preferred ${category} pool.`, section);
+      err("OUT_OF_POOL", `"${libRow.name}" sits outside the approved ${category} pool.`, section);
     }
   }
 
