@@ -156,7 +156,7 @@ const MICRO_BAN_RE =
 const CALORIE_BURNING_MOVEMENT_RE =
   /\b(run|jog|walk|march|bike|cycle|row|ski ?erg|elliptical|stepper|stair|jump rope|skip|shuttle|sprint|battle rope|burpee|jumping jack|high knee|skater|mountain climber|bear crawl|crab walk|squat|lunge|step-?up|carry|swing|thruster|slam|wall ball|push-?up|plank jack|toe tap)\b/i;
 const CALORIE_BURNING_SETUP_RE =
-  /\b(lie|lying|lay|flat on (?:a |the )?bench|on (?:a |the )?bench|seated|sit on|hang from|hanging|pull-?up bar|dip station|parallel bars|preacher|chest-supported|incline bench|decline bench)\b/i;
+  /\b(lie|lying|lay|flat on (?:a |the )?bench|on (?:a |the )?bench|hang from|hanging|pull-?up bar|dip station|parallel bars|preacher|chest-supported|incline bench|decline bench)\b/i;
 const CALORIE_BURNING_ISOLATION_RE =
   /\b(curl|extension|lateral raise|front raise|fly|pullover|pull-over|shrug|kickback|skull crusher|triceps|biceps|calf raise|wrist|neck)\b/i;
 
