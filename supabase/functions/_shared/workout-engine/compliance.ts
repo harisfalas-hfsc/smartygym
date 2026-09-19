@@ -222,20 +222,26 @@ export function auditWorkout(
         );
       }
       // The prescription is written BEFORE the token, so inspect the text that
-      // precedes each token occurrence.
+      // precedes each token occurrence. Sets × reps is the norm; a plain rep
+      // count or a timed hold (mobility, micro-workouts) is equally measurable.
       const chunks = body.split(/\{\{exercise:/);
       let unprescribed = 0;
       for (let i = 1; i < chunks.length; i++) {
         const before = chunks[i - 1]!.slice(-120);
-        if (!/\d+\s*sets?\s*[x×]\s*\d+/i.test(before)) unprescribed++;
+        const measurable =
+          /\d+\s*sets?\s*[x×]\s*\d+/i.test(before) ||
+          /\d+\s*reps?\b/i.test(before) ||
+          /\d+\s*(?:sec(?:onds?)?|min(?:utes?)?)\b/i.test(before);
+        if (!measurable) unprescribed++;
       }
       if (unprescribed) {
         err(
           "SECTION_MISSING_SETS_REPS",
-          `${label} has ${unprescribed} exercise line(s) without an explicit "N sets × M reps" prescription.`,
+          `${label} has ${unprescribed} exercise line(s) without a measurable prescription (sets × reps, reps, or a timed hold).`,
           label,
         );
       }
+
     }
   }
 
