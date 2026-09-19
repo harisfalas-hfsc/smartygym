@@ -18,7 +18,13 @@ For a new **workout**:
 8. Access & price (unchanged)
 9. Review (now also lists the exact equipment you ticked)
 
-Micro-Workouts stay locked to Bodyweight / 5 min as today.
+**Locked categories — no equipment buttons at all:**
+
+- **Micro-Workouts**: Bodyweight, 5 min, as today.
+- **Pilates**: mat / bodyweight only, so no Bodyweight-vs-Equipment choice and no tick-list.
+- **Recovery**: bodyweight plus light props only, and it keeps having no difficulty tiers.
+
+For these three the equipment step is skipped entirely and the review screen simply states the locked setting, so there is nothing to mis-click and no way to create a conflict with their existing rules.
 
 For a new **training program** the same Bodyweight / Equipment question with the same tick-list appears; weeks and days per week stay where they are.
 
