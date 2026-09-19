@@ -13,6 +13,7 @@ import {
   categoryExerciseViolation,
   categoryFormatViolation,
   durationOverflowViolation,
+  durationShortfallViolation,
   dynamicExerciseViolation,
   equipmentFamilyViolation,
   focusViolation,
@@ -367,7 +368,9 @@ export function auditWorkout(
   const sessionMinutes = estimateSessionMinutes(html);
   if (target && format) {
     const floor = minimumWorkMinutes(level, category, format);
-    if (target >= floor && workMinutes + 8 < target) {
+    const shortfall = durationShortfallViolation(workMinutes, target);
+    if (shortfall) err("DURATION_SHORTFALL", shortfall);
+    else if (target >= floor && workMinutes + 8 < target) {
       warn("SHORT_SESSION", `Prescribed work (~${workMinutes} min) is short of the advertised ${target} min.`);
     }
     const overflow = durationOverflowViolation(workMinutes, target);

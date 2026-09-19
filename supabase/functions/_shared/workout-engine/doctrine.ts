@@ -203,6 +203,39 @@ export const FIXED_POSITION_SETUP_RE = new RegExp(
 );
 
 /**
+ * Bar-, station- and landing-dependent movements. The athlete has to reach a
+ * pull-up bar, a dip station, a hyperextension bench or an inverted-row setup,
+ * or has to stop and stabilise a landing — all of which break the continuous
+ * movement the conditioning family exists for, and none of which repeat safely
+ * under a running clock.
+ */
+export const BAR_STATION_SETUP_RE = new RegExp(
+  [
+    "\\bpull-?ups?\\b",
+    "\\bchin-?ups?\\b",
+    "\\bchin\\b",
+    "\\bdips?\\b",
+    "\\bdip station\\b",
+    "\\bparallel bars\\b",
+    "\\bparallettes?\\b",
+    "\\bhang(?:ing|s)?\\b",
+    "\\bhang from\\b",
+    "\\bmuscle-?up\\b",
+    "\\bring row\\b",
+    "\\binverted row\\b",
+    "\\bhyperextension\\b",
+    "\\bback extension\\b",
+    "\\bbench hip extension\\b",
+    "\\bcaptain'?s chair\\b",
+    "\\broman chair\\b",
+    "\\bbox jump down\\b",
+    "\\bjump down\\b[^.]*\\bstabili[sz]ation\\b",
+    "\\bwith one leg stabili[sz]ation\\b",
+  ].join("|"),
+  "i",
+);
+
+/**
  * Preparation and recovery drills do not become conditioning merely because a
  * rep count is added. These remain useful in Activation / Cool Down, but they
  * may never occupy Main Workout or Finisher slots in the conditioning family.
@@ -219,6 +252,8 @@ export function conditioningSetupViolation(e: ExerciseLike, category: Category):
   const name = e.name.toLowerCase();
   if (CONDITIONING_LOW_STIMULUS_RE.test(name))
     return `"${e.name}" is preparation or recovery work, not a continuous ${category} Main Workout or Finisher exercise.`;
+  if (BAR_STATION_SETUP_RE.test(name))
+    return `"${e.name}" needs a bar, a dip station, a bench station or a controlled landing, which breaks the continuous movement ${category} is built on.`;
   if (STANDING_EXEMPT_RE.test(name)) return null;
   if (FIXED_POSITION_SETUP_RE.test(name))
     return `"${e.name}" puts the athlete in a fixed bench, lying or seated position, which breaks the continuous movement ${category} is built on.`;
@@ -482,6 +517,7 @@ export function dynamicExerciseViolation(
     return `"${e.name}" uses ${e.equipment} — setup-dependent strength equipment is not legal in a ${format} ${category} session.`;
   if (
     SETUP_MOVEMENT_RE.test(identity) ||
+    BAR_STATION_SETUP_RE.test(name) ||
     CALORIE_BURNING_SETUP_RE.test(`${identity} ${context}`) ||
     (!STANDING_EXEMPT_RE.test(name) && FIXED_POSITION_SETUP_RE.test(name))
   )
@@ -745,14 +781,28 @@ export function equipmentFamilyViolation(
 
 // --- 19. Time math ----------------------------------------------------------
 
-/** Hard ceiling: work (Main + Finisher) may never balloon past the request. */
+/**
+ * Hard ceiling: work (Main + Finisher) may never run more than 10 minutes past
+ * the advertised session. Advertised duration is a promise, not a suggestion.
+ */
+export const DURATION_TOLERANCE_MINUTES = 10;
+
 export function durationOverflowViolation(
   estimatedMinutes: number,
   targetMinutes: number,
 ): string | null {
-  const ceiling = Math.round(targetMinutes * 1.15) + 4;
-  if (estimatedMinutes > ceiling)
-    return `Prescribed work (~${estimatedMinutes} min) materially exceeds the advertised ${targetMinutes} min session.`;
+  if (estimatedMinutes > targetMinutes + DURATION_TOLERANCE_MINUTES)
+    return `Prescribed work (~${estimatedMinutes} min) runs more than ${DURATION_TOLERANCE_MINUTES} min past the advertised ${targetMinutes} min session.`;
+  return null;
+}
+
+/** The other direction: a session that under-delivers by more than 10 minutes. */
+export function durationShortfallViolation(
+  estimatedMinutes: number,
+  targetMinutes: number,
+): string | null {
+  if (estimatedMinutes + DURATION_TOLERANCE_MINUTES < targetMinutes)
+    return `Prescribed work (~${estimatedMinutes} min) falls more than ${DURATION_TOLERANCE_MINUTES} min short of the advertised ${targetMinutes} min session.`;
   return null;
 }
 
