@@ -13,6 +13,7 @@ import {
   orderForSequence,
   focusViolation,
   regionOf,
+  isRepsAndSetsOnly,
 } from "./doctrine.ts";
 import type { Category, DifficultyLevel, Format, StrengthFocus } from "./spec.ts";
 
