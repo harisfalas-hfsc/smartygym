@@ -2657,24 +2657,6 @@ export type Database = {
         }
         Relationships: []
       }
-      struct_repair_staging: {
-        Row: {
-          finisher_clear: string | null
-          id: string
-          main_workout: string | null
-        }
-        Insert: {
-          finisher_clear?: string | null
-          id: string
-          main_workout?: string | null
-        }
-        Update: {
-          finisher_clear?: string | null
-          id?: string
-          main_workout?: string | null
-        }
-        Relationships: []
-      }
       suppressed_emails: {
         Row: {
           created_at: string
