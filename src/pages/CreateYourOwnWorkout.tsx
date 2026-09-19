@@ -215,8 +215,7 @@ const CreateYourOwnWorkout = () => {
       location &&
       equipment.length > 0 &&
       level &&
-      (!showFocus || focus) &&
-      (!equipment.includes("other") || otherEquipment.trim().length > 0),
+      (!showFocus || focus),
   );
 
   /** Polls the reserved session row until the background build finishes. */
