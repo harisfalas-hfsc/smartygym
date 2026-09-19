@@ -312,7 +312,8 @@ export const ContentCreationWizard = ({
       case "difficulty":
         return difficultyStars >= 0;
       case "equipment":
-        return !!equipment;
+        if (!equipment) return false;
+        return equipment.toLowerCase().includes("bodyweight") || equipmentIds.length > 0;
       case "duration":
         return !!duration;
       case "format":
