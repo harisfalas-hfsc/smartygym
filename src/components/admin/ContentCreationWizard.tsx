@@ -339,6 +339,16 @@ export const ContentCreationWizard = ({
     if (step > 0) setStep(step - 1);
   };
 
+  /** Human-readable list of the ticked apparatus, e.g. "Dumbbells, Kettlebells". */
+  const equipmentLabels = () =>
+    ADMIN_EQUIPMENT_CHOICES.filter((e) => equipmentIds.includes(e.id))
+      .map((e) => e.label)
+      .join(", ");
+
+  /** What the program's own `equipment` field stores (programs use labels). */
+  const programEquipmentValue = () =>
+    equipment.toLowerCase().includes("bodyweight") ? "Bodyweight" : equipmentLabels() || "Equipment";
+
   const handleFinish = () => {
     const isFree = access === "free";
     const isPremium = access === "premium";
