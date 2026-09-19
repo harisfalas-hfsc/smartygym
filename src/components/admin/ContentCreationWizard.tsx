@@ -252,10 +252,17 @@ export const ContentCreationWizard = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Auto-lock micro-workouts to their fixed rules
+  const lockedEquipment = type === "workout" ? LOCKED_EQUIPMENT[category] : undefined;
+
+  // Categories whose equipment (and, for micro-workouts, duration/difficulty)
+  // is fixed by the coaching rules — nothing to choose, nothing to conflict.
   useEffect(() => {
-    if (type === "workout" && category === "MICRO-WORKOUTS") {
-      setEquipment("BODYWEIGHT");
+    if (type !== "workout") return;
+    const locked = LOCKED_EQUIPMENT[category];
+    if (!locked) return;
+    setEquipment(locked.workoutValue);
+    setEquipmentIds([]);
+    if (category === "MICRO-WORKOUTS") {
       setDuration(MICRO_DURATION);
       setDifficultyStars(0);
     }
@@ -278,19 +285,20 @@ export const ContentCreationWizard = ({
       { key: "type", title: "Content Type" },
       { key: "category", title: "Category" },
       { key: "difficulty", title: "Difficulty" },
-      { key: "equipment", title: "Equipment" },
     ];
     if (type === "workout") {
-      list.push({ key: "duration", title: "Duration" });
+      if (!isMicro) list.push({ key: "duration", title: "Duration" });
+      if (!lockedEquipment) list.push({ key: "equipment", title: "Equipment" });
       if (!hasFixedFormat) list.push({ key: "format", title: "Format" });
       if (isStrength) list.push({ key: "focus", title: "Strength Focus" });
     } else {
+      list.push({ key: "equipment", title: "Equipment" });
       list.push({ key: "weeks", title: "Weeks & Days/Week" });
     }
     list.push({ key: "access", title: "Access & Price" });
     list.push({ key: "review", title: "Review" });
     return list;
-  }, [type, hasFixedFormat, isStrength]);
+  }, [type, hasFixedFormat, isStrength, isMicro, lockedEquipment]);
 
   const currentKey = steps[step]?.key;
   const totalSteps = steps.length;
