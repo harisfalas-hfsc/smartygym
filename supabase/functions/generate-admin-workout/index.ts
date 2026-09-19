@@ -11,6 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { requireAdminOrServiceRole } from "../_shared/admin-or-service-auth.ts";
 import { generateWorkoutContent } from "../_shared/workout-engine/generate.server.ts";
 import { microMinutes } from "../_shared/workout-engine/programming.ts";
+import { sanitizeEquipmentForCategory } from "../_shared/workout-engine/pool.server.ts";
 import {
   CATEGORIES,
   CATEGORY_FORMATS,
@@ -151,12 +152,14 @@ serve(async (req) => {
           .map((id) => String(id).toLowerCase().trim())
           .filter((id) => ALLOWED_EQUIPMENT_IDS.includes(id))
       : [];
-    const selectedEquipment =
+    const selectedEquipment = sanitizeEquipmentForCategory(
+      category,
       equipmentMode === "BODYWEIGHT"
         ? ["bodyweight"]
         : pickedIds.length > 0
         ? pickedIds
-        : ["fullgym"];
+        : ["fullgym"],
+    );
 
     const stars = normalizeStars(Number(body.difficulty_stars) || 0);
     const minutes = isMicro ? microMinutes(parseMinutes(body.duration, 5)) : parseMinutes(body.duration, 30);
