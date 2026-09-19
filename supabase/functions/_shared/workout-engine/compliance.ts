@@ -176,6 +176,27 @@ export function auditWorkout(
     }
   }
 
+  // 2b. Protocol declared INSIDE the section headers must obey the same table.
+  //     "Finisher (For Time)" inside a STRENGTH session is a hard error even
+  //     when the workout's format column says REPS & SETS.
+  for (const [label, re] of [
+    ["Main Workout", /💪[\s\S]{0,200}?Main\s*Workout\s*\(([^)<]+)\)/i],
+    ["Finisher", /⚡[\s\S]{0,200}?Finisher\s*\(([^)<]+)\)/i],
+  ] as const) {
+    const m = html.replace(/<[^>]+>/g, "").match(re);
+    if (!m) continue;
+    const declared = normalizeFormat(m[1]);
+    if (!declared) continue;
+    const issue = categoryFormatViolation(category, declared);
+    if (issue || !CATEGORY_FORMATS[category].includes(declared)) {
+      err(
+        "SECTION_FORMAT_ILLEGAL",
+        `The ${label} is written as ${declared}, which is not legal for ${category}. ${category} sections must be ${CATEGORY_FORMATS[category].join(" / ")}.`,
+        label,
+      );
+    }
+  }
+
   // 3. Library linking.
   const tokens = findTokens(html);
   if (!tokens.length) {
