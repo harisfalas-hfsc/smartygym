@@ -154,7 +154,7 @@ const MICRO_BAN_RE =
  * moving without lying on a bench, hanging from a bar or setting up a station.
  */
 const CALORIE_BURNING_MOVEMENT_RE =
-  /\b(run|jog|walk|march|bike|cycle|row|ski ?erg|elliptical|stepper|stair|jump rope|skip|shuttle|sprint|battle ropes?|burpee|jumping jacks?|high knees?|skater|mountain climber|bear crawl|crab walk|squat|lunge|step-?up|carry|swing|thruster|slam|wall ball|push-?up|push up|plank jack|toe tap|deadlift|romanian|clean|push press)\b/i;
+  /\b(run|jog|walk|march|bike|cycle|row|ski ?erg|elliptical|stepper|stair|jump rope|skip|shuttle|sprint|battle ropes?|battling ropes?|burpee|jumping jacks?|high knees?|skater|mountain climber|bear crawl|crab walk|squat|lunge|step-?up|carry|swing|thruster|slam|wall ball|push-?up|push up|plank jack|toe tap|deadlift|romanian|clean|push press)\b/i;
 const CALORIE_BURNING_SETUP_RE =
   /\b(flat on (?:a |the )?bench|on (?:a |the )?bench|hang from|hanging|pull-?up bar|dip station|parallel bars|preacher|chest-supported|incline bench|decline bench)\b/i;
 const CALORIE_BURNING_ISOLATION_RE =
