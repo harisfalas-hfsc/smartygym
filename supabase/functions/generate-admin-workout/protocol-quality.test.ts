@@ -2,6 +2,7 @@ import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { sanitizeProtocolBlocks } from "../_shared/protocol-sanitizer.ts";
 import { applyWodQualityGate } from "../_shared/wod-quality-gate.ts";
 import { guaranteeAllExercisesLinked, rejectNonLibraryExercises } from "../_shared/exercise-matching.ts";
+import { categoryExerciseViolation, dynamicExerciseViolation } from "../_shared/workout-engine/doctrine.ts";
 
 Deno.test("sanitizer removes duplicated exercise names after library tokens", () => {
   const input = `<p class="tiptap-paragraph">12 reps {{exercise:0001:Scapula Push-up}}:Scapula Push-up</p>`;
@@ -116,4 +117,32 @@ Deno.test("final exercise linking handles prescribed lines with coaching tail te
   assertEquals(result.processedContent.includes("15 reps {{exercise:bird-dog:Bird Dog}} — tempo 2-sec hold at extension; rest 0 sec"), true);
   assertEquals(result.processedContent.includes("20 reps {{exercise:0514:jump squat}} — tempo 2-sec lower, explosive lift; rest 0 sec"), true);
   assertEquals(result.processedContent.includes("10 reps {{exercise:0501:jack burpee}} — combine jumping jack with burpee; rest 0 sec"), true);
+});
+
+Deno.test("calorie burning rejects bench pullovers and isolated strength work", () => {
+  const pullover = {
+    name: "dumbbell around pullover",
+    equipment: "dumbbell",
+    body_part: "chest",
+    target_muscle: "pectorals",
+    description: "A chest exercise performed lying on a bench.",
+    instructions: ["Lie flat on a bench and lower the dumbbell behind your head."],
+  };
+
+  assertEquals(Boolean(categoryExerciseViolation(pullover, "CALORIE BURNING")), true);
+  assertEquals(Boolean(dynamicExerciseViolation(pullover, "CALORIE BURNING", "FOR TIME")), true);
+});
+
+Deno.test("calorie burning accepts simple continuous loaded movement", () => {
+  const lunge = {
+    name: "dumbbell lunge",
+    equipment: "dumbbell",
+    body_part: "upper legs",
+    target_muscle: "glutes",
+    description: "Alternate forward lunges while holding dumbbells.",
+    instructions: ["Stand tall, step forward, return to standing, and alternate legs continuously."],
+  };
+
+  assertEquals(categoryExerciseViolation(lunge, "CALORIE BURNING"), null);
+  assertEquals(dynamicExerciseViolation(lunge, "CALORIE BURNING", "FOR TIME"), null);
 });
