@@ -7,6 +7,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // ONE selection policy for the whole platform — see ./exercise-selection.ts
 import { isSelectable, selectionTier } from "./exercise-selection.ts";
+import { matchesSelectedEquipment } from "./workout-engine/pool.server.ts";
 
 export interface LibExercise {
   id: string;

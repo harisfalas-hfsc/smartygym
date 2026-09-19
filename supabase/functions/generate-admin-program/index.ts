@@ -34,7 +34,9 @@ function log(step: string, details?: any) {
 interface WizardBody {
   job_id?: string;
   category: string;
-  equipment: string;            // "Bodyweight" | "Equipment"
+  equipment: string;            // "Bodyweight" or a readable apparatus list
+  /** Exact apparatus ids picked in the wizard, e.g. ["dumbbells","trx"]. */
+  equipment_ids?: string[];
   difficulty_stars: number;     // 0..6
   weeks: number;                // 4 / 6 / 8
   days_per_week: number;        // 3..6
