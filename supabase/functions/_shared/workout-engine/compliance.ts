@@ -270,7 +270,7 @@ export function auditWorkout(
   }
 
   // 7. Soft tissue stays token-free.
-  const softTissue = html.split("🔥")[0] ?? "";
+  const softTissue = html.includes("🧽") ? (html.split("🔥")[0] ?? "") : "";
   if (findTokens(softTissue).length && stripHtml(softTissue).length) {
     warn("SOFT_TISSUE_TOKENS", "Soft Tissue Preparation contains exercise links.", "Soft Tissue Preparation");
   }

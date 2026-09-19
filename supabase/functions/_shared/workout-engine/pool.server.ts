@@ -443,8 +443,13 @@ function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   //     legal but never dominant: the pool keeps a small minority of it so the
   //     session is built from repeatable aerobic work.
   if (f.category === "CARDIO") {
-    const aerobic = pool.filter((e) => AEROBIC_RE.test(`${e.name} ${e.equipment ?? ""}`));
+    const aerobic = pool.filter(
+      (e) =>
+        AEROBIC_RE.test(`${e.name} ${e.equipment ?? ""}`) &&
+        !HIGH_FATIGUE_CONDITIONING_RE.test(e.name),
+    );
     if (aerobic.length >= 12) pool = aerobic;
+    else pool = pool.filter((e) => !HIGH_FATIGUE_CONDITIONING_RE.test(e.name));
   }
 
   // 4. Static-hold guardrail for momentum / conditioning categories.

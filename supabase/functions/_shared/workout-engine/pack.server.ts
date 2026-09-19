@@ -268,7 +268,10 @@ export function buildPackWorkout(
     if (isMicro) return 4;
     const probe = doseFor(input.format, input.level, 0, input.category, input.minutes, 4);
     // Round-based formats fill the clock with rounds, not with more stations.
-    if (!/sets?/i.test(probe.text)) return input.minutes <= 20 ? 4 : 5;
+    if (!/sets?/i.test(probe.text)) {
+      if (input.format === "TABATA") return input.minutes >= 35 ? 6 : 5;
+      return input.minutes <= 20 ? 4 : 5;
+    }
     const sets = Number(probe.text.match(/(\d+)\s*sets?/i)?.[1] ?? 1);
     const reps = Number(probe.text.match(/(\d+)\s*reps?/i)?.[1] ?? 12);
     const secondsPerExercise = sets * (reps * 4 + 60) + 15;
@@ -309,7 +312,7 @@ export function buildPackWorkout(
     }
   }
   if (!workPool.length) workPool = pool;
-  mainCount = Math.max(3, mainCount);
+  mainCount = Math.max(minMain, mainCount);
 
   // §12 — one shared implement budget for the whole session so the finisher
   // can never push the workout over the equipment-family ceiling.
