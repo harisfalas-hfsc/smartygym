@@ -51,15 +51,26 @@ Deno.serve(async (req) => {
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const queued: { url: string; content_type: string; content_id: string }[] = [];
 
+  // Canonical public URL slug — must match src/lib/seo-slugs.ts slugifyContentName
+  const nameSlug = (value: string | null | undefined): string =>
+    (String(value || "")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/&/g, " and ")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .replace(/-{2,}/g, "-")) || "content";
+
   const [w, p, b] = await Promise.all([
     supabase
       .from("admin_workouts")
-      .select("id, category, updated_at, is_visible")
+      .select("id, name, category, updated_at, is_visible")
       .eq("is_visible", true)
       .gte("updated_at", since),
     supabase
       .from("admin_training_programs")
-      .select("id, category, updated_at, is_visible")
+      .select("id, name, category, updated_at, is_visible")
       .eq("is_visible", true)
       .gte("updated_at", since),
     supabase
@@ -72,16 +83,24 @@ Deno.serve(async (req) => {
   for (const row of w.data || []) {
     const slug = workoutSlug(row.category);
     if (slug && row.id)
-      queued.push({ url: `https://smartygym.com/workout/${slug}/${row.id}`, content_type: "workout", content_id: row.id });
+      queued.push({
+        url: `https://smartygym.com/workout/${slug}/${nameSlug(row.name || row.id)}.html`,
+        content_type: "workout",
+        content_id: row.id,
+      });
   }
   for (const row of p.data || []) {
     const slug = programSlug(row.category);
     if (slug && row.id)
-      queued.push({ url: `https://smartygym.com/trainingprogram/${slug}/${row.id}`, content_type: "program", content_id: row.id });
+      queued.push({
+        url: `https://smartygym.com/trainingprogram/${slug}/${nameSlug(row.name || row.id)}.html`,
+        content_type: "program",
+        content_id: row.id,
+      });
   }
   for (const row of b.data || []) {
     if (row.slug)
-      queued.push({ url: `https://smartygym.com/blog/${row.slug}`, content_type: "article", content_id: String(row.id) });
+      queued.push({ url: `https://smartygym.com/blog/${row.slug}.html`, content_type: "article", content_id: String(row.id) });
   }
 
   if (queued.length > 0) {
