@@ -126,7 +126,33 @@ export function auditWorkout(
   const warn = (code: string, message: string, section?: string) =>
     warnings.push({ code, severity: "warning", message, section });
 
-  const html = row.main_workout ?? "";
+  // The player renders activation + warm_up + main_workout + finisher + cool_down,
+  // so everything the athlete can actually see has to be audited, not main_workout alone.
+  const legacySections = [
+    { field: "activation", icon: "🔥", label: "Activation", html: row.activation ?? "" },
+    { field: "warm_up", icon: "🧽", label: "Soft Tissue Preparation", html: row.warm_up ?? "" },
+    { field: "finisher", icon: "⚡", label: "Finisher", html: row.finisher ?? "" },
+    { field: "cool_down", icon: "🧘", label: "Cool Down", html: row.cool_down ?? "" },
+  ].filter((s) => s.html.trim() && s.html.trim() !== "None");
+  const html = [
+    row.activation ?? "",
+    row.warm_up ?? "",
+    row.main_workout ?? "",
+    row.finisher ?? "",
+    row.cool_down ?? "",
+  ]
+    .filter((s) => s.trim() && s.trim() !== "None")
+    .join("\n");
+  for (const s of legacySections) {
+    if ((row.main_workout ?? "").includes(s.icon)) {
+      errors.push({
+        code: "DUPLICATE_SECTION",
+        severity: "error",
+        message: `The ${s.label} section is stored twice and the athlete sees it twice.`,
+        section: s.label,
+      });
+    }
+  }
   const category = normalizeCategory(row.category);
   const format = normalizeFormat(row.format);
   const target = parseTargetMinutes(row.duration);
