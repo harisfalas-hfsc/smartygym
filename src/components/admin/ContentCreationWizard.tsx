@@ -398,7 +398,7 @@ export const ContentCreationWizard = ({
           difficulty_stars: difficultyStars,
           weeks,
           days_per_week: daysPerWeek,
-          equipment,
+          equipment: programEquipmentValue(),
           training_program: "",
           program_description: "",
           construction: "",
@@ -451,7 +451,7 @@ export const ContentCreationWizard = ({
         payload: {
           ...draft,
           category: draft.category || category,
-          equipment: draft.equipment || equipment,
+          equipment: draft.equipment || programEquipmentValue(),
           difficulty_stars: draft.difficulty_stars ?? difficultyStars,
           weeks: draft.weeks ?? weeks,
           days_per_week: draft.days_per_week ?? daysPerWeek,
@@ -472,6 +472,7 @@ export const ContentCreationWizard = ({
         ? {
             category,
             equipment,
+            equipment_ids: equipmentIds,
             difficulty_stars: difficultyStars,
             format,
             duration,
@@ -482,7 +483,8 @@ export const ContentCreationWizard = ({
           }
         : {
             category,
-            equipment,
+            equipment: programEquipmentValue(),
+            equipment_ids: equipmentIds,
             difficulty_stars: difficultyStars,
             weeks,
             days_per_week: daysPerWeek,
