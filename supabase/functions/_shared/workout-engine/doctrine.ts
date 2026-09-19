@@ -15,10 +15,12 @@ export type ExerciseLike = {
   equipment: string | null;
   body_part?: string | null;
   target_muscle?: string | null;
+  description?: string | null;
+  instructions?: string[] | null;
 };
 
 const textOf = (e: ExerciseLike) =>
-  `${e.name} ${e.target_muscle ?? ""} ${e.body_part ?? ""} ${e.equipment ?? ""}`.toLowerCase();
+  `${e.name} ${e.target_muscle ?? ""} ${e.body_part ?? ""} ${e.equipment ?? ""} ${e.description ?? ""} ${(e.instructions ?? []).join(" ")}`.toLowerCase();
 
 
 // --- 2. Category doctrine ---------------------------------------------------
@@ -147,6 +149,18 @@ const MICRO_BAN_RE =
   /\b(dumbbell|kettlebell|barbell|band|machine|bike|rower|rope|treadmill|sled|cable|smith|ez|olympic|medicine ball|bosu|stability ball|pull-?up|chin-?up|hang(ing)?|dip bar|parallette|bench press|box jump|doorway|door frame)\b/i;
 
 /**
+ * Calorie Burning is continuous conditioning, not strength exercises performed
+ * quickly. Every work movement must be simple, repeatable and keep the athlete
+ * moving without lying on a bench, hanging from a bar or setting up a station.
+ */
+const CALORIE_BURNING_MOVEMENT_RE =
+  /\b(run|jog|walk|march|bike|cycle|row|ski ?erg|elliptical|stepper|stair|jump rope|skip|shuttle|sprint|battle rope|burpee|jumping jack|high knee|skater|mountain climber|bear crawl|crab walk|squat|lunge|step-?up|carry|swing|thruster|slam|wall ball|push-?up|plank jack|toe tap)\b/i;
+const CALORIE_BURNING_SETUP_RE =
+  /\b(lie|lying|lay|flat on (?:a |the )?bench|on (?:a |the )?bench|seated|sit on|hang from|hanging|pull-?up bar|dip station|parallel bars|preacher|chest-supported|incline bench|decline bench)\b/i;
+const CALORIE_BURNING_ISOLATION_RE =
+  /\b(curl|extension|lateral raise|front raise|fly|pullover|pull-over|shrug|kickback|skull crusher|triceps|biceps|calf raise|wrist|neck)\b/i;
+
+/**
  * Category-level legality for a single exercise, independent of format.
  * Returns a concrete violation string, never a soft preference.
  */
@@ -162,6 +176,14 @@ export function categoryExerciseViolation(e: ExerciseLike, category: Category): 
     return `"${e.name}" is too intense for a Recovery session.`;
   if (category === "MICRO-WORKOUTS" && (MICRO_BAN_RE.test(t) || HOME_APPARATUS_RE.test(t)))
     return `"${e.name}" needs equipment or a special setup, which a Micro Workout never uses.`;
+  if (category === "CALORIE BURNING") {
+    if (CALORIE_BURNING_SETUP_RE.test(t))
+      return `"${e.name}" requires a bench, hanging position or setup change, which breaks continuous movement in Calorie Burning.`;
+    if (CALORIE_BURNING_ISOLATION_RE.test(t))
+      return `"${e.name}" is isolated strength work, not a continuous Calorie Burning movement.`;
+    if (!CALORIE_BURNING_MOVEMENT_RE.test(t))
+      return `"${e.name}" is not a simple, continuously repeatable Calorie Burning movement.`;
+  }
   return null;
 }
 
@@ -341,7 +363,8 @@ export function dynamicExerciseViolation(
   if (!isDynamicFormat(format)) return null;
   const equipment = (e.equipment ?? "").toLowerCase();
   const name = e.name.toLowerCase();
-  const both = `${name} ${equipment}`;
+  const context = `${e.description ?? ""} ${(e.instructions ?? []).join(" ")}`.toLowerCase();
+  const both = `${name} ${equipment} ${context}`;
 
   if (HIGH_SKILL_RE.test(name))
     return `"${e.name}" is a high-skill or single-limb movement and is never programmed inside a ${format} session.`;
@@ -351,7 +374,7 @@ export function dynamicExerciseViolation(
 
   if (SETUP_EQUIPMENT_RE.test(equipment))
     return `"${e.name}" uses ${e.equipment} — setup-dependent strength equipment is not legal in a ${format} ${category} session.`;
-  if (SETUP_MOVEMENT_RE.test(name))
+  if (SETUP_MOVEMENT_RE.test(both) || CALORIE_BURNING_SETUP_RE.test(both))
     return `"${e.name}" is a setup-, rack-, bench- or spotter-dependent movement and cannot be repeated inside a ${format}.`;
   if (MACHINE_STRENGTH_RE.test(both))
     return `"${e.name}" is machine strength work, which is not legal in a ${format} ${category} session.`;

@@ -44,6 +44,9 @@ export type PoolExercise = {
   gif_path: string | null;
   /** One-line technique cue built from the library description/instructions. */
   cue: string | null;
+  /** Full library context used by deterministic suitability checks. */
+  description?: string | null;
+  instructions?: string[] | null;
 };
 
 /**
@@ -91,6 +94,8 @@ function toPoolExercise(row: LibraryRow): PoolExercise {
     body_region: null,
     gif_path: row.gif_url,
     cue: buildCue(row),
+    description: row.description,
+    instructions: row.instructions,
   };
 }
 
