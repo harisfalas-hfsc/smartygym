@@ -130,7 +130,6 @@ const CreateYourOwnWorkout = () => {
   const [minutes, setMinutes] = useState<number | null>(null);
   const [location, setLocation] = useState<string>("");
   const [equipment, setEquipment] = useState<string[]>([]);
-  const [otherEquipment, setOtherEquipment] = useState("");
   const [note, setNote] = useState("");
   const [level, setLevel] = useState<string>("");
 
