@@ -16,6 +16,7 @@ import {
   durationShortfallViolation,
   dynamicExerciseViolation,
   equipmentFamilyViolation,
+  finisherSizeViolation,
   focusViolation,
   humanRealismViolation,
   isRepsAndSetsOnly,
