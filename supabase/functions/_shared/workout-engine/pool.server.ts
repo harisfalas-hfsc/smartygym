@@ -391,6 +391,11 @@ function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   //    applied before anything else.
   pool = pool.filter((e) => !categoryExerciseViolation(e, f.category));
 
+  // 1b. Universal work-slot rule — stretches and joint circles are Activation /
+  //     Cool Down vocabulary and never enter the work pool outside the three
+  //     mobility-native categories.
+  pool = pool.filter((e) => !workSlotPrepViolation(e, f.category));
+
   // These disciplines have exclusive movement vocabularies. Other categories
   // legitimately combine bodyweight, free-weight and machine families, so the
   // reference list remains an ordering preference for them.

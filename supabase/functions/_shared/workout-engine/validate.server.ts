@@ -243,6 +243,11 @@ export function validateWorkout(html: string, opts: ValidateOptions): Validation
     if (!/\d/.test(step.prescription)) {
       errors.push(`"${step.name}" has no prescribed dose.`);
     }
+    const stepRow = libraryById.get(step.exerciseId);
+    if (stepRow) {
+      const prep = workSlotPrepViolation(stepRow, opts.category);
+      if (prep) errors.push(prep);
+    }
   }
 
   // 5. Repetition guard — a session should not recycle the same two movements.
