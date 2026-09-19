@@ -236,6 +236,8 @@ const COMPLEXITY_RE =
 
 /** Movements that must never be programmed. */
 export function isForbiddenName(name: string): boolean {
+  // Do not confuse the ordinary supine mobility drill with the rings skill.
+  if (/\biron cross stretch\b/i.test(name)) return false;
   if (COMPLEXITY_RE.test(name) || FORBIDDEN_RE.test(name)) return true;
   if (ELEVATED_SINGLE_LEG_SQUAT_RE.test(canonical(name))) return true;
   // Unstable-surface variations are banned unless the reference list asks for

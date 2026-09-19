@@ -203,12 +203,22 @@ export const FIXED_POSITION_SETUP_RE = new RegExp(
 );
 
 /**
+ * Preparation and recovery drills do not become conditioning merely because a
+ * rep count is added. These remain useful in Activation / Cool Down, but they
+ * may never occupy Main Workout or Finisher slots in the conditioning family.
+ */
+export const CONDITIONING_LOW_STIMULUS_RE =
+  /\b(wrist circles?|ankle circles?|arm circles?|neck (?:circle|rotation|stretch)|cervical|stretch|mobility|cars?\b|foam roll|myofascial|release|breathing|breath work|child'?s pose|savasana|cat-?cow|thread the needle|shoulder rolls?|scapular wall slides?)\b/i;
+
+/**
  * Returns a violation when a movement forces a fixed bench / lying / seated
  * setup inside a conditioning category.
  */
 export function conditioningSetupViolation(e: ExerciseLike, category: Category): string | null {
   if (!isConditioningCategory(category)) return null;
   const name = e.name.toLowerCase();
+  if (CONDITIONING_LOW_STIMULUS_RE.test(name))
+    return `"${e.name}" is preparation or recovery work, not a continuous ${category} Main Workout or Finisher exercise.`;
   if (STANDING_EXEMPT_RE.test(name)) return null;
   if (FIXED_POSITION_SETUP_RE.test(name))
     return `"${e.name}" puts the athlete in a fixed bench, lying or seated position, which breaks the continuous movement ${category} is built on.`;
@@ -295,6 +305,9 @@ export const IMPRACTICAL_MOVEMENT_RE =
  * adult is rejected before anything else looks at it.
  */
 export function humanRealismViolation(e: ExerciseLike): string | null {
+  // This is a normal mobility drill, not the gymnastic strength skill that the
+  // global "iron cross" ban targets.
+  if (/\biron cross stretch\b/i.test(e.name)) return null;
   if (IMPRACTICAL_MOVEMENT_RE.test(e.name.toLowerCase()))
     return `"${e.name}" is a high-skill, gymnastic or technically demanding movement that a coach would not program for a normal adult client.`;
   return null;
