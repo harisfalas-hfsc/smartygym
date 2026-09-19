@@ -3852,33 +3852,6 @@ export type Database = {
         }
         Relationships: []
       }
-      workout_swap_staging: {
-        Row: {
-          activation: string | null
-          cool_down: string | null
-          finisher: string | null
-          main_workout: string | null
-          warm_up: string | null
-          workout_id: string
-        }
-        Insert: {
-          activation?: string | null
-          cool_down?: string | null
-          finisher?: string | null
-          main_workout?: string | null
-          warm_up?: string | null
-          workout_id: string
-        }
-        Update: {
-          activation?: string | null
-          cool_down?: string | null
-          finisher?: string | null
-          main_workout?: string | null
-          warm_up?: string | null
-          workout_id?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       leaderboard_stats: {

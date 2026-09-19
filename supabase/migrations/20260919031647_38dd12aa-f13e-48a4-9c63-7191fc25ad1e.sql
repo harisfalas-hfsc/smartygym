@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS public.workout_swap_staging;
