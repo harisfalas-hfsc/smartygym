@@ -178,16 +178,9 @@ function doseFor(
         const controlledSets = Math.max(2, Math.min(6, Math.round((minutes * 60) / Math.max(1, stations * 70))));
         return { text: `${controlledSets} sets × 10 reps`, protocol: "Rest 30 sec between sets. Slow, breath-led control." };
       }
-      if (category === "STRENGTH" && minutes >= 45) {
-        const strengthSets = Math.max(sets, Math.min(7, Math.round(minutes / 8)));
-        return {
-          text: `${strengthSets} sets × ${reps} reps`,
-          protocol: `Rest ${rest} sec between sets. Controlled lowering, strong finish.`,
-        };
-      }
       return {
         text: `${sets} sets × ${reps} reps`,
-        protocol: `Rest ${rest} sec between sets. Controlled lowering, strong finish.`,
+        protocol: `Rest ${rest + (category === "STRENGTH" && minutes >= 45 ? 15 : 0)} sec between sets. Controlled lowering, strong finish.`,
       };
     case "TABATA":
       return {
@@ -202,7 +195,9 @@ function doseFor(
       return { text: `${reps * 2} reps`, protocol: null };
     case "MIX":
       if (category === "RECOVERY") {
-        const recoverySets = Math.max(2, Math.min(8, Math.ceil((minutes * 60) / Math.max(1, stations * 65))));
+        const recoverySets = minutes >= 40
+          ? 8
+          : Math.max(2, Math.min(8, Math.ceil((minutes * 60) / Math.max(1, stations * 65))));
         return { text: `${recoverySets} sets × 8 reps`, protocol: "Rest 20 sec. Move gently with relaxed breathing." };
       }
       if (category === "CHALLENGE") {
@@ -283,7 +278,7 @@ export function buildPackWorkout(
     const probe = doseFor(input.format, input.level, 0, input.category, input.minutes, 4);
     // Round-based formats fill the clock with rounds, not with more stations.
     if (!/sets?/i.test(probe.text)) {
-      if (input.format === "TABATA") return input.minutes >= 35 ? 6 : 5;
+      if (input.format === "TABATA") return input.minutes >= 40 ? 8 : input.minutes >= 35 ? 6 : 5;
       return input.minutes <= 20 ? 4 : 5;
     }
     const sets = Number(probe.text.match(/(\d+)\s*sets?/i)?.[1] ?? 1);
@@ -291,7 +286,7 @@ export function buildPackWorkout(
     const secondsPerExercise = sets * (reps * 4 + 60) + 15;
     const finisherSeconds = noFinisher ? 0 : 3 * (12 * 4 + 60);
     const available = Math.max(120, input.minutes * 60 - finisherSeconds);
-    return Math.max(3, Math.min(6, Math.round(available / secondsPerExercise)));
+    return Math.max(3, Math.min(8, Math.round(available / secondsPerExercise)));
   })();
   // §15 — the chosen body focus is a hard rule for the template engine too.
   // On-focus movements first. When the library cannot cover the whole block
