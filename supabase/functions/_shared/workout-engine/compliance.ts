@@ -197,6 +197,47 @@ export function auditWorkout(
     }
   }
 
+  // 2c. Body structure, not just the heading. In REPS & SETS-only categories a
+  //     section may not be written as timed rounds, and every exercise line in
+  //     Main Workout / Finisher must declare sets and reps.
+  if (isRepsAndSetsOnly(category)) {
+    const plain = html.replace(/<[^>]+>/g, " ");
+    const mainIdx = plain.indexOf("💪");
+    const finIdx = plain.indexOf("⚡");
+    const coolIdx = plain.indexOf("🧘");
+    const slice = (from: number, to: number) =>
+      from === -1 ? "" : plain.slice(from, to === -1 ? plain.length : to);
+    const sections: Array<[string, string]> = [
+      ["Main Workout", slice(mainIdx, finIdx === -1 ? coolIdx : finIdx)],
+      ["Finisher", slice(finIdx, coolIdx)],
+    ];
+    for (const [label, body] of sections) {
+      if (!body) continue;
+      if (/\brounds?\s+for\s+time\b|\bfor\s+time\b|\bAMRAP\b|\bEMOM\b|\bTabata\b|\btime\s*cap\b/i.test(body)) {
+        err(
+          "SECTION_TIMED_STRUCTURE",
+          `The ${label} is written as a timed / round-based block. ${category} work must be prescribed as sets and reps.`,
+          label,
+        );
+      }
+      const lines = body.split(/(?=\{\{exercise:)/).slice(1);
+      const unprescribed = lines.filter((line) => {
+        const tail = line.split("}}")[1] ?? "";
+        const head = line.slice(0, 0) + (body.slice(0, body.indexOf(line)) || "");
+        const context = line + tail;
+        return !/\d+\s*sets?\s*[x×]\s*\d+\s*reps?/i.test(context) &&
+          !/\d+\s*sets?\s*[x×]\s*\d+/i.test(context);
+      });
+      if (unprescribed.length) {
+        err(
+          "SECTION_MISSING_SETS_REPS",
+          `${label} has ${unprescribed.length} exercise line(s) without an explicit "N sets × M reps" prescription.`,
+          label,
+        );
+      }
+    }
+  }
+
   // 3. Library linking.
   const tokens = findTokens(html);
   if (!tokens.length) {
