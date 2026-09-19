@@ -274,10 +274,26 @@ export function auditWorkout(
   const rowsOf = (ids: string[]) =>
     ids.map((id) => libraryById.get(id)).filter(Boolean) as PoolExercise[];
   const workSteps = [...main, ...finisher];
+  const allSteps = [...main, ...finisher, ...activation, ...cooldown];
   const workRows = rowsOf(workSteps.map((s) => s.exerciseId));
   const isBodyweight = String(row.equipment ?? "").toUpperCase().includes("BODYWEIGHT");
 
   // 4. Exercise selection policy — the shared single source of truth.
+  // Global bans and human-realism rules apply to every playable section. A
+  // prohibited movement cannot hide in Activation or Cool Down.
+  const globallySeen = new Set<string>();
+  for (const step of allSteps) {
+    const libRow = libraryById.get(step.exerciseId);
+    if (!libRow || globallySeen.has(libRow.id)) continue;
+    globallySeen.add(libRow.id);
+    if (!isSelectable(libRow.name)) {
+      err("BANNED_EXERCISE", `"${libRow.name}" is banned by the current selection rules.`, step.section);
+    }
+    const real = humanRealismViolation(libRow);
+    if (real) err("UNREALISTIC_EXERCISE", real, step.section);
+  }
+
+  // Category, format, equipment and focus legality apply to training work.
   const seen = new Set<string>();
   for (const step of workSteps) {
     const libRow = libraryById.get(step.exerciseId);
@@ -285,11 +301,6 @@ export function auditWorkout(
     if (seen.has(libRow.id)) continue;
     seen.add(libRow.id);
     const section = step.section;
-    if (!isSelectable(libRow.name)) {
-      err("BANNED_EXERCISE", `"${libRow.name}" is banned by the current selection rules.`, section);
-    }
-    const real = humanRealismViolation(libRow);
-    if (real) err("UNREALISTIC_EXERCISE", real, section);
     const cat = categoryExerciseViolation(libRow, category);
     if (cat) err("CATEGORY_EXERCISE", cat, section);
     if (category === "MICRO-WORKOUTS" && microExerciseViolation(libRow)) {

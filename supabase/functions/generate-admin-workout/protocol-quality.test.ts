@@ -2,8 +2,9 @@ import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { sanitizeProtocolBlocks } from "../_shared/protocol-sanitizer.ts";
 import { applyWodQualityGate } from "../_shared/wod-quality-gate.ts";
 import { guaranteeAllExercisesLinked, rejectNonLibraryExercises } from "../_shared/exercise-matching.ts";
-import { categoryExerciseViolation, dynamicExerciseViolation } from "../_shared/workout-engine/doctrine.ts";
+import { categoryExerciseViolation, dynamicExerciseViolation, humanRealismViolation } from "../_shared/workout-engine/doctrine.ts";
 import { equipmentLegalForSession } from "../_shared/workout-engine/pool.server.ts";
+import { isSelectable } from "../_shared/exercise-selection.ts";
 
 Deno.test("sanitizer removes duplicated exercise names after library tokens", () => {
   const input = `<p class="tiptap-paragraph">12 reps {{exercise:0001:Scapula Push-up}}:Scapula Push-up</p>`;
@@ -188,6 +189,33 @@ Deno.test("standing and bent-over variants stay legal in conditioning work", () 
       `${e.name} should stay legal in a circuit`,
     );
   }
+});
+
+Deno.test("conditioning work rejects preparation drills such as wrist circles", () => {
+  const wristCircles = {
+    name: "wrist circles",
+    equipment: "body weight",
+    body_part: "lower arms",
+    target_muscle: "forearms",
+  };
+  for (const category of ["CARDIO", "METABOLIC", "CALORIE BURNING", "CHALLENGE"] as const) {
+    assertEquals(
+      Boolean(categoryExerciseViolation(wristCircles, category)),
+      true,
+      `wrist circles should not be training work in ${category}`,
+    );
+  }
+});
+
+Deno.test("iron cross stretch is not confused with the banned gymnastic iron cross", () => {
+  const mobility = {
+    name: "iron cross stretch",
+    equipment: "body weight",
+    body_part: "upper legs",
+    target_muscle: "glutes",
+  };
+  assertEquals(isSelectable(mobility.name), true);
+  assertEquals(humanRealismViolation(mobility), null);
 });
 
 Deno.test("strength keeps bench and seated work fully legal", () => {
