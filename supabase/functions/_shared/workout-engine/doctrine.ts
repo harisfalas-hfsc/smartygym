@@ -161,6 +161,52 @@ const CALORIE_BURNING_ISOLATION_RE =
   /\b(curl|extension|lateral raise|front raise|fly|pullover|pull-over|shrug|kickback|skull crusher|triceps|biceps|calf raise|wrist|neck)\b/i;
 
 /**
+ * THE CONDITIONING FAMILY (Cardio, Metabolic, Calorie Burning, Challenge).
+ *
+ * Equipment is welcome — swings, cleans, thrusters, slams, carries, goblet
+ * squats, lunges, ropes, ergometers — in the Main Workout and in the Finisher.
+ * What is never allowed is putting the athlete into a fixed bench, lying,
+ * supine or seated position to lift or hold load, because that kills the
+ * continuous movement and the elevated heart rate the category exists for.
+ * Anything explicitly named "standing" is exempt.
+ */
+export const CONDITIONING_CATEGORIES: Category[] = [
+  "CARDIO",
+  "METABOLIC",
+  "CALORIE BURNING",
+  "CHALLENGE",
+];
+
+export function isConditioningCategory(category: Category): boolean {
+  return CONDITIONING_CATEGORIES.includes(category);
+}
+
+/** Explicitly upright variants are always legal in conditioning work. */
+export const STANDING_EXEMPT_RE = /\b(standing|upright|bent-?over|kneeling)\b/i;
+
+/**
+ * Bench / lying / supine / seated setup vocabulary — the gap that let
+ * "dumbbell around pullover" and "dumbbell bench seated press" through.
+ */
+export const FIXED_POSITION_SETUP_RE =
+  /\b(pullover|pull-?over|fly|flye|flyes|skull ?crusher|lying|supine|prone|bench|seated|sitting|incline|decline|exercise ball|stability ball|swiss ball|concentration curl|preacher|chest-supported)\b/i;
+
+/**
+ * Returns a violation when a movement forces a fixed bench / lying / seated
+ * setup inside a conditioning category.
+ */
+export function conditioningSetupViolation(e: ExerciseLike, category: Category): string | null {
+  if (!isConditioningCategory(category)) return null;
+  const name = e.name.toLowerCase();
+  if (STANDING_EXEMPT_RE.test(name)) return null;
+  if (FIXED_POSITION_SETUP_RE.test(name))
+    return `"${e.name}" puts the athlete in a fixed bench, lying or seated position, which breaks the continuous movement ${category} is built on.`;
+  if (HIGH_SKILL_RE.test(name))
+    return `"${e.name}" is a skill movement that degrades under fatigue and does not belong in a ${category} session.`;
+  return null;
+}
+
+/**
  * Category-level legality for a single exercise, independent of format.
  * Returns a concrete violation string, never a soft preference.
  */
@@ -177,6 +223,10 @@ export function categoryExerciseViolation(e: ExerciseLike, category: Category): 
     return `"${e.name}" is too intense for a Recovery session.`;
   if (category === "MICRO-WORKOUTS" && (MICRO_BAN_RE.test(t) || HOME_APPARATUS_RE.test(t)))
     return `"${e.name}" needs equipment or a special setup, which a Micro Workout never uses.`;
+
+  const conditioning = conditioningSetupViolation(e, category);
+  if (conditioning) return conditioning;
+
   if (category === "CALORIE BURNING") {
     const fullContext = `${t} ${e.description ?? ""} ${(e.instructions ?? []).join(" ")}`.toLowerCase();
     if (CALORIE_BURNING_SETUP_RE.test(fullContext))
@@ -188,6 +238,7 @@ export function categoryExerciseViolation(e: ExerciseLike, category: Category): 
   }
   return null;
 }
+
 
 
 // --- 11 / 12 / 13. Dynamic-format equipment legality ------------------------
