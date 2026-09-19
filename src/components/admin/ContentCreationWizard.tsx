@@ -812,7 +812,16 @@ export const ContentCreationWizard = ({
                 label="Difficulty"
                 value={DIFFICULTY_OPTIONS.find((d) => d.stars === difficultyStars)?.label || "—"}
               />
-              <Row label="Equipment" value={equipment} />
+              <Row
+                label="Equipment"
+                value={
+                  lockedEquipment
+                    ? lockedEquipment.note
+                    : equipment.toLowerCase().includes("bodyweight")
+                    ? equipment
+                    : equipmentLabels() || equipment
+                }
+              />
               {type === "workout" ? (
                 <>
                   <Row label="Duration" value={duration} />
