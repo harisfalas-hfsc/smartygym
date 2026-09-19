@@ -428,6 +428,40 @@ function estimateMinutes(html: string, sections: string[], transitionSec: number
     seconds += transitionSec;
   }
   if (budget.fixedSeconds !== null) seconds = Math.max(seconds, budget.fixedSeconds);
+  seconds = Math.max(seconds, declaredSectionSeconds(html, sections));
   return Math.round(seconds / 60);
+}
+
+/**
+ * §19c — a section header that declares its own clock ("Main Workout (EMOM 25')",
+ * "Finisher (10 minutes)", "Main Workout (AMRAP 20 min)") fixes the cost of that
+ * block. Time-capped conditioning blocks do not write per-exercise rounds, so
+ * without this the estimator under-counts a genuinely full session.
+ */
+function declaredSectionSeconds(html: string, sections: string[]): number {
+  const text = html.replace(/<[^>]+>/g, " ").replace(/\{\{exercise:[^}]*\}\}/g, " ").replace(/\s+/g, " ");
+  const headers: Array<[string, RegExp]> = [
+    // "Main Workout (EMOM 25')", "Main Workout (EMOM) 20'", "Main Workout (15-minute AMRAP)"
+    ["Main Workout", /Main\s*Workout\b[^.]{0,40}?(\d+)[-\s]*(?:'|min\b|minute)/i],
+    ["Finisher", /Finisher\b[^.]{0,40}?(\d+)[-\s]*(?:'|min\b|minute)/i],
+  ];
+  let total = 0;
+  for (const [section, re] of headers) {
+    if (!sections.includes(section)) continue;
+    const m = text.match(re);
+    if (!m) continue;
+    const value = Number(m[1]);
+    if (value >= 3 && value <= 90) total += value * 60;
+  }
+  // An explicit written total for the work block ("Prescribed work and recovery
+  // total approximately 34 min 55 sec") is the coach's own dose statement.
+  if (sections.includes("Main Workout")) {
+    const stated = text.match(/total(?:s|ling)?\s+(?:approximately\s+)?(\d+)\s*min/i);
+    if (stated) {
+      const value = Number(stated[1]);
+      if (value >= 3 && value <= 120) total = Math.max(total, value * 60);
+    }
+  }
+  return total;
 }
 

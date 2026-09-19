@@ -20,6 +20,7 @@ import {
   cardioDominanceViolation,
   categoryFormatViolation,
   durationOverflowViolation,
+  durationShortfallViolation,
   dynamicExerciseViolation,
   equipmentFamilyViolation,
   focusViolation,
@@ -304,7 +305,9 @@ export function validateWorkout(html: string, opts: ValidateOptions): Validation
   //    top of it, and the whole session keeps a generous sanity ceiling.
   const workMinutes = estimateWorkMinutes(html);
   const floor = minimumWorkMinutes(opts.level, opts.category, opts.format);
-  if (opts.targetMinutes >= floor && workMinutes + 8 < opts.targetMinutes) {
+  const shortfall = durationShortfallViolation(workMinutes, opts.targetMinutes);
+  if (shortfall) errors.push(shortfall);
+  else if (opts.targetMinutes >= floor && workMinutes + 8 < opts.targetMinutes) {
     warnings.push(
       `Prescribed work (~${workMinutes} min) is short of the advertised ${opts.targetMinutes} min.`,
     );
