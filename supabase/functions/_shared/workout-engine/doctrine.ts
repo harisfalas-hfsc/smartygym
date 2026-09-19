@@ -827,6 +827,8 @@ export function finisherSizeViolation(finisherText: string): string | null {
     /\((\d+)\s*(?:min|minutes|')\)/gi,
     /set\s+a\s+(\d+)\s*-?\s*minute/gi,
     /total(?:s|ling)?\s+(?:approximately\s+)?(\d+)\s*min/gi,
+    /completion\s+time\s*:?\s*(?:exactly\s+)?(\d+)\s*min/gi,
+    /(\d+)\s*min(?:ute)?s?\s+\d+\s*sec/gi,
   ];
   for (const re of minutePatterns) {
     for (const m of text.matchAll(re)) {
