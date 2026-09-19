@@ -188,8 +188,19 @@ export const STANDING_EXEMPT_RE = /\b(standing|upright|bent-?over|kneeling)\b/i;
  * Bench / lying / supine / seated setup vocabulary — the gap that let
  * "dumbbell around pullover" and "dumbbell bench seated press" through.
  */
-export const FIXED_POSITION_SETUP_RE =
-  /\b(pullover|pull-?over|fly|flye|flyes|skull ?crusher|lying|supine|prone|bench|seated|sitting|incline|decline|exercise ball|stability ball|swiss ball|concentration curl|preacher|chest-supported)\b/i;
+export const FIXED_POSITION_SETUP_RE = new RegExp(
+  [
+    "\\bpull-?over\\b",
+    "\\bskull ?crusher\\b",
+    "\\b(?:lying|supine|prone|seated|sitting|incline|decline|bench)\\b[^.]*?\\b(?:press|fly|flye|flyes|curl|extension|pullover|pull-?over|row|shrug|pronation|supination)\\b",
+    "\\b(?:press|fly|flye|flyes|curl|extension|row|shrug)\\b[^.]*?\\b(?:on (?:a |the )?bench|on (?:an |the )?(?:exercise|stability|swiss) ball|lying|supine|seated)\\b",
+    "\\bconcentration curl\\b",
+    "\\bpreacher\\b",
+    "\\bchest-supported\\b",
+    "\\b(?:dumbbell|barbell|kettlebell|cable)\\b[^.]*\\b(?:fly|flye|flyes)\\b",
+  ].join("|"),
+  "i",
+);
 
 /**
  * Returns a violation when a movement forces a fixed bench / lying / seated
