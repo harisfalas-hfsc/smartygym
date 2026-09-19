@@ -133,7 +133,19 @@ serve(async (req) => {
     const isMicro = category === "MICRO-WORKOUTS";
     const equipmentMode: EquipmentMode =
       isMicro || String(body.equipment).toUpperCase() === "BODYWEIGHT" ? "BODYWEIGHT" : "EQUIPMENT";
-    const selectedEquipment = equipmentMode === "BODYWEIGHT" ? ["bodyweight"] : ["fullgym"];
+    // Honour the exact apparatus the admin ticked; fall back to full gym only
+    // when nothing specific was sent (older clients).
+    const pickedIds = Array.isArray(body.equipment_ids)
+      ? body.equipment_ids
+          .map((id) => String(id).toLowerCase().trim())
+          .filter((id) => ALLOWED_EQUIPMENT_IDS.includes(id))
+      : [];
+    const selectedEquipment =
+      equipmentMode === "BODYWEIGHT"
+        ? ["bodyweight"]
+        : pickedIds.length > 0
+        ? pickedIds
+        : ["fullgym"];
 
     const stars = normalizeStars(Number(body.difficulty_stars) || 0);
     const minutes = isMicro ? microMinutes(parseMinutes(body.duration, 5)) : parseMinutes(body.duration, 30);
