@@ -37,6 +37,7 @@ import {
 import {
   BODY_FOCUS,
   EQUIPMENT,
+  equipmentForGoal,
   FOCUS_GOALS,
   GOALS,
   LEVEL_GROUPS,
@@ -630,7 +631,7 @@ const CreateYourOwnWorkout = () => {
           hint="Only what you pick will appear in your workout."
         >
           <Grid>
-            {EQUIPMENT.map((e) => (
+            {equipmentForGoal(goal).map((e) => (
               <Chip
                 key={e.id}
                 active={equipment.includes(e.id)}

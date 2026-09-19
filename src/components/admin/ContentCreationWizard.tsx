@@ -12,7 +12,7 @@ import {
   WORKOUT_CATEGORIES,
   STRENGTH_FOCUS_OPTIONS,
 } from "@/constants/workoutCategories";
-import { ADMIN_EQUIPMENT_CHOICES } from "@/lib/coach-options";
+import { ADMIN_EQUIPMENT_CHOICES, adminEquipmentForCategory } from "@/lib/coach-options";
 
 /**
  * Guided wizard for creating a new Workout or Training Program.
@@ -695,7 +695,10 @@ export const ContentCreationWizard = ({
                     Which equipment? (pick at least one)
                   </Label>
                   <ChoiceGrid
-                    options={ADMIN_EQUIPMENT_CHOICES.map((e) => ({ value: e.id, label: e.label }))}
+                    options={adminEquipmentForCategory(category).map((e) => ({
+                      value: e.id,
+                      label: e.label,
+                    }))}
                     value={equipmentIds}
                     onChange={(v) => {
                       const id = String(v);
