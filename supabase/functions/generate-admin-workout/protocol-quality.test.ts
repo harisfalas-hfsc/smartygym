@@ -3,6 +3,7 @@ import { sanitizeProtocolBlocks } from "../_shared/protocol-sanitizer.ts";
 import { applyWodQualityGate } from "../_shared/wod-quality-gate.ts";
 import { guaranteeAllExercisesLinked, rejectNonLibraryExercises } from "../_shared/exercise-matching.ts";
 import { categoryExerciseViolation, dynamicExerciseViolation } from "../_shared/workout-engine/doctrine.ts";
+import { equipmentLegalForSession } from "../_shared/workout-engine/pool.server.ts";
 
 Deno.test("sanitizer removes duplicated exercise names after library tokens", () => {
   const input = `<p class="tiptap-paragraph">12 reps {{exercise:0001:Scapula Push-up}}:Scapula Push-up</p>`;
@@ -145,4 +146,63 @@ Deno.test("calorie burning accepts simple continuous loaded movement", () => {
 
   assertEquals(categoryExerciseViolation(lunge, "CALORIE BURNING"), null);
   assertEquals(dynamicExerciseViolation(lunge, "CALORIE BURNING", "FOR TIME"), null);
+});
+
+Deno.test("every conditioning category rejects bench, lying and seated isolation setups", () => {
+  const cases = [
+    { name: "dumbbell around pullover", equipment: "dumbbell" },
+    { name: "dumbbell bench seated press", equipment: "dumbbell" },
+    { name: "barbell pullover to press", equipment: "barbell" },
+    { name: "dumbbell incline fly", equipment: "dumbbell" },
+    { name: "lying triceps extension", equipment: "barbell" },
+    { name: "dumbbell concentration curl", equipment: "dumbbell" },
+    { name: "skull crusher", equipment: "barbell" },
+  ];
+  for (const category of ["CARDIO", "METABOLIC", "CALORIE BURNING", "CHALLENGE"] as const) {
+    for (const e of cases) {
+      assertEquals(
+        Boolean(categoryExerciseViolation({ ...e, body_part: "chest", target_muscle: "pectorals" }, category)),
+        true,
+        `${e.name} should be illegal in ${category}`,
+      );
+    }
+  }
+});
+
+Deno.test("standing and bent-over variants stay legal in conditioning work", () => {
+  const legal = [
+    { name: "standing dumbbell overhead press", equipment: "dumbbell" },
+    { name: "bent-over reverse fly", equipment: "dumbbell" },
+    { name: "kettlebell swing", equipment: "kettlebell" },
+    { name: "dumbbell thruster", equipment: "dumbbell" },
+  ];
+  for (const e of legal) {
+    assertEquals(
+      categoryExerciseViolation({ ...e, body_part: "shoulders", target_muscle: "delts" }, "METABOLIC"),
+      null,
+      `${e.name} should stay legal`,
+    );
+    assertEquals(
+      dynamicExerciseViolation({ ...e, body_part: "shoulders", target_muscle: "delts" }, "METABOLIC", "CIRCUIT"),
+      null,
+      `${e.name} should stay legal in a circuit`,
+    );
+  }
+});
+
+Deno.test("strength keeps bench and seated work fully legal", () => {
+  const bench = { name: "barbell bench press", equipment: "barbell", body_part: "chest", target_muscle: "pectorals" };
+  assertEquals(categoryExerciseViolation(bench, "STRENGTH"), null);
+});
+
+Deno.test("a member who only picked kettlebells never sees a barbell movement", () => {
+  const barbell = {
+    id: "1", name: "barbell clean", equipment: "barbell", body_part: "full body",
+    target_muscle: "glutes", secondary_muscles: null, category: null, difficulty: "intermediate",
+    movement_pattern: null, body_region: null, gif_path: null, cue: null,
+  };
+  const kb = { ...barbell, id: "2", name: "kettlebell swing", equipment: "kettlebell" };
+  const opts = { category: "METABOLIC" as const, equipmentMode: "EQUIPMENT" as const, selectedEquipment: ["bodyweight", "kettlebells"] };
+  assertEquals(equipmentLegalForSession(barbell, opts), false);
+  assertEquals(equipmentLegalForSession(kb, opts), true);
 });
