@@ -80,6 +80,25 @@ const DIFFICULTY_OPTIONS = [
 
 const EQUIPMENT_OPTIONS = ["BODYWEIGHT", "EQUIPMENT"];
 const PROGRAM_EQUIPMENT_OPTIONS = ["Bodyweight", "Equipment"];
+
+/**
+ * Categories whose equipment is part of their coaching rules and must never be
+ * chosen in the wizard — the step is skipped entirely so nothing can conflict.
+ */
+const LOCKED_EQUIPMENT: Record<string, { workoutValue: string; note: string }> = {
+  "MICRO-WORKOUTS": {
+    workoutValue: "BODYWEIGHT",
+    note: "Micro-workouts are locked to bodyweight only (office / home / chair / desk).",
+  },
+  PILATES: {
+    workoutValue: "BODYWEIGHT",
+    note: "Pilates is locked to mat / bodyweight work.",
+  },
+  RECOVERY: {
+    workoutValue: "BODYWEIGHT",
+    note: "Recovery is locked to bodyweight and light props (mat, band, ball, roller).",
+  },
+};
 const WEEKS_OPTIONS = [4, 6, 8];
 const DAYS_PER_WEEK_OPTIONS = [3, 4, 5, 6];
 
