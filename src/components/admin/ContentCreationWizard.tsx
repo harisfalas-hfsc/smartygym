@@ -559,7 +559,7 @@ export const ContentCreationWizard = ({
       }
     >
       {options.map((o) => {
-        const active = value === o.value;
+        const active = Array.isArray(value) ? value.includes(o.value) : value === o.value;
         return (
           <Card
             key={String(o.value)}
