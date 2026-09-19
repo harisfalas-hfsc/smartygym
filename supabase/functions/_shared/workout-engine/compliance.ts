@@ -228,10 +228,10 @@ export function auditWorkout(
         const before = chunks[i - 1]!.slice(-120);
         if (!/\d+\s*sets?\s*[x×]\s*\d+/i.test(before)) unprescribed++;
       }
-      if (unprescribed.length) {
+      if (unprescribed) {
         err(
           "SECTION_MISSING_SETS_REPS",
-          `${label} has ${unprescribed.length} exercise line(s) without an explicit "N sets × M reps" prescription.`,
+          `${label} has ${unprescribed} exercise line(s) without an explicit "N sets × M reps" prescription.`,
           label,
         );
       }
