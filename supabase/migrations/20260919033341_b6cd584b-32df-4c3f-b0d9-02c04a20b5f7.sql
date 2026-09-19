@@ -1,0 +1,1 @@
+DROP TABLE public.struct_repair_staging;
