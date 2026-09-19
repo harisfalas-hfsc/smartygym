@@ -2,7 +2,7 @@ import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { sanitizeProtocolBlocks } from "../_shared/protocol-sanitizer.ts";
 import { applyWodQualityGate } from "../_shared/wod-quality-gate.ts";
 import { guaranteeAllExercisesLinked, rejectNonLibraryExercises } from "../_shared/exercise-matching.ts";
-import { categoryExerciseViolation, dynamicExerciseViolation, humanRealismViolation, workSlotPrepViolation } from "../_shared/workout-engine/doctrine.ts";
+import { categoryExerciseViolation, dynamicExerciseViolation, finisherSizeViolation, humanRealismViolation, workSlotPrepViolation } from "../_shared/workout-engine/doctrine.ts";
 import { equipmentLegalForSession } from "../_shared/workout-engine/pool.server.ts";
 import { isSelectable } from "../_shared/exercise-selection.ts";
 
