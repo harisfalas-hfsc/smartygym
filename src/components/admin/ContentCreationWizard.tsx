@@ -12,6 +12,7 @@ import {
   WORKOUT_CATEGORIES,
   STRENGTH_FOCUS_OPTIONS,
 } from "@/constants/workoutCategories";
+import { ADMIN_EQUIPMENT_CHOICES } from "@/lib/coach-options";
 
 /**
  * Guided wizard for creating a new Workout or Training Program.
