@@ -196,7 +196,7 @@ serve(async (req) => {
     const { exercises: rawLibrary } =
       await fetchAndBuildExerciseReference(supabase, "[WIZ-PROG]", equipFilter, difficultyText.toLowerCase());
     if (!rawLibrary || rawLibrary.length === 0) throw new Error("No exercises available for this equipment/difficulty.");
-    const library: LibExercise[] = filterLibraryForProgram(rawLibrary as LibExercise[], equipment, difficultyText, body.category);
+    const library: LibExercise[] = filterLibraryForProgram(rawLibrary as LibExercise[], equipment, difficultyText, body.category, equipmentIds);
     log("Library filtered", { remaining: library.length });
 
     // Independent copy requests run together so program generation stays
