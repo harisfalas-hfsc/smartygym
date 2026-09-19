@@ -1,7 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { Resend } from "https://esm.sh/resend@3.5.0";
 
 import { generateWorkoutContent } from "../_shared/workout-engine/generate.server.ts";
+import { getEmailHeaders, wrapInEmailTemplateWithFooter } from "../_shared/email-utils.ts";
+import { logEmailDelivery } from "../_shared/email-log.ts";
+import { canSend } from "../_shared/notification-preferences.ts";
 import { microMinutes, resolveDifficulty } from "../_shared/workout-engine/programming.ts";
 import {
   CATEGORY_FORMATS,
@@ -19,6 +23,16 @@ const corsHeaders = {
 
 /** Member-built workouts allowed per calendar day. */
 const DAILY_LIMIT = 2;
+
+const safeErrorMessage = (error: unknown) => {
+  const message = error instanceof Error ? error.message : "Unknown error";
+  if (/credit|limit|configuration|unavailable|denied|refus/i.test(message)) return message.slice(0, 300);
+  return "Smarty Coach couldn't build a workout that meets the coaching standard this time. Please try again.";
+};
+
+const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (character) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
+})[character] ?? character);
 
 const GOAL_TO_CATEGORY: Record<string, Category> = {
   strength: "STRENGTH",
@@ -101,6 +115,18 @@ serve(async (req) => {
       }
     }
 
+    const { data: activeBuild } = await db
+      .from("user_custom_workouts")
+      .select("id,category")
+      .eq("user_id", user.id)
+      .eq("status", "generating")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (activeBuild) {
+      return json({ id: activeBuild.id, status: "generating", category: activeBuild.category, resumed: true });
+    }
+
     // ── Daily limit ───────────────────────────────────────────────────────────
     const dayStart = new Date();
     dayStart.setUTCHours(0, 0, 0, 0);
@@ -108,6 +134,7 @@ serve(async (req) => {
       .from("user_custom_workouts")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
+      .neq("status", "failed")
       .gte("created_at", dayStart.toISOString());
     if ((todayCount ?? 0) >= DAILY_LIMIT) {
       return json(
@@ -242,7 +269,7 @@ serve(async (req) => {
           usedNames,
         );
 
-        await db
+        const { error: readyError } = await db
           .from("user_custom_workouts")
           .update({
             name: built.name,
@@ -255,13 +282,48 @@ serve(async (req) => {
             needs_review: built.needs_review,
             review_warnings: built.warnings ?? [],
             status: "created",
+            generation_error: null,
           })
           .eq("id", sessionId);
+        if (readyError) throw readyError;
+
+        const subject = "Your workout is ready";
+        const content = `Your <strong>${escapeHtml(built.name)}</strong> workout is ready in My Own Workouts.`;
+        const { data: memberProfile } = await db.from("profiles").select("notification_preferences").eq("user_id", user.id).maybeSingle();
+        const prefs = memberProfile?.notification_preferences as Record<string, unknown> | null;
+        if (canSend(prefs, "custom_workout_ready", "dashboard")) {
+          const { error: messageError } = await db.from("user_system_messages").insert({
+            user_id: user.id, message_type: "custom_workout_ready", subject, content, is_read: false,
+          });
+          if (!messageError) await db.from("user_custom_workouts").update({ ready_notified_at: new Date().toISOString() }).eq("id", sessionId).is("ready_notified_at", null);
+          else console.error("[create-custom-workout] ready message failed", messageError.message);
+        }
+
+        if (canSend(prefs, "custom_workout_ready", "email")) {
+          const { data: authUser } = await db.auth.admin.getUserById(user.id);
+          const userEmail = authUser?.user?.email;
+          const resendKey = Deno.env.get("RESEND_API_KEY");
+          if (userEmail && resendKey) {
+            const { count: suppressedCount } = await db.from("suppressed_emails").select("id", { count: "exact", head: true }).ilike("email", userEmail);
+            if ((suppressedCount ?? 0) === 0) {
+              try {
+                const email = await new Resend(resendKey).emails.send({
+                  from: "SmartyGym <notifications@smartygym.com>", to: [userEmail], subject,
+                  html: wrapInEmailTemplateWithFooter(subject, content, userEmail, `https://smartygym.com/my-workouts/${sessionId}`, "Open my workout", "new_workout"),
+                  headers: getEmailHeaders(userEmail, "new_workout"),
+                });
+                await db.from("user_custom_workouts").update({ ready_emailed_at: new Date().toISOString() }).eq("id", sessionId).is("ready_emailed_at", null);
+                await logEmailDelivery({ userId: user.id, toEmail: userEmail, messageType: "custom_workout_ready", status: "sent", resendId: email.data?.id ?? null });
+              } catch (emailError) {
+                await logEmailDelivery({ userId: user.id, toEmail: userEmail, messageType: "custom_workout_ready", status: "failed", errorMessage: emailError instanceof Error ? emailError.message : String(emailError) });
+              }
+            }
+          }
+        }
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Unknown error";
+        const message = safeErrorMessage(error);
         console.error("[create-custom-workout] build failed", message);
-        // A failed build never costs the athlete one of their daily sessions.
-        await db.from("user_custom_workouts").delete().eq("id", sessionId);
+        await db.from("user_custom_workouts").update({ status: "failed", generation_error: message, name: "Workout build failed" }).eq("id", sessionId);
       }
     };
 
