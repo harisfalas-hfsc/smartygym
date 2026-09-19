@@ -807,6 +807,48 @@ export function durationShortfallViolation(
 }
 
 /**
+ * The Finisher caps off the session — it is never a second main workout.
+ * Rule of thumb: about 3 rounds, ~5 minutes; up to 5 rounds / 8 minutes is
+ * still reasonable. Anything beyond that is oversized regardless of format.
+ * A Tabata block (20/10 intervals) legitimately runs 8 intervals in 4 minutes,
+ * so interval counts inside a Tabata block are not counted as rounds.
+ */
+export const FINISHER_MAX_MINUTES = 8;
+export const FINISHER_MAX_ROUNDS = 5;
+
+export function finisherSizeViolation(finisherText: string): string | null {
+  const text = finisherText.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  if (!text.trim()) return null;
+
+  let minutes = 0;
+  const minutePatterns = [
+    /time\s*cap\s*:?\s*(\d+)\s*(?:min|minute)/gi,
+    /(\d+)\s*-?\s*minute(?:s)?\b/gi,
+    /\((\d+)\s*(?:min|minutes|')\)/gi,
+    /set\s+a\s+(\d+)\s*-?\s*minute/gi,
+    /total(?:s|ling)?\s+(?:approximately\s+)?(\d+)\s*min/gi,
+  ];
+  for (const re of minutePatterns) {
+    for (const m of text.matchAll(re)) {
+      const v = Number(m[1]);
+      if (v >= 3 && v <= 120) minutes = Math.max(minutes, v);
+    }
+  }
+  if (minutes > FINISHER_MAX_MINUTES)
+    return `The Finisher claims ~${minutes} min. A Finisher caps off the session (~3 rounds, ~${5} min, ${FINISHER_MAX_MINUTES} min ceiling), it is not a second main workout.`;
+
+  const isTabataBlock = /\b20\s*sec[^.]{0,20}\b10\s*sec\b|\btabata\b/i.test(text);
+  let rounds = 0;
+  for (const m of text.matchAll(/(\d+)\s*(?:rounds?|passes|circuits?)\b/gi)) {
+    const v = Number(m[1]);
+    if (v >= 1 && v <= 50) rounds = Math.max(rounds, v);
+  }
+  if (!isTabataBlock && rounds > FINISHER_MAX_ROUNDS)
+    return `The Finisher prescribes ${rounds} rounds. A Finisher caps off the session (~3 rounds, ${FINISHER_MAX_ROUNDS} rounds ceiling), it is not a second main workout.`;
+  return null;
+}
+
+/**
  * §19 — the advertised duration is TRAINING TIME: Main Workout + Finisher.
  * Activation and cool down sit on top of it as a bounded allowance, so prep
  * can never eat the session and a 30-minute request really trains 30 minutes.

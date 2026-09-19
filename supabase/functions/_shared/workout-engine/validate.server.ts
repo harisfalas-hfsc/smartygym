@@ -21,6 +21,7 @@ import {
   categoryFormatViolation,
   durationOverflowViolation,
   durationShortfallViolation,
+  finisherSizeViolation,
   dynamicExerciseViolation,
   equipmentFamilyViolation,
   focusViolation,
@@ -231,6 +232,17 @@ export function validateWorkout(html: string, opts: ValidateOptions): Validation
   if (requiresFinisher && finisher.length < (opts.finisherMin ?? 3)) {
     if (!finisher.length) errors.push("Finisher section is missing.");
     else warnings.push(`Finisher has only ${finisher.length} exercises.`);
+  }
+  if (finisher.length) {
+    const plain = html.replace(/<[^>]+>/g, " ");
+    const finIdx = plain.indexOf("⚡");
+    const coolIdx = plain.indexOf("🧘");
+    if (finIdx !== -1) {
+      const size = finisherSizeViolation(
+        plain.slice(finIdx, coolIdx === -1 ? plain.length : coolIdx),
+      );
+      if (size) errors.push(size);
+    }
   }
 
   if (wantsActivation && activation.length < 3) {

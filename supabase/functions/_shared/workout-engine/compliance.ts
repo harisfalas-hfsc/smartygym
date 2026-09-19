@@ -16,6 +16,7 @@ import {
   durationShortfallViolation,
   dynamicExerciseViolation,
   equipmentFamilyViolation,
+  finisherSizeViolation,
   focusViolation,
   humanRealismViolation,
   isRepsAndSetsOnly,
@@ -326,6 +327,18 @@ export function auditWorkout(
       !matchesCategoryPool(libRow.name, category)
     ) {
       err("OUT_OF_POOL", `"${libRow.name}" sits outside the approved ${category} pool.`, section);
+    }
+  }
+
+  // 4b. Finisher sizing — complementary, never a second main workout.
+  {
+    const plain = html.replace(/<[^>]+>/g, " ");
+    const finIdx = plain.indexOf("⚡");
+    if (finIdx !== -1) {
+      const coolIdx = plain.indexOf("🧘");
+      const body = plain.slice(finIdx, coolIdx === -1 ? plain.length : coolIdx);
+      const size = finisherSizeViolation(body);
+      if (size) err("FINISHER_OVERSIZED", size, "Finisher");
     }
   }
 
