@@ -74,6 +74,34 @@ export const EQUIPMENT = [
 export const ADMIN_EQUIPMENT_CHOICES = EQUIPMENT.filter((e) => e.id !== "bodyweight");
 
 /**
+ * Conditioning work must keep the athlete moving, so gym machines and "full
+ * gym" are not offered there at all — only light, portable kit. Bodyweight is
+ * always part of these sessions whatever is ticked.
+ */
+export const CONDITIONING_GOALS = ["cardio", "metabolic", "calorie", "challenge"];
+export const CONDITIONING_CATEGORY_NAMES = [
+  "CARDIO",
+  "METABOLIC",
+  "CALORIE BURNING",
+  "CHALLENGE",
+];
+const HEAVY_STATION_EQUIPMENT = ["machines", "fullgym"];
+
+/** Equipment chips legal for a member goal id (e.g. "cardio"). */
+export function equipmentForGoal(goalId: string) {
+  return CONDITIONING_GOALS.includes(goalId)
+    ? EQUIPMENT.filter((e) => !HEAVY_STATION_EQUIPMENT.includes(e.id))
+    : EQUIPMENT;
+}
+
+/** Equipment chips legal for an admin category name (e.g. "METABOLIC"). */
+export function adminEquipmentForCategory(category: string) {
+  return CONDITIONING_CATEGORY_NAMES.includes((category ?? "").toUpperCase())
+    ? ADMIN_EQUIPMENT_CHOICES.filter((e) => !HEAVY_STATION_EQUIPMENT.includes(e.id))
+    : ADMIN_EQUIPMENT_CHOICES;
+}
+
+/**
  * SIX-STAR DIFFICULTY PICKER, grouped into the three familiar bands.
  * 1-2 Beginner, 3-4 Intermediate, 5-6 Advanced. The second star of each band
  * is only slightly harder: more volume / less rest, never harder exercises.

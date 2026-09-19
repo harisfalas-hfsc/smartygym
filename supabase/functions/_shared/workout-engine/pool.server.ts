@@ -276,6 +276,42 @@ export function matchesSelectedEquipment(
 }
 
 /**
+ * Conditioning categories: the athlete must keep moving, so fixed stations and
+ * gym machines are never legal kit here whatever was ticked in the form.
+ */
+export const CONDITIONING_CATEGORIES = new Set<string>([
+  "CARDIO",
+  "METABOLIC",
+  "CALORIE BURNING",
+  "CHALLENGE",
+]);
+
+/** Light, portable apparatus a conditioning session may legally carry. */
+const CONDITIONING_LIGHT_KIT = ["dumbbells", "kettlebells", "bands", "trx"];
+
+/**
+ * Narrows the athlete's ticked apparatus to what the CATEGORY allows before the
+ * pool is ever filtered, so selection, prompt and validator all agree.
+ *
+ * In CARDIO / METABOLIC / CALORIE BURNING / CHALLENGE: machines are dropped and
+ * "full gym" collapses to the light kit (dumbbells, kettlebells, bands, TRX) —
+ * bodyweight always stays legal alongside it. Every other category is untouched.
+ */
+export function sanitizeEquipmentForCategory(category: string, selected: string[]): string[] {
+  if (!CONDITIONING_CATEGORIES.has(category)) return selected;
+  const out = new Set<string>(["bodyweight"]);
+  for (const id of selected) {
+    if (id === "machines") continue;
+    if (id === "fullgym") {
+      CONDITIONING_LIGHT_KIT.forEach((k) => out.add(k));
+      continue;
+    }
+    out.add(id);
+  }
+  return [...out];
+}
+
+/**
  * THE equipment rule for a session — used by the pool filter AND the validator
  * so selection and checking can never disagree.
  *

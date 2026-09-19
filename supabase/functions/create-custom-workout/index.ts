@@ -7,6 +7,7 @@ import { getEmailHeaders, wrapInEmailTemplateWithFooter } from "../_shared/email
 import { logEmailDelivery } from "../_shared/email-log.ts";
 import { canSend } from "../_shared/notification-preferences.ts";
 import { microMinutes, resolveDifficulty } from "../_shared/workout-engine/programming.ts";
+import { sanitizeEquipmentForCategory } from "../_shared/workout-engine/pool.server.ts";
 import {
   CATEGORY_FORMATS,
   difficultyLabel,
@@ -166,6 +167,11 @@ serve(async (req) => {
 
     let category: Category = GOAL_TO_CATEGORY[goal] ?? "STRENGTH";
     if (minutes <= 5) category = "MICRO-WORKOUTS";
+
+    // Conditioning categories never carry machines or a whole gym, whatever the
+    // athlete ticked — bodyweight plus light portable kit only.
+    equipmentIds = sanitizeEquipmentForCategory(category, equipmentIds);
+    equipmentMode = equipmentIds.every((e: string) => e === "bodyweight") ? "BODYWEIGHT" : "EQUIPMENT";
 
     // ── Athlete context ───────────────────────────────────────────────────────
     const [{ data: profile }, { data: goals }, { data: history }] = await Promise.all([

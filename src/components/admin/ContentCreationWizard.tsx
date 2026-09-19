@@ -12,7 +12,7 @@ import {
   WORKOUT_CATEGORIES,
   STRENGTH_FOCUS_OPTIONS,
 } from "@/constants/workoutCategories";
-import { ADMIN_EQUIPMENT_CHOICES } from "@/lib/coach-options";
+import { ADMIN_EQUIPMENT_CHOICES, adminEquipmentForCategory } from "@/lib/coach-options";
 
 /**
  * Guided wizard for creating a new Workout or Training Program.
@@ -192,6 +192,13 @@ export const ContentCreationWizard = ({
   const [difficultyStars, setDifficultyStars] = useState<number>(3);
   const [equipment, setEquipment] = useState<string>("");
   const [equipmentIds, setEquipmentIds] = useState<string[]>([]);
+  // Conditioning categories never carry machines or a full gym.
+  useEffect(() => {
+    const legal = adminEquipmentForCategory(category).map((e) => e.id as string);
+    setEquipmentIds((prev) =>
+      prev.every((id) => legal.includes(id)) ? prev : prev.filter((id) => legal.includes(id)),
+    );
+  }, [category]);
   const [duration, setDuration] = useState<string>("");
   const [format, setFormat] = useState<string>("");
   const [focus, setFocus] = useState<string>("");
@@ -695,7 +702,10 @@ export const ContentCreationWizard = ({
                     Which equipment? (pick at least one)
                   </Label>
                   <ChoiceGrid
-                    options={ADMIN_EQUIPMENT_CHOICES.map((e) => ({ value: e.id, label: e.label }))}
+                    options={adminEquipmentForCategory(category).map((e) => ({
+                      value: e.id,
+                      label: e.label,
+                    }))}
                     value={equipmentIds}
                     onChange={(v) => {
                       const id = String(v);

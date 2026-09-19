@@ -37,6 +37,7 @@ import {
 import {
   BODY_FOCUS,
   EQUIPMENT,
+  equipmentForGoal,
   FOCUS_GOALS,
   GOALS,
   LEVEL_GROUPS,
@@ -131,6 +132,14 @@ const CreateYourOwnWorkout = () => {
   const [location, setLocation] = useState<string>("");
   const [equipment, setEquipment] = useState<string[]>([]);
   const [note, setNote] = useState("");
+  // Conditioning goals never carry machines or a full gym — drop them silently
+  // if the athlete ticked them before changing goal.
+  useEffect(() => {
+    const legal = equipmentForGoal(goal).map((e) => e.id as string);
+    setEquipment((prev) =>
+      prev.every((id) => legal.includes(id)) ? prev : prev.filter((id) => legal.includes(id)),
+    );
+  }, [goal]);
   const [level, setLevel] = useState<string>("");
 
   const [busy, setBusy] = useState(false);
@@ -630,7 +639,7 @@ const CreateYourOwnWorkout = () => {
           hint="Only what you pick will appear in your workout."
         >
           <Grid>
-            {EQUIPMENT.map((e) => (
+            {equipmentForGoal(goal).map((e) => (
               <Chip
                 key={e.id}
                 active={equipment.includes(e.id)}
