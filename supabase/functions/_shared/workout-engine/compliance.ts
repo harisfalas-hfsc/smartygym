@@ -48,6 +48,11 @@ export type WorkoutRow = {
   duration: string | null;
   focus: string | null;
   main_workout: string | null;
+  /** Legacy per-section columns. The player still renders them, so the audit must read them too. */
+  warm_up?: string | null;
+  activation?: string | null;
+  finisher?: string | null;
+  cool_down?: string | null;
 };
 
 export type Issue = { code: string; severity: "error" | "warning"; message: string; section?: string };
