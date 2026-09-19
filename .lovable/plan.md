@@ -18,7 +18,13 @@ For a new **workout**:
 8. Access & price (unchanged)
 9. Review (now also lists the exact equipment you ticked)
 
-Micro-Workouts stay locked to Bodyweight / 5 min as today.
+**Locked categories — no equipment buttons at all:**
+
+- **Micro-Workouts**: Bodyweight, 5 min, as today.
+- **Pilates**: mat / bodyweight only, so no Bodyweight-vs-Equipment choice and no tick-list.
+- **Recovery**: bodyweight plus light props only, and it keeps having no difficulty tiers.
+
+For these three the equipment step is skipped entirely and the review screen simply states the locked setting, so there is nothing to mis-click and no way to create a conflict with their existing rules.
 
 For a new **training program** the same Bodyweight / Equipment question with the same tick-list appears; weeks and days per week stay where they are.
 
@@ -38,7 +44,7 @@ No coaching rules, category rules, formats, finisher rules, validation, pricing,
 
 - `src/lib/coach-options.ts`: drop the `other` entry from `EQUIPMENT`; add an `ADMIN_EQUIPMENT_CHOICES` list (the seven ids above) reused by both admin steps.
 - `src/pages/CreateYourOwnWorkout.tsx`: remove `otherEquipment` state, the textarea, the validation branch and the `equipmentOther` payload field.
-- `src/components/admin/ContentCreationWizard.tsx`: reorder the step list so `duration` precedes `equipment` for workouts; keep `equipment` state as `BODYWEIGHT | EQUIPMENT` and add `equipmentIds: string[]`; block Continue when mode is EQUIPMENT and the list is empty; send `equipment_ids` in the generate request for both workout and program; show them on the Review step.
+- `src/components/admin/ContentCreationWizard.tsx`: reorder the step list so `duration` precedes `equipment` for workouts; keep `equipment` state as `BODYWEIGHT | EQUIPMENT` and add `equipmentIds: string[]`; block Continue when mode is EQUIPMENT and the list is empty; send `equipment_ids` in the generate request for both workout and program; show them on the Review step. A `LOCKED_EQUIPMENT` map (MICRO-WORKOUTS, PILATES, RECOVERY → bodyweight) drops the equipment step from the step list and force-sets the state, mirroring the existing micro-workout auto-lock effect; RECOVERY also keeps its no-difficulty-tier handling.
 - `supabase/functions/generate-admin-workout/index.ts`: replace the hardcoded `selectedEquipment = ["fullgym"]` with the sanitised `equipment_ids` from the body (falling back to `["fullgym"]` only when absent, so older callers keep working). `equipmentMode` logic unchanged; the saved `equipment` column keeps storing `BODYWEIGHT` / `EQUIPMENT` so public filters and the 537 existing rows are unaffected.
 - `supabase/functions/generate-admin-program/index.ts`: accept `equipment_ids`, pass them to `filterLibraryForProgram`, and store a readable label list (e.g. `Dumbbells, Kettlebells`) in the program's `equipment` field, matching how existing programs already store it.
 - `supabase/functions/_shared/program-exercise-picker.ts`: `filterLibraryForProgram` gains an optional allowed-equipment argument applied with the same `EQUIPMENT_LABELS` mapping used by `pool.server.ts` — one shared source of equipment legality, no duplicate rules.
