@@ -19,6 +19,7 @@ export type AutomationKey =
   | "morning_daily_digest"
   | "monday_motivation"
   | "new_workout"
+  | "custom_workout_ready"
   | "new_program"
   | "new_article"
   | "weekly_activity_report"
@@ -44,6 +45,7 @@ const LEGACY_FALLBACK: Record<AutomationKey, { email: string[]; dashboard: strin
   },
   monday_motivation: { email: ["email_monday_motivation"], dashboard: ["dashboard_monday_motivation"], push: ["mobile_push_monday_motivation"] },
   new_workout: { email: ["email_new_workout"], dashboard: ["dashboard_new_workout"], push: ["mobile_push_new_workout"] },
+  custom_workout_ready: { email: [], dashboard: [], push: [] },
   new_program: { email: ["email_new_program"], dashboard: ["dashboard_new_program"], push: ["mobile_push_new_program"] },
   new_article: { email: ["email_new_article"], dashboard: ["dashboard_new_article"], push: ["mobile_push_new_article"] },
   weekly_activity_report: {

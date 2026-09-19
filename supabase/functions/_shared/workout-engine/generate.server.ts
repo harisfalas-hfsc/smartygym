@@ -30,6 +30,29 @@ import {
 } from "./spec.ts";
 
 const MODEL = "openai/gpt-6-astra";
+const MAX_TRANSIENT_ATTEMPTS = 3;
+
+class GatewayError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+    public readonly retryAfterMs: number | null = null,
+  ) {
+    super(message);
+  }
+}
+
+export function isRetryableGatewayStatus(status: number): boolean {
+  return status === 429 || status >= 500;
+}
+
+export function retryDelayMs(attempt: number, retryAfterMs: number | null): number {
+  if (retryAfterMs !== null) return Math.min(Math.max(retryAfterMs, 1_000), 60_000);
+  const base = Math.min(1_000 * 2 ** attempt, 8_000);
+  return base + Math.floor(Math.random() * 500);
+}
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export type GenerateInput = {
   category: Category;
@@ -111,7 +134,8 @@ async function askModel(system: string, user: string): Promise<Record<string, un
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      "Lovable-API-Key": apiKey,
+      "X-Lovable-AIG-SDK": "fetch",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -126,11 +150,25 @@ async function askModel(system: string, user: string): Promise<Record<string, un
     }),
   });
   if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`AI gateway ${res.status}: ${body.slice(0, 300)}`);
+    const raw = await res.text();
+    let safeMessage = raw.slice(0, 300);
+    try {
+      const parsed = JSON.parse(raw) as { message?: string; error?: { message?: string } };
+      safeMessage = parsed.message ?? parsed.error?.message ?? safeMessage;
+    } catch {
+      // Keep the safely truncated response text.
+    }
+    const retryAfter = res.headers.get("Retry-After");
+    const retryAfterMs = retryAfter && Number.isFinite(Number(retryAfter))
+      ? Number(retryAfter) * 1_000
+      : null;
+    throw new GatewayError(res.status, safeMessage || `AI gateway ${res.status}`, retryAfterMs);
   }
   const json = await res.json();
   const text = String(json?.choices?.[0]?.message?.content ?? "");
+  const refusal = String(json?.choices?.[0]?.message?.refusal ?? "").trim();
+  if (refusal) throw new GatewayError(403, refusal);
+  if (!text.trim()) throw new GatewayError(403, "The model did not provide a workout.");
   return extractJson(text);
 }
 
@@ -265,14 +303,10 @@ export async function generateWorkoutContent(
     );
 
   const libraryById = new Map(all.map((e) => [e.id, e]));
-  type Candidate = GeneratedWorkout & { score: number };
-  let best: Candidate | null = null;
   let lastError = "";
-  // One model call only. A valid draft is returned for review even when its
-  // quality score is below the ideal threshold; deterministic enforcement and
-  // the template fallback preserve safety without holding the request open for
-  // several expensive full regenerations.
-  for (let attempt = 0; attempt < 3; attempt++) {
+  // One normal model call. Only 429 and transient 5xx responses receive bounded,
+  // delayed retries. Invalid output goes directly to deterministic fallback.
+  for (let attempt = 0; attempt < MAX_TRANSIENT_ATTEMPTS; attempt++) {
     let payload: Record<string, unknown>;
     try {
       const { system, user } = buildWorkoutPrompt({
@@ -296,16 +330,13 @@ export async function generateWorkoutContent(
 
       payload = await askModel(
         extraRules ? `${system}\n\nADDITIONAL COACH RULES (highest priority)\n${extraRules}` : system,
-        attempt === 0
-          ? user
-          : `${user}\n\nPREVIOUS ATTEMPT REJECTED: ${lastError}\nFix it and return valid JSON.`,
+        user,
       );
     } catch (err) {
       lastError = err instanceof Error ? err.message : "model call failed";
-      // 400/401/402/403 are terminal per the gateway contract — repeating the
-      // call returns the same error and only multiplies the wait. Go straight
-      // to the deterministic fallback instead of burning two more attempts.
-      if (/AI gateway (400|401|402|403)/.test(lastError)) break;
+      if (!(err instanceof GatewayError) || !isRetryableGatewayStatus(err.status)) break;
+      if (attempt + 1 >= MAX_TRANSIENT_ATTEMPTS) break;
+      await wait(retryDelayMs(attempt, err.retryAfterMs));
       continue;
     }
 
@@ -320,7 +351,7 @@ export async function generateWorkoutContent(
     if (enforcedSplit.structural.length) {
       lastError = enforcedSplit.structural.join(" ");
       console.log(`[ENGINE] attempt ${attempt} enforce-structural: ${lastError.slice(0, 500)}`);
-      continue;
+      break;
     }
 
     // Deterministic validation — the last word on ids, equipment and dosing.
@@ -329,7 +360,7 @@ export async function generateWorkoutContent(
     if (validatedSplit.structural.length) {
       lastError = validatedSplit.structural.slice(0, 6).join(" ");
       console.log(`[ENGINE] attempt ${attempt} validate-structural: ${lastError.slice(0, 500)}`);
-      continue;
+      break;
     }
 
     let name = String(payload["name"] ?? "").trim();
@@ -353,7 +384,7 @@ export async function generateWorkoutContent(
       estimatedMinutes: estimateWorkMinutes(enforced.html),
     });
 
-    const candidate: Candidate = {
+    const candidate: GeneratedWorkout & { score: number } = {
       name,
       description_html: String(payload["description"] ?? ""),
       main_workout: enforced.html,
@@ -363,12 +394,8 @@ export async function generateWorkoutContent(
       needs_review: warnings.length > 0 || quality.score < 75,
       score: quality.score,
     };
-    if (!best || candidate.score > best.score) best = candidate;
-
-    return { ...best, format, pool, duration };
+    return { ...candidate, format, pool, duration };
   }
-
-  if (best) return { ...best, format, pool, duration };
 
   // ---- Reliability fallback: deterministic template engine ---------------------
   const pack = buildPackWorkout(pool, all, {
