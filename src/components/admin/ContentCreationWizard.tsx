@@ -190,6 +190,7 @@ export const ContentCreationWizard = ({
   const [category, setCategory] = useState<string>("");
   const [difficultyStars, setDifficultyStars] = useState<number>(3);
   const [equipment, setEquipment] = useState<string>("");
+  const [equipmentIds, setEquipmentIds] = useState<string[]>([]);
   const [duration, setDuration] = useState<string>("");
   const [format, setFormat] = useState<string>("");
   const [focus, setFocus] = useState<string>("");
@@ -206,6 +207,7 @@ export const ContentCreationWizard = ({
       setCategory("");
       setDifficultyStars(3);
       setEquipment("");
+      setEquipmentIds([]);
       setDuration("");
       setFormat("");
       setFocus("");
