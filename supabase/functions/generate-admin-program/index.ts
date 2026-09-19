@@ -179,6 +179,9 @@ serve(async (req) => {
     if (!body?.category) throw new Error("category is required");
 
     const equipment = body.equipment || "Equipment";
+    const equipmentIds = Array.isArray(body.equipment_ids)
+      ? body.equipment_ids.map((id) => String(id).toLowerCase().trim()).filter(Boolean)
+      : [];
     const weeks = Math.min(Math.max(body.weeks || 4, 4), 8);
     const daysPerWeek = Math.min(Math.max(body.days_per_week || 4, 3), 6);
     const difficulty = body.difficulty_stars ?? 3;
