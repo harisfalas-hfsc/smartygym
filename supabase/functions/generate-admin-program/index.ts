@@ -34,7 +34,9 @@ function log(step: string, details?: any) {
 interface WizardBody {
   job_id?: string;
   category: string;
-  equipment: string;            // "Bodyweight" | "Equipment"
+  equipment: string;            // "Bodyweight" or a readable apparatus list
+  /** Exact apparatus ids picked in the wizard, e.g. ["dumbbells","trx"]. */
+  equipment_ids?: string[];
   difficulty_stars: number;     // 0..6
   weeks: number;                // 4 / 6 / 8
   days_per_week: number;        // 3..6
@@ -177,6 +179,9 @@ serve(async (req) => {
     if (!body?.category) throw new Error("category is required");
 
     const equipment = body.equipment || "Equipment";
+    const equipmentIds = Array.isArray(body.equipment_ids)
+      ? body.equipment_ids.map((id) => String(id).toLowerCase().trim()).filter(Boolean)
+      : [];
     const weeks = Math.min(Math.max(body.weeks || 4, 4), 8);
     const daysPerWeek = Math.min(Math.max(body.days_per_week || 4, 3), 6);
     const difficulty = body.difficulty_stars ?? 3;
@@ -191,7 +196,7 @@ serve(async (req) => {
     const { exercises: rawLibrary } =
       await fetchAndBuildExerciseReference(supabase, "[WIZ-PROG]", equipFilter, difficultyText.toLowerCase());
     if (!rawLibrary || rawLibrary.length === 0) throw new Error("No exercises available for this equipment/difficulty.");
-    const library: LibExercise[] = filterLibraryForProgram(rawLibrary as LibExercise[], equipment, difficultyText, body.category);
+    const library: LibExercise[] = filterLibraryForProgram(rawLibrary as LibExercise[], equipment, difficultyText, body.category, equipmentIds);
     log("Library filtered", { remaining: library.length });
 
     // Independent copy requests run together so program generation stays

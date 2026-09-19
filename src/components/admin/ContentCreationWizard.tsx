@@ -12,6 +12,7 @@ import {
   WORKOUT_CATEGORIES,
   STRENGTH_FOCUS_OPTIONS,
 } from "@/constants/workoutCategories";
+import { ADMIN_EQUIPMENT_CHOICES } from "@/lib/coach-options";
 
 /**
  * Guided wizard for creating a new Workout or Training Program.
@@ -80,6 +81,25 @@ const DIFFICULTY_OPTIONS = [
 
 const EQUIPMENT_OPTIONS = ["BODYWEIGHT", "EQUIPMENT"];
 const PROGRAM_EQUIPMENT_OPTIONS = ["Bodyweight", "Equipment"];
+
+/**
+ * Categories whose equipment is part of their coaching rules and must never be
+ * chosen in the wizard — the step is skipped entirely so nothing can conflict.
+ */
+const LOCKED_EQUIPMENT: Record<string, { workoutValue: string; note: string }> = {
+  "MICRO-WORKOUTS": {
+    workoutValue: "BODYWEIGHT",
+    note: "Micro-workouts are locked to bodyweight only (office / home / chair / desk).",
+  },
+  PILATES: {
+    workoutValue: "BODYWEIGHT",
+    note: "Pilates is locked to mat / bodyweight work.",
+  },
+  RECOVERY: {
+    workoutValue: "BODYWEIGHT",
+    note: "Recovery is locked to bodyweight and light props (mat, band, ball, roller).",
+  },
+};
 const WEEKS_OPTIONS = [4, 6, 8];
 const DAYS_PER_WEEK_OPTIONS = [3, 4, 5, 6];
 
@@ -171,6 +191,7 @@ export const ContentCreationWizard = ({
   const [category, setCategory] = useState<string>("");
   const [difficultyStars, setDifficultyStars] = useState<number>(3);
   const [equipment, setEquipment] = useState<string>("");
+  const [equipmentIds, setEquipmentIds] = useState<string[]>([]);
   const [duration, setDuration] = useState<string>("");
   const [format, setFormat] = useState<string>("");
   const [focus, setFocus] = useState<string>("");
@@ -187,6 +208,7 @@ export const ContentCreationWizard = ({
       setCategory("");
       setDifficultyStars(3);
       setEquipment("");
+      setEquipmentIds([]);
       setDuration("");
       setFormat("");
       setFocus("");
@@ -231,10 +253,17 @@ export const ContentCreationWizard = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Auto-lock micro-workouts to their fixed rules
+  const lockedEquipment = type === "workout" ? LOCKED_EQUIPMENT[category] : undefined;
+
+  // Categories whose equipment (and, for micro-workouts, duration/difficulty)
+  // is fixed by the coaching rules — nothing to choose, nothing to conflict.
   useEffect(() => {
-    if (type === "workout" && category === "MICRO-WORKOUTS") {
-      setEquipment("BODYWEIGHT");
+    if (type !== "workout") return;
+    const locked = LOCKED_EQUIPMENT[category];
+    if (!locked) return;
+    setEquipment(locked.workoutValue);
+    setEquipmentIds([]);
+    if (category === "MICRO-WORKOUTS") {
       setDuration(MICRO_DURATION);
       setDifficultyStars(0);
     }
@@ -257,19 +286,20 @@ export const ContentCreationWizard = ({
       { key: "type", title: "Content Type" },
       { key: "category", title: "Category" },
       { key: "difficulty", title: "Difficulty" },
-      { key: "equipment", title: "Equipment" },
     ];
     if (type === "workout") {
-      list.push({ key: "duration", title: "Duration" });
+      if (!isMicro) list.push({ key: "duration", title: "Duration" });
+      if (!lockedEquipment) list.push({ key: "equipment", title: "Equipment" });
       if (!hasFixedFormat) list.push({ key: "format", title: "Format" });
       if (isStrength) list.push({ key: "focus", title: "Strength Focus" });
     } else {
+      list.push({ key: "equipment", title: "Equipment" });
       list.push({ key: "weeks", title: "Weeks & Days/Week" });
     }
     list.push({ key: "access", title: "Access & Price" });
     list.push({ key: "review", title: "Review" });
     return list;
-  }, [type, hasFixedFormat, isStrength]);
+  }, [type, hasFixedFormat, isStrength, isMicro, lockedEquipment]);
 
   const currentKey = steps[step]?.key;
   const totalSteps = steps.length;
@@ -283,7 +313,8 @@ export const ContentCreationWizard = ({
       case "difficulty":
         return difficultyStars >= 0;
       case "equipment":
-        return !!equipment;
+        if (!equipment) return false;
+        return equipment.toLowerCase().includes("bodyweight") || equipmentIds.length > 0;
       case "duration":
         return !!duration;
       case "format":
@@ -308,6 +339,16 @@ export const ContentCreationWizard = ({
   const goBack = () => {
     if (step > 0) setStep(step - 1);
   };
+
+  /** Human-readable list of the ticked apparatus, e.g. "Dumbbells, Kettlebells". */
+  const equipmentLabels = () =>
+    ADMIN_EQUIPMENT_CHOICES.filter((e) => equipmentIds.includes(e.id))
+      .map((e) => e.label)
+      .join(", ");
+
+  /** What the program's own `equipment` field stores (programs use labels). */
+  const programEquipmentValue = () =>
+    equipment.toLowerCase().includes("bodyweight") ? "Bodyweight" : equipmentLabels() || "Equipment";
 
   const handleFinish = () => {
     const isFree = access === "free";
@@ -357,7 +398,7 @@ export const ContentCreationWizard = ({
           difficulty_stars: difficultyStars,
           weeks,
           days_per_week: daysPerWeek,
-          equipment,
+          equipment: programEquipmentValue(),
           training_program: "",
           program_description: "",
           construction: "",
@@ -410,7 +451,7 @@ export const ContentCreationWizard = ({
         payload: {
           ...draft,
           category: draft.category || category,
-          equipment: draft.equipment || equipment,
+          equipment: draft.equipment || programEquipmentValue(),
           difficulty_stars: draft.difficulty_stars ?? difficultyStars,
           weeks: draft.weeks ?? weeks,
           days_per_week: draft.days_per_week ?? daysPerWeek,
@@ -431,6 +472,7 @@ export const ContentCreationWizard = ({
         ? {
             category,
             equipment,
+            equipment_ids: equipmentIds,
             difficulty_stars: difficultyStars,
             format,
             duration,
@@ -441,7 +483,8 @@ export const ContentCreationWizard = ({
           }
         : {
             category,
-            equipment,
+            equipment: programEquipmentValue(),
+            equipment_ids: equipmentIds,
             difficulty_stars: difficultyStars,
             weeks,
             days_per_week: daysPerWeek,
@@ -504,7 +547,8 @@ export const ContentCreationWizard = ({
     columns = 2,
   }: {
     options: { value: string | number; label: string; sub?: string }[];
-    value: string | number;
+    /** A single selected value, or an array when several may be ticked. */
+    value: string | number | (string | number)[];
     onChange: (v: any) => void;
     columns?: 2 | 3 | 4;
   }) => (
@@ -515,7 +559,7 @@ export const ContentCreationWizard = ({
       }
     >
       {options.map((o) => {
-        const active = value === o.value;
+        const active = Array.isArray(value) ? value.includes(o.value) : value === o.value;
         return (
           <Card
             key={String(o.value)}
@@ -633,11 +677,6 @@ export const ContentCreationWizard = ({
 
           {currentKey === "equipment" && (
             <>
-              {isMicro && (
-                <p className="text-xs text-amber-600 dark:text-amber-400 mb-2">
-                  Micro-workouts are locked to BODYWEIGHT only (office / home / chair / desk).
-                </p>
-              )}
               <ChoiceGrid
                 options={(type === "workout" ? EQUIPMENT_OPTIONS : PROGRAM_EQUIPMENT_OPTIONS).map((e) => ({
                   value: e,
@@ -645,11 +684,32 @@ export const ContentCreationWizard = ({
                 }))}
                 value={equipment}
                 onChange={(v) => {
-                  if (isMicro) return;
                   setEquipment(v);
+                  if (v.toLowerCase().includes("bodyweight")) setEquipmentIds([]);
                 }}
                 columns={2}
               />
+              {equipment && !equipment.toLowerCase().includes("bodyweight") && (
+                <div className="pt-4 mt-4 border-t">
+                  <Label className="text-sm font-medium mb-2 block">
+                    Which equipment? (pick at least one)
+                  </Label>
+                  <ChoiceGrid
+                    options={ADMIN_EQUIPMENT_CHOICES.map((e) => ({ value: e.id, label: e.label }))}
+                    value={equipmentIds}
+                    onChange={(v) => {
+                      const id = String(v);
+                      setEquipmentIds((prev) =>
+                        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+                      );
+                    }}
+                    columns={2}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Only these will be used. Bodyweight movements stay available alongside them.
+                  </p>
+                </div>
+              )}
             </>
           )}
 
@@ -752,7 +812,16 @@ export const ContentCreationWizard = ({
                 label="Difficulty"
                 value={DIFFICULTY_OPTIONS.find((d) => d.stars === difficultyStars)?.label || "—"}
               />
-              <Row label="Equipment" value={equipment} />
+              <Row
+                label="Equipment"
+                value={
+                  lockedEquipment
+                    ? lockedEquipment.note
+                    : equipment.toLowerCase().includes("bodyweight")
+                    ? equipment
+                    : equipmentLabels() || equipment
+                }
+              />
               {type === "workout" ? (
                 <>
                   <Row label="Duration" value={duration} />

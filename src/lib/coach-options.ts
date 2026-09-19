@@ -65,8 +65,13 @@ export const EQUIPMENT = [
   { id: "trx", label: "TRX" },
   { id: "machines", label: "Machines" },
   { id: "fullgym", label: "Full Gym" },
-  { id: "other", label: "Other" },
 ] as const;
+
+/**
+ * Apparatus the admin wizard offers once "EQUIPMENT" is chosen. Same ids the
+ * engine already understands — bodyweight is the other mode, not a tick here.
+ */
+export const ADMIN_EQUIPMENT_CHOICES = EQUIPMENT.filter((e) => e.id !== "bodyweight");
 
 /**
  * SIX-STAR DIFFICULTY PICKER, grouped into the three familiar bands.

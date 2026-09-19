@@ -38,6 +38,8 @@ interface WizardBody {
   job_id?: string;
   category: string;
   equipment: "BODYWEIGHT" | "EQUIPMENT" | string;
+  /** Exact apparatus picked in the wizard, e.g. ["dumbbells","kettlebells"]. */
+  equipment_ids?: string[];
   difficulty_stars: number; // 0..6
   format?: string;
   duration?: string; // e.g. "30 min"
@@ -47,6 +49,17 @@ interface WizardBody {
   tier_required?: string;
   note?: string;
 }
+
+/** Equipment ids the shared engine already understands. */
+const ALLOWED_EQUIPMENT_IDS = [
+  "dumbbells",
+  "kettlebells",
+  "barbell",
+  "bands",
+  "trx",
+  "machines",
+  "fullgym",
+];
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -131,7 +144,19 @@ serve(async (req) => {
     const isMicro = category === "MICRO-WORKOUTS";
     const equipmentMode: EquipmentMode =
       isMicro || String(body.equipment).toUpperCase() === "BODYWEIGHT" ? "BODYWEIGHT" : "EQUIPMENT";
-    const selectedEquipment = equipmentMode === "BODYWEIGHT" ? ["bodyweight"] : ["fullgym"];
+    // Honour the exact apparatus the admin ticked; fall back to full gym only
+    // when nothing specific was sent (older clients).
+    const pickedIds = Array.isArray(body.equipment_ids)
+      ? body.equipment_ids
+          .map((id) => String(id).toLowerCase().trim())
+          .filter((id) => ALLOWED_EQUIPMENT_IDS.includes(id))
+      : [];
+    const selectedEquipment =
+      equipmentMode === "BODYWEIGHT"
+        ? ["bodyweight"]
+        : pickedIds.length > 0
+        ? pickedIds
+        : ["fullgym"];
 
     const stars = normalizeStars(Number(body.difficulty_stars) || 0);
     const minutes = isMicro ? microMinutes(parseMinutes(body.duration, 5)) : parseMinutes(body.duration, 30);
@@ -142,6 +167,7 @@ serve(async (req) => {
     log("Wizard request", {
       category,
       equipmentMode,
+      selectedEquipment,
       stars,
       minutes,
       format: requestedFormat,

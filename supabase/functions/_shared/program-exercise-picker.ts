@@ -7,6 +7,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // ONE selection policy for the whole platform — see ./exercise-selection.ts
 import { isSelectable, selectionTier } from "./exercise-selection.ts";
+import { matchesSelectedEquipment } from "./workout-engine/pool.server.ts";
 
 export interface LibExercise {
   id: string;
@@ -723,6 +724,7 @@ export function filterLibraryForProgram(
   equipment: string,
   difficulty?: string,
   category = "",
+  equipmentIds: string[] = [],
 ): LibExercise[] {
   const equipLower = (equipment || "").toLowerCase();
   let pool = library;
@@ -730,6 +732,13 @@ export function filterLibraryForProgram(
     pool = pool.filter(isHomeBodyweightFriendly);
   } else {
     pool = pool.filter((ex) => !isBodyweightExercise(ex));
+    // When the admin named the exact apparatus, only those are legal — same
+    // rule the single-workout engine uses, so the two can never disagree.
+    if (equipmentIds.length && !equipmentIds.includes("fullgym")) {
+      pool = pool.filter((ex) =>
+        matchesSelectedEquipment(ex as unknown as Parameters<typeof matchesSelectedEquipment>[0], equipmentIds),
+      );
+    }
   }
   pool = pool.filter(excludesStaticHolds);
   pool = pool.filter((ex) => excludesSkillExercises(ex, difficulty));

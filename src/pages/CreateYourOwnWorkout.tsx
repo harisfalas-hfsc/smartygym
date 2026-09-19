@@ -130,7 +130,6 @@ const CreateYourOwnWorkout = () => {
   const [minutes, setMinutes] = useState<number | null>(null);
   const [location, setLocation] = useState<string>("");
   const [equipment, setEquipment] = useState<string[]>([]);
-  const [otherEquipment, setOtherEquipment] = useState("");
   const [note, setNote] = useState("");
   const [level, setLevel] = useState<string>("");
 
@@ -216,8 +215,7 @@ const CreateYourOwnWorkout = () => {
       location &&
       equipment.length > 0 &&
       level &&
-      (!showFocus || focus) &&
-      (!equipment.includes("other") || otherEquipment.trim().length > 0),
+      (!showFocus || focus),
   );
 
   /** Polls the reserved session row until the background build finishes. */
@@ -278,7 +276,6 @@ const CreateYourOwnWorkout = () => {
       minutes: minutes ?? undefined,
       location,
       equipment: equipment.length ? equipment : ["bodyweight"],
-      equipmentOther: equipment.includes("other") ? otherEquipment.trim() : "",
       note: note.trim(),
       level: levelOverride ?? level,
     };
@@ -304,10 +301,7 @@ const CreateYourOwnWorkout = () => {
     if (!canGenerate) {
       toast({
         title: "Almost there",
-        description:
-          equipment.includes("other") && !otherEquipment.trim()
-            ? "Tell Smarty Coach what other equipment you have."
-            : "Please answer all required questions first.",
+        description: "Please answer all required questions first.",
         variant: "destructive",
       });
       return;
@@ -346,7 +340,6 @@ const CreateYourOwnWorkout = () => {
       minutes: pick([30, 40, 45]),
       location: location || "anywhere",
       equipment: equipment.length ? equipment : ["bodyweight"],
-      equipmentOther: "",
       note: "",
       level: level || "auto",
     };
@@ -647,23 +640,6 @@ const CreateYourOwnWorkout = () => {
               </Chip>
             ))}
           </Grid>
-          {equipment.includes("other") ? (
-            <div className="mt-3">
-              <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
-                What else do you have? Separate with commas.
-              </label>
-              <Textarea
-                value={otherEquipment}
-                onChange={(e) => setOtherEquipment(e.target.value)}
-                placeholder="e.g. sandbag, medicine ball, stability ball, rope"
-                rows={2}
-                className="rounded-2xl"
-              />
-              <p className="mt-1.5 text-xs text-muted-foreground">
-                Smarty Coach only uses it if a matching exercise exists in the library.
-              </p>
-            </div>
-          ) : null}
         </QuestionCard>
 
         <QuestionCard
