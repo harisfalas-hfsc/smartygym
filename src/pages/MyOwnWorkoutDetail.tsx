@@ -44,6 +44,8 @@ interface CustomWorkoutDetail {
   needs_review: boolean;
   review_warnings: string[] | null;
   created_at: string;
+  status: string;
+  generation_error: string | null;
 }
 
 const MyOwnWorkoutDetail = () => {
@@ -59,16 +61,17 @@ const MyOwnWorkoutDetail = () => {
       const { data, error } = await supabase
         .from("user_custom_workouts")
         .select("*")
-        .eq("id", id!)
+        .eq("id", id ?? "")
         .maybeSingle();
       if (error) throw error;
       return (data as CustomWorkoutDetail) ?? null;
     },
+    refetchInterval: (query) => query.state.data?.status === "generating" ? 3000 : false,
   });
 
   // Opening a session counts as viewing it (private tracking only).
   useEffect(() => {
-    if (!workout || workout.has_viewed) return;
+    if (!workout || workout.status !== "created" || workout.has_viewed) return;
     void supabase
       .from("user_custom_workouts")
       .update({ has_viewed: true, viewed_at: new Date().toISOString() })
@@ -100,6 +103,17 @@ const MyOwnWorkoutDetail = () => {
         <Button className="mt-6 rounded-2xl" onClick={() => navigate("/my-workouts")}>
           Back to my workouts
         </Button>
+      </div>
+    );
+  }
+
+  if (workout.status !== "created") {
+    const failed = workout.status === "failed";
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-16 text-center">
+        <h1 className="text-2xl font-extrabold">{failed ? "Workout build failed" : "Building your workout…"}</h1>
+        <p className="mt-2 text-muted-foreground">{failed ? workout.generation_error ?? "Please try building another workout." : "You can leave this page. We will message you when it is ready."}</p>
+        <Button className="mt-6 rounded-2xl" onClick={() => navigate(failed ? "/create-your-own-workout" : "/my-workouts")}>{failed ? "Try again" : "My own workouts"}</Button>
       </div>
     );
   }

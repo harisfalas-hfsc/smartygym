@@ -36,6 +36,8 @@ export interface CustomWorkoutRow {
   created_at: string;
   is_shared?: boolean | null;
   image_url?: string | null;
+  status: string;
+  generation_error: string | null;
 }
 
 const Stars = ({ count }: { count: number }) => (
@@ -70,12 +72,13 @@ const MyOwnWorkouts = () => {
       const { data, error } = await supabase
         .from("user_custom_workouts")
         .select(
-          "id,name,category,format,focus,difficulty_stars,difficulty_label,duration_label,duration_min,equipment,location,is_favorite,completed_at,has_viewed,rating,created_at,is_shared,image_url",
+          "id,name,category,format,focus,difficulty_stars,difficulty_label,duration_label,duration_min,equipment,location,is_favorite,completed_at,has_viewed,rating,created_at,is_shared,image_url,status,generation_error",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as CustomWorkoutRow[];
     },
+    refetchInterval: (query) => query.state.data?.some((workout) => workout.status === "generating") ? 3000 : false,
   });
 
   const scheduledByWorkoutId = new Map(
@@ -215,13 +218,15 @@ const MyOwnWorkouts = () => {
           {filteredWorkouts.map((w) => (
             <Card
               key={w.id}
-              className="cursor-pointer rounded-2xl border-2 border-border transition hover:border-primary"
-              onClick={() => navigate(`/my-workouts/${w.id}`)}
+              className={w.status === "created" ? "cursor-pointer rounded-2xl border-2 border-border transition hover:border-primary" : "rounded-2xl border-2 border-border"}
+              onClick={() => { if (w.status === "created") navigate(`/my-workouts/${w.id}`); }}
             >
               <CardContent className="flex items-start justify-between gap-3 p-4 sm:p-5">
                 <div className="min-w-0">
                   <h2 className="truncate text-base font-extrabold sm:text-lg">{w.name}</h2>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
+                     {w.status === "generating" ? <Badge>Building</Badge> : null}
+                     {w.status === "failed" ? <Badge variant="destructive">Failed</Badge> : null}
                     <Badge variant="secondary" className="text-xs">
                       {w.category}
                     </Badge>
@@ -261,10 +266,11 @@ const MyOwnWorkouts = () => {
                        </span>
                      ) : null}
                   </div>
-                  <div onClick={(e) => e.stopPropagation()} className="mt-3 space-y-2">
+                   {w.status === "failed" && w.generation_error ? <p className="mt-2 text-sm text-destructive">{w.generation_error}</p> : null}
+                   {w.status === "created" ? <div onClick={(e) => e.stopPropagation()} className="mt-3 space-y-2">
                      <CustomWorkoutActions workout={w} compact onScheduled={() => void refetchScheduled()} />
                      <ShareWorkoutToggle workout={w} compact onChanged={() => void refetchWorkouts()} />
-                  </div>
+                   </div> : null}
                 </div>
               </CardContent>
             </Card>

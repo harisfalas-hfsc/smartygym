@@ -140,6 +140,7 @@ const CreateYourOwnWorkout = () => {
   const [name, setName] = useState<string>("");
   const [builtToday, setBuiltToday] = useState<number | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const activeJobKey = "smartygym_active_custom_workout";
 
   const remaining = builtToday === null ? null : Math.max(0, DAILY_LIMIT - builtToday);
   const limitReached = remaining === 0;
@@ -169,6 +170,33 @@ const CreateYourOwnWorkout = () => {
       setName((profile?.full_name as string) ?? "");
       setBuiltToday(count ?? 0);
       setIsLoggedIn(true);
+
+      const { data: activeRows } = await supabase
+        .from("user_custom_workouts")
+        .select("id")
+        .eq("user_id", auth.user.id)
+        .eq("status", "generating")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      const activeId = localStorage.getItem(activeJobKey) ?? activeRows?.[0]?.id;
+      if (activeId && !cancelled) {
+        localStorage.setItem(activeJobKey, activeId);
+        setBusy(true);
+        setGenerationDialogOpen(true);
+        void waitForSession(activeId)
+          .then((ready) => {
+            localStorage.removeItem(activeJobKey);
+            setGenerationDialogOpen(false);
+            setBusy(false);
+            if (ready.status === "created") navigate(`/my-workouts/${activeId}`);
+          })
+          .catch((error) => {
+            localStorage.removeItem(activeJobKey);
+            setGenerationDialogOpen(false);
+            setBusy(false);
+            toast({ title: "Couldn't build the workout", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+          });
+      }
     })();
     return () => {
       cancelled = true;
@@ -192,22 +220,17 @@ const CreateYourOwnWorkout = () => {
 
   /** Polls the reserved session row until the background build finishes. */
   async function waitForSession(id: string) {
-    const deadline = Date.now() + 4 * 60 * 1000;
-    while (Date.now() < deadline) {
+    while (true) {
       await new Promise((r) => setTimeout(r, 3000));
       const { data } = await supabase
         .from("user_custom_workouts")
-        .select("id,status,review_warnings")
+        .select("id,status,review_warnings,generation_error")
         .eq("id", id)
         .maybeSingle();
-      if (!data) {
-        throw new Error(
-          "Smarty Coach couldn't build a session that meets the coaching standard this time. Please try again.",
-        );
-      }
-      if (data.status !== "generating") return data as { review_warnings?: string[] | null };
+      if (!data) throw new Error("This workout is no longer available.");
+      if (data.status === "failed") throw new Error(data.generation_error ?? "Smarty Coach couldn't build this workout. Please try again.");
+      if (data.status === "created") return data;
     }
-    throw new Error("This is taking longer than usual. Check My own workouts in a moment.");
   }
 
   async function generate(request: Record<string, unknown>) {
@@ -220,16 +243,19 @@ const CreateYourOwnWorkout = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      localStorage.setItem(activeJobKey, String(data.id));
 
       // The session is assembled in the background (it takes longer than a
       // single request allows), so wait here until the row is ready.
       const ready = await waitForSession(String(data.id));
+      localStorage.removeItem(activeJobKey);
       setBuiltToday((n) => (n ?? 0) + 1);
       if (ready.review_warnings?.length) {
         toast({ title: "A note from Smarty Coach", description: ready.review_warnings[0] });
       }
       navigate(`/my-workouts/${data.id}`);
     } catch (e) {
+      localStorage.removeItem(activeJobKey);
       const message =
         e instanceof Error && e.message && !/non-2xx/i.test(e.message)
           ? e.message
@@ -474,7 +500,11 @@ const CreateYourOwnWorkout = () => {
 
       <GeneratingDialog
         open={busy && generationDialogOpen}
-        onLeave={() => setGenerationDialogOpen(false)}
+        onLeave={() => {
+          setGenerationDialogOpen(false);
+          setBusy(false);
+          navigate("/my-workouts");
+        }}
       />
 
       <div className="mb-6 rounded-3xl border-2 border-primary bg-primary/5 p-5 text-center">
