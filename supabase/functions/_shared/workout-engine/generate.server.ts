@@ -303,8 +303,6 @@ export async function generateWorkoutContent(
     );
 
   const libraryById = new Map(all.map((e) => [e.id, e]));
-  type Candidate = GeneratedWorkout & { score: number };
-  let best: Candidate | null = null;
   let lastError = "";
   // One normal model call. Only 429 and transient 5xx responses receive bounded,
   // delayed retries. Invalid output goes directly to deterministic fallback.
@@ -386,7 +384,7 @@ export async function generateWorkoutContent(
       estimatedMinutes: estimateWorkMinutes(enforced.html),
     });
 
-    const candidate: Candidate = {
+    const candidate: GeneratedWorkout & { score: number } = {
       name,
       description_html: String(payload["description"] ?? ""),
       main_workout: enforced.html,
@@ -396,12 +394,8 @@ export async function generateWorkoutContent(
       needs_review: warnings.length > 0 || quality.score < 75,
       score: quality.score,
     };
-    if (!best || candidate.score > best.score) best = candidate;
-
-    return { ...best, format, pool, duration };
+    return { ...candidate, format, pool, duration };
   }
-
-  if (best) return { ...best, format, pool, duration };
 
   // ---- Reliability fallback: deterministic template engine ---------------------
   const pack = buildPackWorkout(pool, all, {

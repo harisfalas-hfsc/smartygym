@@ -64,12 +64,9 @@ export function GeneratingDialog({ open, onLeave }: { open: boolean; onLeave?: (
           <p className="mt-4 text-xs leading-5 text-muted-foreground">
             Keep waiting and it will open automatically, or continue using Smarty Gym. We will message you when it is ready.
           </p>
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            <Button type="button" variant="outline" className="h-11 rounded-xl" onClick={onLeave}>
+          <div className="mt-5">
+            <Button type="button" variant="outline" className="h-11 w-full rounded-xl" onClick={onLeave}>
               Continue using Smarty Gym
-            </Button>
-            <Button type="button" className="h-11 rounded-xl" disabled>
-              Keep waiting
             </Button>
           </div>
         </div>

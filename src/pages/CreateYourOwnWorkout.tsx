@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
 import {
@@ -141,6 +141,7 @@ const CreateYourOwnWorkout = () => {
   const [builtToday, setBuiltToday] = useState<number | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const activeJobKey = "smartygym_active_custom_workout";
+  const leftGenerationScreen = useRef(false);
 
   const remaining = builtToday === null ? null : Math.max(0, DAILY_LIMIT - builtToday);
   const limitReached = remaining === 0;
@@ -180,6 +181,7 @@ const CreateYourOwnWorkout = () => {
         .limit(1);
       const activeId = localStorage.getItem(activeJobKey) ?? activeRows?.[0]?.id;
       if (activeId && !cancelled) {
+        leftGenerationScreen.current = false;
         localStorage.setItem(activeJobKey, activeId);
         setBusy(true);
         setGenerationDialogOpen(true);
@@ -188,7 +190,7 @@ const CreateYourOwnWorkout = () => {
             localStorage.removeItem(activeJobKey);
             setGenerationDialogOpen(false);
             setBusy(false);
-            if (ready.status === "created") navigate(`/my-workouts/${activeId}`);
+            if (ready.status === "created" && !leftGenerationScreen.current) navigate(`/my-workouts/${activeId}`);
           })
           .catch((error) => {
             localStorage.removeItem(activeJobKey);
@@ -201,7 +203,7 @@ const CreateYourOwnWorkout = () => {
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, toast]);
 
   function toggleEquipment(id: string) {
     setEquipment((prev) => (prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]));
@@ -236,6 +238,7 @@ const CreateYourOwnWorkout = () => {
   async function generate(request: Record<string, unknown>) {
     if (busy) return;
     setBusy(true);
+    leftGenerationScreen.current = false;
     setGenerationDialogOpen(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-custom-workout", {
@@ -253,7 +256,7 @@ const CreateYourOwnWorkout = () => {
       if (ready.review_warnings?.length) {
         toast({ title: "A note from Smarty Coach", description: ready.review_warnings[0] });
       }
-      navigate(`/my-workouts/${data.id}`);
+      if (!leftGenerationScreen.current) navigate(`/my-workouts/${data.id}`);
     } catch (e) {
       localStorage.removeItem(activeJobKey);
       const message =
@@ -501,6 +504,7 @@ const CreateYourOwnWorkout = () => {
       <GeneratingDialog
         open={busy && generationDialogOpen}
         onLeave={() => {
+          leftGenerationScreen.current = true;
           setGenerationDialogOpen(false);
           setBusy(false);
           navigate("/my-workouts");
