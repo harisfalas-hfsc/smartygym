@@ -547,7 +547,8 @@ export const ContentCreationWizard = ({
     columns = 2,
   }: {
     options: { value: string | number; label: string; sub?: string }[];
-    value: string | number;
+    /** A single selected value, or an array when several may be ticked. */
+    value: string | number | (string | number)[];
     onChange: (v: any) => void;
     columns?: 2 | 3 | 4;
   }) => (
