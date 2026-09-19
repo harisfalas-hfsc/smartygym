@@ -5,6 +5,7 @@
 import type { PoolExercise } from "./pool.server.ts";
 import { pickPrep, STRETCH_RE } from "./pool.server.ts";
 import {
+  categoryAllowsFinisher,
   dominantRegion,
   equipmentFamilyLimit,
   equipmentFamilyOf,
@@ -155,7 +156,14 @@ export function pickBalanced(
 
 type Dose = { text: string; protocol: string | null };
 
-function doseFor(format: Format, level: DifficultyLevel, index: number): Dose {
+function doseFor(
+  format: Format,
+  level: DifficultyLevel,
+  index: number,
+  category?: Category,
+  minutes = 30,
+  stations = 4,
+): Dose {
   const sets = level === "beginner" ? 3 : level === "advanced" ? 5 : 4;
   const reps = level === "beginner" ? 10 : level === "advanced" ? 8 : 10;
   const rest = level === "beginner" ? 90 : level === "advanced" ? 60 : 75;
@@ -163,12 +171,22 @@ function doseFor(format: Format, level: DifficultyLevel, index: number): Dose {
 
   switch (format) {
     case "REPS & SETS":
+      if (category === "MICRO-WORKOUTS") {
+        return { text: "2 sets × 10 reps", protocol: "Rest 30 sec between sets. Easy, controlled movement." };
+      }
+      if (category === "PILATES" || category === "MOBILITY & STABILITY") {
+        const controlledSets = Math.max(2, Math.min(6, Math.round((minutes * 60) / Math.max(1, stations * 70))));
+        return { text: `${controlledSets} sets × 10 reps`, protocol: "Rest 30 sec between sets. Slow, breath-led control." };
+      }
       return {
         text: `${sets} sets × ${reps} reps`,
         protocol: `Rest ${rest} sec between sets. Controlled lowering, strong finish.`,
       };
     case "TABATA":
-      return { text: "20 sec", protocol: "8 rounds of 20 sec work / 10 sec rest per station." };
+      return {
+        text: "20 sec",
+        protocol: `${minutes >= 40 ? 10 : 8} rounds of 20 sec work / 10 sec rest per station.`,
+      };
     case "EMOM":
       return { text: `Minute ${index + 1}: ${reps + 2} reps`, protocol: null };
     case "AMRAP":
@@ -176,9 +194,17 @@ function doseFor(format: Format, level: DifficultyLevel, index: number): Dose {
     case "FOR TIME":
       return { text: `${reps * 2} reps`, protocol: null };
     case "MIX":
-      return index < 2
-        ? { text: `${sets} sets × ${reps} reps`, protocol: null }
-        : { text: `${work} sec`, protocol: null };
+      if (category === "RECOVERY") {
+        const recoverySets = minutes >= 40
+          ? 8
+          : Math.max(2, Math.min(8, Math.ceil((minutes * 60) / Math.max(1, stations * 65))));
+        return { text: `${recoverySets} sets × 8 reps`, protocol: "Rest 20 sec. Move gently with relaxed breathing." };
+      }
+      if (category === "CHALLENGE") {
+        const challengeSets = Math.max(3, Math.min(8, Math.round((minutes * 60 * 0.8) / Math.max(1, stations * 100))));
+        return { text: `${challengeSets} sets × ${reps} reps`, protocol: "Rest 60 sec between sets. Keep every rep clean." };
+      }
+      return index < 2 ? { text: `${sets} sets × ${reps} reps`, protocol: null } : { text: `${work} sec`, protocol: null };
     case "CIRCUIT":
     default:
       return { text: `${work} sec`, protocol: null };
@@ -238,8 +264,9 @@ export function buildPackWorkout(
 ): PackResult {
   const isMicro = input.category === "MICRO-WORKOUTS";
   const isRecovery = input.category === "RECOVERY";
-  // HARD RULE: Micro Workout and Pilates never get a finisher.
-  const noFinisher = isMicro || isRecovery || input.category === "PILATES";
+  // The shared doctrine is the sole authority for categories without a
+  // finisher (Pilates, Mobility & Stability, Recovery and Micro Workouts).
+  const noFinisher = !categoryAllowsFinisher(input.category);
   const favouriteIds = input.favoriteIds ?? [];
   const used = new Set<string>();
 
@@ -248,9 +275,12 @@ export function buildPackWorkout(
   // so a 30-minute request never ships as a 50-minute session.
   const budgetCount = (() => {
     if (isMicro) return 4;
-    const probe = doseFor(input.format, input.level, 0);
+    const probe = doseFor(input.format, input.level, 0, input.category, input.minutes, 4);
     // Round-based formats fill the clock with rounds, not with more stations.
-    if (!/sets?/i.test(probe.text)) return input.minutes <= 20 ? 4 : 5;
+    if (!/sets?/i.test(probe.text)) {
+      if (input.format === "TABATA") return input.minutes >= 40 ? 8 : input.minutes >= 35 ? 6 : 5;
+      return input.minutes <= 20 ? 4 : 5;
+    }
     const sets = Number(probe.text.match(/(\d+)\s*sets?/i)?.[1] ?? 1);
     const reps = Number(probe.text.match(/(\d+)\s*reps?/i)?.[1] ?? 12);
     const secondsPerExercise = sets * (reps * 4 + 60) + 15;
@@ -291,7 +321,7 @@ export function buildPackWorkout(
     }
   }
   if (!workPool.length) workPool = pool;
-  mainCount = Math.max(3, mainCount);
+  mainCount = Math.max(minMain, mainCount);
 
   // §12 — one shared implement budget for the whole session so the finisher
   // can never push the workout over the equipment-family ceiling.
@@ -380,7 +410,7 @@ export function buildPackWorkout(
   blocks.push(heading("💪", `Main Workout (${input.format})`));
   if (protocolLine) blocks.push(para(protocolLine));
   mainPicks.forEach((e, i) => {
-    const dose = doseFor(input.format, input.level, i);
+    const dose = doseFor(input.format, input.level, i, input.category, input.minutes, mainPicks.length);
     blocks.push(li(`${dose.text} ${token(e)}${dose.protocol ? ` — ${dose.protocol}` : ""}`));
   });
 

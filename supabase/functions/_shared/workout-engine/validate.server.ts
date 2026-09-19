@@ -3,6 +3,7 @@
 // contract: real library ids, the exact equipment allowlist, banned exercises,
 // section shape and dose hygiene. Nothing here trusts the model.
 import { equipmentLegalForSession, matchesSelectedEquipment, nameStem, type PoolExercise } from "./pool.server.ts";
+import { matchesCategoryPool } from "../exercise-selection.ts";
 import { findTokens, isLibraryId, stripHtml } from "./tokens.ts";
 import { parseWorkoutSteps } from "./parse-steps.ts";
 import {
@@ -170,6 +171,12 @@ export function validateWorkout(html: string, opts: ValidateOptions): Validation
       //     Challenge) — one shared definition with the pool filter.
       const cat = categoryExerciseViolation(row, opts.category);
       if (cat) errors.push(cat);
+      if (
+        ["PILATES", "RECOVERY", "MOBILITY & STABILITY"].includes(opts.category) &&
+        !matchesCategoryPool(row.name, opts.category)
+      ) {
+        errors.push(`"${row.name}" is outside the approved ${opts.category} exercise pool.`);
+      }
       if (opts.category === "MICRO-WORKOUTS" && microExerciseViolation(row)) {
         errors.push(`"${row.name}" needs equipment or a special setup, which a micro-workout never uses.`);
       }

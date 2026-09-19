@@ -233,8 +233,11 @@ export function auditWorkout(
       const fv = focusViolation(libRow, focus);
       if (fv) err("FOCUS_MISMATCH", `"${libRow.name}" does not train the ${focus} focus.`, section);
     }
-    if (!matchesCategoryPool(libRow.name, category)) {
-      warn("OUT_OF_POOL", `"${libRow.name}" sits outside the preferred ${category} pool.`, section);
+    if (
+      ["PILATES", "RECOVERY", "MOBILITY & STABILITY"].includes(category) &&
+      !matchesCategoryPool(libRow.name, category)
+    ) {
+      err("OUT_OF_POOL", `"${libRow.name}" sits outside the approved ${category} pool.`, section);
     }
   }
 
@@ -267,7 +270,7 @@ export function auditWorkout(
   }
 
   // 7. Soft tissue stays token-free.
-  const softTissue = html.split("🔥")[0] ?? "";
+  const softTissue = html.includes("🧽") ? (html.split("🔥")[0] ?? "") : "";
   if (findTokens(softTissue).length && stripHtml(softTissue).length) {
     warn("SOFT_TISSUE_TOKENS", "Soft Tissue Preparation contains exercise links.", "Soft Tissue Preparation");
   }
