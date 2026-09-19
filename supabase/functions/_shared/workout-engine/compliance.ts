@@ -17,6 +17,7 @@ import {
   equipmentFamilyViolation,
   focusViolation,
   humanRealismViolation,
+  isRepsAndSetsOnly,
   microExerciseViolation,
   sequenceViolation,
   sessionOverflowViolation,
@@ -194,6 +195,57 @@ export function auditWorkout(
         `The ${label} is written as ${declared}, which is not legal for ${category}. ${category} sections must be ${CATEGORY_FORMATS[category].join(" / ")}.`,
         label,
       );
+    }
+  }
+
+  // 2c. Body structure, not just the heading. In REPS & SETS-only categories a
+  //     section may not be written as timed rounds, and every exercise line in
+  //     Main Workout / Finisher must declare sets and reps.
+  if (isRepsAndSetsOnly(category)) {
+    const plain = html.replace(/<[^>]+>/g, " ");
+    const mainIdx = plain.indexOf("💪");
+    const finIdx = plain.indexOf("⚡");
+    const coolIdx = plain.indexOf("🧘");
+    const slice = (from: number, to: number) =>
+      from === -1 ? "" : plain.slice(from, to === -1 ? plain.length : to);
+    const sections: Array<[string, string]> = [
+      ["Main Workout", slice(mainIdx, finIdx === -1 ? coolIdx : finIdx)],
+      ["Finisher", slice(finIdx, coolIdx)],
+    ];
+    for (const [label, body] of sections) {
+      if (!body) continue;
+      if (/\brounds?\s+for\s+time\b|\bfor\s+time\b|\bAMRAP\b|\bEMOM\b|\bTabata\b|\btime\s*cap\b/i.test(body)) {
+        err(
+          "SECTION_TIMED_STRUCTURE",
+          `The ${label} is written as a timed / round-based block. ${category} work must be prescribed as sets and reps.`,
+          label,
+        );
+      }
+      // The prescription is written BEFORE the token, so inspect the text that
+      // precedes each token occurrence. Sets × reps is the norm; a plain rep
+      // count or a timed hold (mobility, micro-workouts) is equally measurable.
+      const chunks = body.split(/\{\{exercise:/);
+      let unprescribed = 0;
+      for (let i = 1; i < chunks.length; i++) {
+        const before = chunks[i - 1]!.slice(-120);
+        const after = (chunks[i]!.split("}}")[1] ?? "").slice(0, 60);
+        const dose = (t: string) =>
+          /\d+\s*sets?\s*[x×]\s*\d+/i.test(t) ||
+          /\d+\s*[x×]\s*\d+/i.test(t) ||
+          /\d+\s*reps?\b/i.test(t) ||
+          /\d+\s*(?:sec(?:onds?)?|min(?:utes?)?|breaths?)\b/i.test(t);
+        const measurable = dose(before) || dose(after);
+
+        if (!measurable) unprescribed++;
+      }
+      if (unprescribed) {
+        err(
+          "SECTION_MISSING_SETS_REPS",
+          `${label} has ${unprescribed} exercise line(s) without a measurable prescription (sets × reps, reps, or a timed hold).`,
+          label,
+        );
+      }
+
     }
   }
 
