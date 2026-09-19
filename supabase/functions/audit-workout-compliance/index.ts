@@ -57,7 +57,9 @@ serve(async (req) => {
 
     const { data, error } = await supabase
       .from("admin_workouts")
-      .select("id,name,category,format,difficulty_stars,equipment,duration,focus,main_workout")
+      .select(
+        "id,name,category,format,difficulty_stars,equipment,duration,focus,main_workout,warm_up,activation,finisher,cool_down",
+      )
       .order("id", { ascending: true })
       .range(offset, offset + limit - 1);
     if (error) throw new Error(error.message);
