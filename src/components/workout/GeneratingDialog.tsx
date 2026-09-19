@@ -28,8 +28,6 @@ const FITNESS_TIPS = [
  */
 export function GeneratingDialog({ open, onLeave }: { open: boolean; onLeave?: () => void }) {
   const [tipIndex, setTipIndex] = useState(0);
-  const [handOff, setHandOff] = useState(false);
-  const [waitRound, setWaitRound] = useState(0);
 
   useEffect(() => {
     if (!open) return;
@@ -39,18 +37,6 @@ export function GeneratingDialog({ open, onLeave }: { open: boolean; onLeave?: (
     }, 7000);
     return () => clearInterval(id);
   }, [open]);
-
-  // After 90 seconds the athlete is never trapped — the build continues on the
-  // server and, if anything goes wrong, the recovery system delivers it.
-  useEffect(() => {
-    if (!open) {
-      setHandOff(false);
-      setWaitRound(0);
-      return;
-    }
-    const id = setTimeout(() => setHandOff(true), 90000);
-    return () => clearTimeout(id);
-  }, [open, waitRound]);
 
   return (
     <Dialog open={open}>
@@ -64,9 +50,7 @@ export function GeneratingDialog({ open, onLeave }: { open: boolean; onLeave?: (
         <div className="p-2 text-center text-muted-foreground">
           <Loader2 className="mx-auto mb-3 h-6 w-6 animate-spin text-primary" />
           <p className="font-medium text-foreground">
-            {handOff
-              ? "Still building — leave it with us."
-              : "Building your workout… this can take up to 2 minutes."}
+            Building your workout…
           </p>
           <div
             className="mx-auto mt-6 max-w-md rounded-md border border-border bg-muted/40 p-4 text-left"
@@ -78,23 +62,16 @@ export function GeneratingDialog({ open, onLeave }: { open: boolean; onLeave?: (
             </p>
           </div>
           <p className="mt-4 text-xs leading-5 text-muted-foreground">
-            {handOff
-              ? "You can close this and carry on — your workout finishes on the server and lands in your logbook. We will email you the moment it is ready."
-              : "Stay on this screen — your workout will appear automatically when it is ready."}
+            Keep waiting and it will open automatically, or continue using Smarty Gym. We will message you when it is ready.
           </p>
-          {handOff ? (
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              <Button type="button" variant="outline" className="h-11 rounded-xl" onClick={onLeave}>
-                Leave it with us
-              </Button>
-              <Button type="button" className="h-11 rounded-xl" onClick={() => {
-                  setHandOff(false);
-                  setWaitRound((n) => n + 1);
-                }}>
-                Keep waiting
-              </Button>
-            </div>
-          ) : null}
+          <div className="mt-5 grid grid-cols-2 gap-2">
+            <Button type="button" variant="outline" className="h-11 rounded-xl" onClick={onLeave}>
+              Continue using Smarty Gym
+            </Button>
+            <Button type="button" className="h-11 rounded-xl" disabled>
+              Keep waiting
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -140,6 +140,9 @@ export const MESSAGE_TYPES = {
   
   /** Program status update */
   PROGRAM_STATUS: 'status_update',
+
+  /** A member-created workout has finished building */
+  CUSTOM_WORKOUT_READY: 'custom_workout_ready',
   
   // ============================================
   // SUPPORT & ADMIN NOTIFICATIONS
@@ -200,6 +203,7 @@ export const MESSAGE_TYPE_SOURCES: Record<string, { source: string; schedule: st
   [MESSAGE_TYPES.REACTIVATION]: { source: 'send-reengagement-emails', schedule: 'Wednesdays 08:00 UTC' },
   [MESSAGE_TYPES.SUPPORT]: { source: 'send-contact-response-notification', schedule: 'On response' },
   [MESSAGE_TYPES.PROGRAM_DELIVERED]: { source: 'send-new-content-notifications', schedule: 'On delivery' },
+  [MESSAGE_TYPES.CUSTOM_WORKOUT_READY]: { source: 'create-custom-workout', schedule: 'On completion' },
 };
 
 /**

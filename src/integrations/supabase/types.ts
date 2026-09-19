@@ -2934,6 +2934,7 @@ export type Database = {
           equipment: string[]
           focus: string | null
           format: string | null
+          generation_error: string | null
           has_viewed: boolean
           id: string
           image_url: string | null
@@ -2947,6 +2948,8 @@ export type Database = {
           needs_review: boolean
           rated_at: string | null
           rating: number | null
+          ready_emailed_at: string | null
+          ready_notified_at: string | null
           review_warnings: string[]
           share_report_count: number
           shared_at: string | null
@@ -2969,6 +2972,7 @@ export type Database = {
           equipment?: string[]
           focus?: string | null
           format?: string | null
+          generation_error?: string | null
           has_viewed?: boolean
           id?: string
           image_url?: string | null
@@ -2982,6 +2986,8 @@ export type Database = {
           needs_review?: boolean
           rated_at?: string | null
           rating?: number | null
+          ready_emailed_at?: string | null
+          ready_notified_at?: string | null
           review_warnings?: string[]
           share_report_count?: number
           shared_at?: string | null
@@ -3004,6 +3010,7 @@ export type Database = {
           equipment?: string[]
           focus?: string | null
           format?: string | null
+          generation_error?: string | null
           has_viewed?: boolean
           id?: string
           image_url?: string | null
@@ -3017,6 +3024,8 @@ export type Database = {
           needs_review?: boolean
           rated_at?: string | null
           rating?: number | null
+          ready_emailed_at?: string | null
+          ready_notified_at?: string | null
           review_warnings?: string[]
           share_report_count?: number
           shared_at?: string | null
@@ -4416,6 +4425,7 @@ export type Database = {
         | "morning_notification"
         | "status_update"
         | "unified_announcement"
+        | "custom_workout_ready"
       plan_type:
         | "free"
         | "gold"
@@ -4605,6 +4615,7 @@ export const Constants = {
         "morning_notification",
         "status_update",
         "unified_announcement",
+        "custom_workout_ready",
       ],
       plan_type: [
         "free",
