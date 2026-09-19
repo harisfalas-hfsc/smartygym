@@ -38,6 +38,8 @@ interface WizardBody {
   job_id?: string;
   category: string;
   equipment: "BODYWEIGHT" | "EQUIPMENT" | string;
+  /** Exact apparatus picked in the wizard, e.g. ["dumbbells","kettlebells"]. */
+  equipment_ids?: string[];
   difficulty_stars: number; // 0..6
   format?: string;
   duration?: string; // e.g. "30 min"
