@@ -50,6 +50,17 @@ interface WizardBody {
   note?: string;
 }
 
+/** Equipment ids the shared engine already understands. */
+const ALLOWED_EQUIPMENT_IDS = [
+  "dumbbells",
+  "kettlebells",
+  "barbell",
+  "bands",
+  "trx",
+  "machines",
+  "fullgym",
+];
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
