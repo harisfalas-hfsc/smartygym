@@ -180,7 +180,7 @@ function doseFor(
       }
       return {
         text: `${sets} sets × ${reps} reps`,
-        protocol: `Rest ${rest + (category === "STRENGTH" && minutes >= 45 ? 15 : 0)} sec between sets. Controlled lowering, strong finish.`,
+        protocol: `Rest ${rest} sec between sets. Controlled lowering, strong finish.`,
       };
     case "TABATA":
       return {
@@ -286,7 +286,7 @@ export function buildPackWorkout(
     const secondsPerExercise = sets * (reps * 4 + 60) + 15;
     const finisherSeconds = noFinisher ? 0 : 3 * (12 * 4 + 60);
     const available = Math.max(120, input.minutes * 60 - finisherSeconds);
-    return Math.max(3, Math.min(8, Math.round(available / secondsPerExercise)));
+    return Math.max(3, Math.min(6, Math.round(available / secondsPerExercise)));
   })();
   // §15 — the chosen body focus is a hard rule for the template engine too.
   // On-focus movements first. When the library cannot cover the whole block
