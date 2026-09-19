@@ -307,6 +307,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://smartygym.com/workout/pilates/advanced-power-pilates.html</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://smartygym.com/workout/strength/arcadian-press-helix-upp-b-a.html</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -512,7 +518,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/strength/iron-current.html</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -716,7 +722,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/calorie-burning/ember-cascade-burn.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -805,6 +811,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://smartygym.com/workout/cardio/cadence-current-weave.html</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://smartygym.com/workout/micro-workouts/squat-storm.html</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -813,12 +825,6 @@
   <url>
     <loc>https://smartygym.com/workout/cardio/mercury-cadence-storm.html</loc>
     <lastmod>2026-08-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://smartygym.com/workout/cardio/cadence-current-weave.html</loc>
-    <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -878,7 +884,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/pilates/intermediate-stability-flow.html</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -932,7 +938,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/micro-workouts/jump-starter.html</loc>
-    <lastmod>2026-06-15</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1069,12 +1075,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://smartygym.com/workout/pilates/advanced-power-pilates.html</loc>
-    <lastmod>2026-09-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://smartygym.com/workout/calorie-burning/calorie-melt-reactor-rush.html</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -1100,7 +1100,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/cardio/arcus-vortex.html</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1430,7 +1430,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/pilates/advanced-reformer-mastery.html</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2264,7 +2264,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/cardio/cadence-awaken-flow.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2300,7 +2300,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/metabolic/cadence-coil-tabata.html</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2365,13 +2365,13 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://smartygym.com/workout/calorie-burning/ember-step-ladder.html</loc>
-    <lastmod>2026-09-17</lastmod>
+    <loc>https://smartygym.com/workout/strength/atlas-circuit-unbound.html</loc>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://smartygym.com/workout/strength/atlas-circuit-unbound.html</loc>
+    <loc>https://smartygym.com/workout/calorie-burning/ember-step-ladder.html</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -2684,7 +2684,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/cardio/cadence-pulse-trail.html</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2888,7 +2888,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/pilates/intermediate-core-balance.html</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2984,7 +2984,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/pilates/beginner-mat-flow.html</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3002,7 +3002,7 @@
   </url>
   <url>
     <loc>https://smartygym.com/workout/calorie-burning/kinetic-forge-flow.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3337,14 +3337,14 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://smartygym.com/workout/challenge/circuit-surge.html</loc>
+    <loc>https://smartygym.com/workout/calorie-burning/kinetic-cascade-apex.html</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://smartygym.com/workout/calorie-burning/kinetic-cascade-apex.html</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://smartygym.com/workout/challenge/circuit-surge.html</loc>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
