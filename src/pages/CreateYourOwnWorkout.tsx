@@ -340,7 +340,6 @@ const CreateYourOwnWorkout = () => {
       minutes: pick([30, 40, 45]),
       location: location || "anywhere",
       equipment: equipment.length ? equipment : ["bodyweight"],
-      equipmentOther: "",
       note: "",
       level: level || "auto",
     };
