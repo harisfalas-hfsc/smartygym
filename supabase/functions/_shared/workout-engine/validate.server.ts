@@ -35,6 +35,7 @@ import {
   cooldownOverflowViolation,
   sessionOverflowViolation,
   sessionBudgetViolation,
+  workSlotPrepViolation,
 } from "./doctrine.ts";
 
 import {
@@ -242,6 +243,11 @@ export function validateWorkout(html: string, opts: ValidateOptions): Validation
   for (const step of [...main, ...finisher]) {
     if (!/\d/.test(step.prescription)) {
       errors.push(`"${step.name}" has no prescribed dose.`);
+    }
+    const stepRow = libraryById.get(step.exerciseId);
+    if (stepRow) {
+      const prep = workSlotPrepViolation(stepRow, opts.category);
+      if (prep) errors.push(prep);
     }
   }
 

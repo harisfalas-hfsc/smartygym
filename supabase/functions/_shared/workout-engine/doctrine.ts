@@ -228,6 +228,34 @@ export function conditioningSetupViolation(e: ExerciseLike, category: Category):
 }
 
 /**
+ * Categories whose actual training content IS mobility / stretch work. In every
+ * OTHER category a stretch or joint-circle drill is preparation or recovery: it
+ * belongs in Activation or Cool Down and may never be dosed as work inside Main
+ * Workout or a Finisher, whatever the format.
+ */
+export const STRETCH_NATIVE_CATEGORIES: Category[] = [
+  "MOBILITY & STABILITY",
+  "RECOVERY",
+  "PILATES",
+];
+
+/** Preparation / recovery vocabulary that is never a work-slot exercise. */
+export const WORK_SLOT_PREP_RE = new RegExp(
+  `${STRETCH_RE.source}|${CONDITIONING_LOW_STIMULUS_RE.source}`,
+  "i",
+);
+
+/**
+ * Universal work-slot rule: applies to Main Workout and Finisher in EVERY
+ * category except the three whose content is mobility by definition.
+ */
+export function workSlotPrepViolation(e: ExerciseLike, category: Category): string | null {
+  if (STRETCH_NATIVE_CATEGORIES.includes(category)) return null;
+  if (!WORK_SLOT_PREP_RE.test(e.name)) return null;
+  return `"${e.name}" is a stretch or mobility drill. It belongs in Activation or Cool Down, never dosed as work in a ${category} Main Workout or Finisher.`;
+}
+
+/**
  * Category-level legality for a single exercise, independent of format.
  * Returns a concrete violation string, never a soft preference.
  */

@@ -21,6 +21,7 @@ import {
   microExerciseViolation,
   sequenceViolation,
   sessionOverflowViolation,
+  workSlotPrepViolation,
 } from "./doctrine.ts";
 import { isSelectable, matchesCategoryPool } from "../exercise-selection.ts";
 import {
@@ -303,6 +304,8 @@ export function auditWorkout(
     const section = step.section;
     const cat = categoryExerciseViolation(libRow, category);
     if (cat) err("CATEGORY_EXERCISE", cat, section);
+    const prep = workSlotPrepViolation(libRow, category);
+    if (prep) err("WORK_SLOT_PREP", prep, section);
     if (category === "MICRO-WORKOUTS" && microExerciseViolation(libRow)) {
       err("MICRO_EQUIPMENT", `"${libRow.name}" needs equipment, which a micro-workout never uses.`, section);
     }

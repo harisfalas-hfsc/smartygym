@@ -2,7 +2,7 @@ import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { sanitizeProtocolBlocks } from "../_shared/protocol-sanitizer.ts";
 import { applyWodQualityGate } from "../_shared/wod-quality-gate.ts";
 import { guaranteeAllExercisesLinked, rejectNonLibraryExercises } from "../_shared/exercise-matching.ts";
-import { categoryExerciseViolation, dynamicExerciseViolation, humanRealismViolation } from "../_shared/workout-engine/doctrine.ts";
+import { categoryExerciseViolation, dynamicExerciseViolation, humanRealismViolation, workSlotPrepViolation } from "../_shared/workout-engine/doctrine.ts";
 import { equipmentLegalForSession } from "../_shared/workout-engine/pool.server.ts";
 import { isSelectable } from "../_shared/exercise-selection.ts";
 
@@ -233,4 +233,24 @@ Deno.test("a member who only picked kettlebells never sees a barbell movement", 
   const opts = { category: "METABOLIC" as const, equipmentMode: "EQUIPMENT" as const, selectedEquipment: ["bodyweight", "kettlebells"] };
   assertEquals(equipmentLegalForSession(barbell, opts), false);
   assertEquals(equipmentLegalForSession(kb, opts), true);
+});
+
+Deno.test("stretches and joint circles are never work-slot exercises outside the mobility-native categories", () => {
+  const drills = [
+    { name: "rear deltoid stretch", equipment: "body weight" },
+    { name: "circles knee stretch", equipment: "body weight" },
+    { name: "Cat-Cow Stretch", equipment: "body weight" },
+    { name: "wrist circles", equipment: "body weight" },
+    { name: "seated glute stretch", equipment: "body weight" },
+    { name: "Shoulder CARs", equipment: "body weight" },
+  ];
+  for (const d of drills) {
+    for (const category of ["STRENGTH", "CALORIE BURNING", "CARDIO", "METABOLIC", "CHALLENGE", "MICRO-WORKOUTS"] as const) {
+      assertEquals(Boolean(workSlotPrepViolation(d, category)), true, `${d.name} / ${category}`);
+    }
+    for (const category of ["MOBILITY & STABILITY", "RECOVERY", "PILATES"] as const) {
+      assertEquals(workSlotPrepViolation(d, category), null, `${d.name} / ${category}`);
+    }
+  }
+  assertEquals(workSlotPrepViolation({ name: "barbell back squat", equipment: "barbell" }, "STRENGTH"), null);
 });
