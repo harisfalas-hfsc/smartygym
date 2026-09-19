@@ -676,11 +676,6 @@ export const ContentCreationWizard = ({
 
           {currentKey === "equipment" && (
             <>
-              {isMicro && (
-                <p className="text-xs text-amber-600 dark:text-amber-400 mb-2">
-                  Micro-workouts are locked to BODYWEIGHT only (office / home / chair / desk).
-                </p>
-              )}
               <ChoiceGrid
                 options={(type === "workout" ? EQUIPMENT_OPTIONS : PROGRAM_EQUIPMENT_OPTIONS).map((e) => ({
                   value: e,
@@ -688,11 +683,32 @@ export const ContentCreationWizard = ({
                 }))}
                 value={equipment}
                 onChange={(v) => {
-                  if (isMicro) return;
                   setEquipment(v);
+                  if (v.toLowerCase().includes("bodyweight")) setEquipmentIds([]);
                 }}
                 columns={2}
               />
+              {equipment && !equipment.toLowerCase().includes("bodyweight") && (
+                <div className="pt-4 mt-4 border-t">
+                  <Label className="text-sm font-medium mb-2 block">
+                    Which equipment? (pick at least one)
+                  </Label>
+                  <ChoiceGrid
+                    options={ADMIN_EQUIPMENT_CHOICES.map((e) => ({ value: e.id, label: e.label }))}
+                    value={equipmentIds}
+                    onChange={(v) => {
+                      const id = String(v);
+                      setEquipmentIds((prev) =>
+                        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+                      );
+                    }}
+                    columns={2}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Only these will be used. Bodyweight movements stay available alongside them.
+                  </p>
+                </div>
+              )}
             </>
           )}
 
