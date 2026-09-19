@@ -178,12 +178,22 @@ function doseFor(
         const controlledSets = Math.max(2, Math.min(6, Math.round((minutes * 60) / Math.max(1, stations * 70))));
         return { text: `${controlledSets} sets × 10 reps`, protocol: "Rest 30 sec between sets. Slow, breath-led control." };
       }
+      if (category === "STRENGTH" && minutes >= 45) {
+        const strengthSets = Math.max(sets, Math.min(7, Math.round(minutes / 8)));
+        return {
+          text: `${strengthSets} sets × ${reps} reps`,
+          protocol: `Rest ${rest} sec between sets. Controlled lowering, strong finish.`,
+        };
+      }
       return {
         text: `${sets} sets × ${reps} reps`,
         protocol: `Rest ${rest} sec between sets. Controlled lowering, strong finish.`,
       };
     case "TABATA":
-      return { text: "20 sec", protocol: "8 rounds of 20 sec work / 10 sec rest per station." };
+      return {
+        text: "20 sec",
+        protocol: `${minutes >= 40 ? 10 : 8} rounds of 20 sec work / 10 sec rest per station.`,
+      };
     case "EMOM":
       return { text: `Minute ${index + 1}: ${reps + 2} reps`, protocol: null };
     case "AMRAP":
@@ -192,8 +202,12 @@ function doseFor(
       return { text: `${reps * 2} reps`, protocol: null };
     case "MIX":
       if (category === "RECOVERY") {
-        const recoverySets = Math.max(2, Math.min(8, Math.round((minutes * 60) / Math.max(1, stations * 65))));
+        const recoverySets = Math.max(2, Math.min(8, Math.ceil((minutes * 60) / Math.max(1, stations * 65))));
         return { text: `${recoverySets} sets × 8 reps`, protocol: "Rest 20 sec. Move gently with relaxed breathing." };
+      }
+      if (category === "CHALLENGE") {
+        const challengeSets = Math.max(3, Math.min(8, Math.round((minutes * 60 * 0.8) / Math.max(1, stations * 100))));
+        return { text: `${challengeSets} sets × ${reps} reps`, protocol: "Rest 60 sec between sets. Keep every rep clean." };
       }
       return index < 2 ? { text: `${sets} sets × ${reps} reps`, protocol: null } : { text: `${work} sec`, protocol: null };
     case "CIRCUIT":
