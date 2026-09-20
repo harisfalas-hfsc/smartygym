@@ -331,6 +331,12 @@ export function categoryExerciseViolation(e: ExerciseLike, category: Category): 
     return `"${e.name}" is too intense for a Recovery session.`;
   if (category === "MICRO-WORKOUTS" && (MICRO_BAN_RE.test(t) || HOME_APPARATUS_RE.test(t)))
     return `"${e.name}" needs equipment or a special setup, which a Micro Workout never uses.`;
+  // Classical Pilates mat repertoire is Pilates content. It is control and
+  // breath work, not strength, conditioning or hypertrophy work.
+  if (!STRETCH_NATIVE_CATEGORIES.includes(category) && PILATES_REPERTOIRE_RE.test(name))
+    return `"${e.name}" is classical Pilates mat repertoire and belongs in a Pilates session, not a ${category} work section.`;
+
+
 
   const stillness = conditioningStillnessViolation(e, category);
   if (stillness) return stillness;
