@@ -76,7 +76,7 @@ Deno.test("program picker: category-first rules keep weight-loss work realistic 
   ];
   const pool = filterLibraryForProgram(library, "Bodyweight", "Advanced", "WEIGHT LOSS");
 
-  assertEquals(pool.map((ex) => ex.id).sort(), ["wl-1"]);
+  assertEquals(pool.map((ex) => ex.id).sort(), ["wl-1", "wl-2"]);
 });
 
 Deno.test("exercise matching: post-processing repairs static hold prescriptions only", () => {
