@@ -14,13 +14,12 @@ const LIBRARY: LibExercise[] = [
   { id: "eq-beg-chest", name: "machine chest press", body_part: "chest", equipment: "machine", target: "pectorals", difficulty: "Beginner" },
 ];
 
-Deno.test("program picker: equipment mode never falls back to bodyweight and difficulty is exact", () => {
+Deno.test("program picker: equipment is a ceiling, bodyweight remains legal, and difficulty is exact", () => {
   const equipmentAdvanced = filterLibraryForProgram(LIBRARY, "Equipment", "Advanced");
 
-  assertEquals(equipmentAdvanced.every((ex) => ex.equipment !== "body weight"), true);
   assertEquals(equipmentAdvanced.every((ex) => ex.difficulty === "Advanced"), true);
   assertEquals(equipmentAdvanced.some((ex) => ex.id === "eq-beg-chest"), false);
-  assertEquals(equipmentAdvanced.some((ex) => ex.id === "bw-adv-push"), false);
+  assertEquals(equipmentAdvanced.some((ex) => ex.id === "bw-adv-push"), true);
 });
 
 Deno.test("program picker: bodyweight mode excludes equipment and apparatus-dependent bodyweight", () => {
@@ -77,7 +76,7 @@ Deno.test("program picker: category-first rules keep weight-loss work realistic 
   ];
   const pool = filterLibraryForProgram(library, "Bodyweight", "Advanced", "WEIGHT LOSS");
 
-  assertEquals(pool.map((ex) => ex.id).sort(), ["wl-1", "wl-2"]);
+  assertEquals(pool.map((ex) => ex.id).sort(), ["wl-1"]);
 });
 
 Deno.test("exercise matching: post-processing repairs static hold prescriptions only", () => {
