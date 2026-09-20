@@ -109,6 +109,9 @@ export function auditProgramCompliance(program: ProgramLike, library: PoolExerci
       if (section === "Main Workout" && tokens.length < 4) {
         issues.push({ code: "THIN_MAIN", day: dayName, section, message: `Main Workout has only ${tokens.length} linked exercises.` });
       }
+      if (section === "Finisher" && tokens.length === 0) {
+        issues.push({ code: "EMPTY_FINISHER", day: dayName, section, message: "Finisher has no linked exercises." });
+      }
       for (const token of tokens) {
         const exercise = byId.get(token.id);
         if (!exercise) {
