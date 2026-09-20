@@ -701,9 +701,16 @@ export function buildDayBullets(
     ? mainPicks.map((ex, i) => protocolMainPrescription(proto.main, ex, i + 1, category, dayTitle))
     : Array.from({ length: counts.main }, (_, i) => `• Exercise ${i + 1} — sets × reps, rest period`);
 
-  const finisherBullets = finisherPicks.length
-    ? finisherPicks.map((ex) => protocolFinisherPrescription(proto.finisher, ex, category))
+  // A Finisher is a work section: it must always carry real, linked exercises.
+  // When the pool ran dry, recycle the safest movements already used in the
+  // Main Workout rather than printing prose with no exercises.
+  const finisherSource = finisherPicks.length
+    ? finisherPicks
+    : mainPicks.slice(-Math.max(1, Math.min(counts.finisher || 2, mainPicks.length)));
+  const finisherBullets = finisherSource.length
+    ? finisherSource.map((ex) => protocolFinisherPrescription(proto.finisher, ex, category))
     : [sessionFinisher(category, dayTitle)];
+
 
   const finisherLines = programAllowsFinisher(category)
     ? [
