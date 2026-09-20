@@ -92,6 +92,17 @@ Deno.serve(async (req) => {
     }
     console.log(`${LOG} Library loaded: ${allExercises.length}`);
     const complianceLibrary = await loadAllExercises(supabase);
+    // The picker and the auditor must judge the SAME record. The compliance
+    // library carries description + instructions, which several doctrine rules
+    // read; without them the picker can accept a movement the audit rejects.
+    const complianceById = new Map(complianceLibrary.map((e: any) => [String(e.id), e]));
+    for (const ex of allExercises) {
+      const full = complianceById.get(String(ex.id));
+      if (!full) continue;
+      (ex as any).description = full.description ?? (ex as any).description ?? null;
+      (ex as any).instructions = (full as any).instructions ?? null;
+    }
+
 
     const results: Array<{ id: string; name: string; status: string; bullets: number; reused: number }> = [];
 
@@ -124,11 +135,17 @@ Deno.serve(async (req) => {
           .filter((t) => libById.has(t.id))
           .map((t) => libById.get(t.id)!)
           .filter((exercise) => library.some((allowed) => allowed.id === exercise.id))
-          .filter((exercise) => !programWorkExerciseViolation({
-            ...exercise,
-            equipment: exercise.equipment ?? null,
-            target_muscle: exercise.target,
-          }, p.category, programMainFormat(p.category, 1)));
+          .filter((exercise) => {
+            // A reused pick is rotated across both week templates, so it must be
+            // legal under EVERY main format the category can run, not just week A.
+            const formats = [1, 2].map((t) => programMainFormat(p.category, t));
+            return formats.every((fmt) => !programWorkExerciseViolation({
+              ...exercise,
+              equipment: exercise.equipment ?? null,
+              target_muscle: exercise.target,
+            }, p.category, fmt));
+          });
+
       const usedQueue = [...reusedValid];
       let reusedUsed = 0;
 
