@@ -274,9 +274,17 @@ export const STRETCH_NATIVE_CATEGORIES: Category[] = [
   "PILATES",
 ];
 
+/**
+ * Mobility positions held for time (deep squat hold, pigeon hold, couch hold).
+ * They are preparation or recovery content, never a dosed work-slot exercise
+ * outside the three mobility-native categories.
+ */
+export const MOBILITY_HOLD_RE =
+  /\b(?:deep squat|squat sit|lizard|pigeon|frog|couch|butterfly|straddle|saddle|child'?s pose|hip flexor|hamstring|calf|quad)\s+hold\b/i;
+
 /** Preparation / recovery vocabulary that is never a work-slot exercise. */
 export const WORK_SLOT_PREP_RE = new RegExp(
-  `${STRETCH_RE.source}|${CONDITIONING_LOW_STIMULUS_RE.source}`,
+  `${STRETCH_RE.source}|${CONDITIONING_LOW_STIMULUS_RE.source}|${MOBILITY_HOLD_RE.source}`,
   "i",
 );
 
@@ -289,6 +297,22 @@ export function workSlotPrepViolation(e: ExerciseLike, category: Category): stri
   if (!WORK_SLOT_PREP_RE.test(e.name)) return null;
   return `"${e.name}" is a stretch or mobility drill. It belongs in Activation or Cool Down, never dosed as work in a ${category} Main Workout or Finisher.`;
 }
+
+/**
+ * Motion, not position. In the conditioning family the athlete must keep
+ * moving: true stillness (static holds, wall sits, dead hangs, isometrics,
+ * windmill) is never work, whatever the format. Dynamic seated or lying
+ * movements — sit-ups, leg raises, mountain climbers — remain legal.
+ */
+const CONDITIONING_STILLNESS_RE =
+  /\b(hold|holds|isometric|isometrics|wall sit|dead hang|static|windmill)\b/i;
+
+export function conditioningStillnessViolation(e: ExerciseLike, category: Category): string | null {
+  if (!isConditioningCategory(category)) return null;
+  if (!CONDITIONING_STILLNESS_RE.test(e.name)) return null;
+  return `"${e.name}" is a static hold. ${category} work keeps the athlete moving — stillness belongs in Activation or Cool Down.`;
+}
+
 
 /**
  * Category-level legality for a single exercise, independent of format.
