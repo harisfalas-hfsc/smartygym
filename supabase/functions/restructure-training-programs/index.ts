@@ -92,6 +92,17 @@ Deno.serve(async (req) => {
     }
     console.log(`${LOG} Library loaded: ${allExercises.length}`);
     const complianceLibrary = await loadAllExercises(supabase);
+    // The picker and the auditor must judge the SAME record. The compliance
+    // library carries description + instructions, which several doctrine rules
+    // read; without them the picker can accept a movement the audit rejects.
+    const complianceById = new Map(complianceLibrary.map((e: any) => [String(e.id), e]));
+    for (const ex of allExercises) {
+      const full = complianceById.get(String(ex.id));
+      if (!full) continue;
+      (ex as any).description = full.description ?? (ex as any).description ?? null;
+      (ex as any).instructions = (full as any).instructions ?? null;
+    }
+
 
     const results: Array<{ id: string; name: string; status: string; bullets: number; reused: number }> = [];
 
