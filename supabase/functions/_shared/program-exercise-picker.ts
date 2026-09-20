@@ -815,11 +815,14 @@ export function buildDayBullets(
     ...activationLines(category, dayTitle),
     `<strong>🏋 Main Workout (${proto.main}) — ${mainTimeWindow}</strong>`,
     `<em>${proto.mainIntro}</em>`,
+    ...locomotionLines(category, dayTitle, weekIndex, dayIndex, tier, equipmentIds),
     ...mainBullets,
     ...finisherLines,
+    ...downRegulationLines(category),
     "<strong>🧘 Cool Down — 5 minutes</strong>",
     ...coolDownLines(category),
   ];
+
 }
 
 /**
