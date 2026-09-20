@@ -192,7 +192,14 @@ Deno.serve(async (req) => {
         weekly_schedule: schedule,
       }, complianceLibrary);
       if (!audit.passed) {
-        results.push({ id: p.id, name: p.name, status: `invalid:${audit.issues.slice(0, 3).map((issue) => issue.code).join(",")}`, bullets: bulletTotal, reused: reusedUsed });
+        results.push({
+          id: p.id,
+          name: p.name,
+          status: `invalid:${audit.issues.slice(0, 3).map((issue) => issue.code).join(",")}`,
+          issues: audit.issues.slice(0, 3),
+          bullets: bulletTotal,
+          reused: reusedUsed,
+        });
         continue;
       }
 
