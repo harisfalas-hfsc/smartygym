@@ -2843,6 +2843,72 @@ export type Database = {
         }
         Relationships: []
       }
+      training_program_compliance_audit: {
+        Row: {
+          audited_at: string
+          category: string | null
+          issues: Json
+          linked_exercises: number
+          name: string
+          program_id: string
+          status: string
+          training_days: number
+        }
+        Insert: {
+          audited_at?: string
+          category?: string | null
+          issues?: Json
+          linked_exercises?: number
+          name?: string
+          program_id: string
+          status?: string
+          training_days?: number
+        }
+        Update: {
+          audited_at?: string
+          category?: string | null
+          issues?: Json
+          linked_exercises?: number
+          name?: string
+          program_id?: string
+          status?: string
+          training_days?: number
+        }
+        Relationships: []
+      }
+      training_program_content_backup: {
+        Row: {
+          created_at: string
+          id: string
+          nutrition_tips: string | null
+          program_id: string
+          program_structure: string | null
+          progression_plan: string | null
+          reason: string | null
+          weekly_schedule: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nutrition_tips?: string | null
+          program_id: string
+          program_structure?: string | null
+          progression_plan?: string | null
+          reason?: string | null
+          weekly_schedule?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nutrition_tips?: string | null
+          program_id?: string
+          program_structure?: string | null
+          progression_plan?: string | null
+          reason?: string | null
+          weekly_schedule?: string | null
+        }
+        Relationships: []
+      }
       user_activity_log: {
         Row: {
           action_type: string
