@@ -323,6 +323,29 @@ export function movementKey(name: string): string {
   return words.slice(-2).join(" ") || n;
 }
 
+export type ExerciseFamily =
+  | "UPPER_PUSH"
+  | "UPPER_PULL"
+  | "LOWER_PUSH"
+  | "LOWER_PULL"
+  | "CORE"
+  | "CONDITIONING"
+  | "FULL_BODY"
+  | "GENERAL";
+
+/** Shared movement-family hierarchy used after legality and category filters. */
+export function exerciseFamily(name: string, bodyPart?: string | null, target?: string | null): ExerciseFamily {
+  const n = canonical(`${name} ${bodyPart || ""} ${target || ""}`);
+  if (/\b(burpee|jumping jack|high knees|butt kicks|skater|mountain climber|bear crawl|sled push|run|jog|skip)\b/.test(n)) return "CONDITIONING";
+  if (/\b(thruster|clean and press|squat to press|row to press)\b/.test(n)) return "FULL_BODY";
+  if (/\b(plank|sit up|crunch|dead bug|bird dog|leg raise|pallof|wood chop|rotary torso|abs|oblique|waist)\b/.test(n)) return "CORE";
+  if (/\b(push up|dip|bench press|floor press|chest press|shoulder press|push press|chest fly|pec deck|pectorals|triceps)\b/.test(n)) return "UPPER_PUSH";
+  if (/\b(pull up|chin up|row|pulldown|face pull|rear delt|biceps|back|lats)\b/.test(n)) return "UPPER_PULL";
+  if (/\b(squat|lunge|step up|leg press|leg extension|calf raise|quadriceps|quads)\b/.test(n)) return "LOWER_PUSH";
+  if (/\b(deadlift|good morning|hamstring|leg curl|hip thrust|glute bridge|pull through|glute kickback|posterior)\b/.test(n)) return "LOWER_PULL";
+  return "GENERAL";
+}
+
 /**
  * Keeps, for each movement family, only the simplest variation available —
  * preferring reference-list matches. Everything else is returned after it, so

@@ -6,7 +6,7 @@
 // to enforce equipment + difficulty constraints WITHOUT relying on the model.
 // ═══════════════════════════════════════════════════════════════════════════════
 // ONE selection policy for the whole platform — see ./exercise-selection.ts
-import { isSelectable, selectionTier } from "./exercise-selection.ts";
+import { exerciseFamily, isSelectable, selectionTier } from "./exercise-selection.ts";
 import { matchesSelectedEquipment } from "./workout-engine/pool.server.ts";
 import {
   programAllowsFinisher,
@@ -499,22 +499,12 @@ export function pickExercisesForDay(
   // movement first), then everything else, then never-promoted equipment.
   const tier = (ex: LibExercise) => selectionTier(ex.name || "", category);
   const candidates = [0, 1, 2, 3].flatMap((t) => rotated.filter((ex) => tier(ex) === t));
-  const movementFamily = (ex: LibExercise): string => {
-    const name = (ex.name || "").toLowerCase();
-    if (/burpee|jack|jump|hop|bound/.test(name)) return "plyometric";
-    if (/push|press|chest/.test(name)) return "push";
-    if (/row|pull|chin/.test(name)) return "pull";
-    if (/squat|lunge|leg/.test(name)) return "lower";
-    if (/run|walk|step|mountain|climber/.test(name)) return "locomotion";
-    if (/plank|crunch|sit|twist|core|abs/.test(name)) return "core";
-    return (ex.body_part || ex.target || "general").toLowerCase();
-  };
   const picks: LibExercise[] = [];
   const usedIds = new Set<string>();
   const usedFamilies = new Set<string>();
   for (const ex of candidates) {
     if (picks.length >= n) break;
-    const family = movementFamily(ex);
+    const family = exerciseFamily(ex.name || "", ex.body_part, ex.target);
     if (usedIds.has(ex.id)) continue;
     if (usedFamilies.has(family) && picks.length < Math.min(n, 4)) continue;
     usedIds.add(ex.id);

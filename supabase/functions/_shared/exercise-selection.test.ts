@@ -1,6 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   applySelectionPolicy,
+  exerciseFamily,
   isPriorityName,
   isSelectable,
   matchesCategoryPool,
@@ -37,6 +38,16 @@ Deno.test("equipment-aware pools distinguish functional kit and machines", () =>
   assertEquals(poolsOf("medicine ball rotational throw").includes("FREE_WEIGHT"), true);
   assertEquals(poolsOf("cable Pallof press").includes("MACHINE"), true);
   assertEquals(poolsOf("leg press").includes("MACHINE"), true);
+});
+
+Deno.test("shared movement hierarchy classifies the common exercise families", () => {
+  assertEquals(exerciseFamily("Push-Up", "chest", "pectorals"), "UPPER_PUSH");
+  assertEquals(exerciseFamily("TRX Row", "back", "lats"), "UPPER_PULL");
+  assertEquals(exerciseFamily("Goblet Squat", "upper legs", "quads"), "LOWER_PUSH");
+  assertEquals(exerciseFamily("Romanian Deadlift", "upper legs", "hamstrings"), "LOWER_PULL");
+  assertEquals(exerciseFamily("Dead Bug", "waist", "abs"), "CORE");
+  assertEquals(exerciseFamily("Burpee", "cardio", "cardiovascular system"), "CONDITIONING");
+  assertEquals(exerciseFamily("Dumbbell Thruster"), "FULL_BODY");
 });
 
 Deno.test("category priority never promotes machines into conditioning", () => {
