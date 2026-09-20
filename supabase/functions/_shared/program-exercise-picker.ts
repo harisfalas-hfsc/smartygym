@@ -84,7 +84,7 @@ const CATEGORY_RULES: Record<string, CategoryRule> = {
   "WEIGHT LOSS": {
     allowCardioBodyPart: true,
     preferred: [/squat|lunge|push\s*up|incline\s*push|step|mountain\s*climber|jumping\s*jack|jack\s*jump|star\s*jump|scissor\s*jump|high\s*knee|butt\s*kick|burpee|bear\s*crawl|dead\s*bug|glute\s*bridge|plank|skater|fast\s*feet|walk|run|jog|bike|row|swing|thruster|crawl/i],
-    forbidden: [/sissy\s*squat|pistol|one\s*leg\s*squat|max|heavy|one\s*rep|bench\s*press|leg\s*press|preacher\s*curl|concentration\s*curl/i],
+    forbidden: [/sissy\s*squat|pistol|one\s*leg\s*squat|max|heavy|one\s*rep|bench\s*press|leg\s*press|preacher\s*curl|concentration\s*curl|step[ -]?up/i],
   },
   "FUNCTIONAL STRENGTH": {
     rejectCardioBodyPart: true,
