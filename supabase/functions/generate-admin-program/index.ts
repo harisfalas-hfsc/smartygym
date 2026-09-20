@@ -47,26 +47,17 @@ interface WizardBody {
   tier_required?: string;
 }
 
-const CATEGORY_PHILOSOPHY: Record<string, string> = {
-  "LOW BACK PAIN":
-    "Therapeutic progression. Foundation (pain-free ROM, basic core activation), Build (gentle strengthening, stability), Progress (functional movement). McKenzie work, pelvic tilts, bird-dogs, bridges, dead bugs, cat-cow. No heavy loading. No explosive movement.",
-  "CARDIO ENDURANCE":
-    "Zone-based endurance: Zone 2 base (70-80% HR), threshold (85-90%), VO2 intervals (90-95%). Mix modalities and include complementary indoor circuits and metabolic work. Periodized base → intensity → peak → recovery.",
-  "FUNCTIONAL STRENGTH":
-    "Real-world strength: free-weight bias (deadlifts, squats, presses, pulls), carries, climbs, swings. Combine complementary lifts. Include mobility. Not bodybuilding.",
-  "MUSCLE HYPERTROPHY":
-    "Periodized hypertrophy with proper splits (UL / PPL / FB). Progressive overload, planned deloads (40-50%). Compound + isolation. 60-120s rest. Track sets/reps/tempo. Consistency over novelty.",
-  "WEIGHT LOSS":
-    "Strategic blend: cardio endurance + metabolic conditioning + calorie-burning + strength retention. Wave intensity. Address metabolic adaptation. Avoid daily HIIT.",
-  "MOBILITY & STABILITY":
-    "Joint-by-joint: ankles mobility, knees stability, hips mobility, lumbar stability, thoracic mobility, shoulders mobility. Pallof, planks, cat-cows, hanging, single-leg stands, breathing. Controlled, 30-60s holds. No explosive movement.",
-};
-
+// Category philosophy, adaptation and progression all come from the shared
+// doctrine in ../_shared/program-doctrine.ts — ONE rules source for the picker,
+// the prose and the compliance audit.
 function philosophyFor(category: string): string {
-  const u = category.toUpperCase();
-  for (const [k, v] of Object.entries(CATEGORY_PHILOSOPHY)) if (u.includes(k)) return v;
-  return "Follow professional coaching standards for this category.";
+  return [
+    programPhilosophy(category),
+    programAdaptationRule(category),
+    programProgressionRule(category),
+  ].join(" ");
 }
+
 
 function difficultyLabel(stars: number) {
   if (stars >= 5) return "Advanced";
