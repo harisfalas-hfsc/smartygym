@@ -760,9 +760,7 @@ export function filterLibraryForProgram(
   pool = pool.filter(excludesStaticHolds);
   pool = pool.filter((ex) => excludesSkillExercises(ex, difficulty));
   const hasCategoryRule = !!ruleForCategory(category);
-  // Keep the preferred category pool only when it is deep enough to build
-  // varied full sessions; otherwise widen within the same hard doctrine.
-  const categoryPool = categorySelectionPool(pool, category, 24, difficulty);
+  const categoryPool = categorySelectionPool(pool, category, 1, difficulty);
   const intentPool = categoryPool.length ? categoryPool : pool;
   if (!difficulty) return intentPool;
 
