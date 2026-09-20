@@ -124,11 +124,17 @@ Deno.serve(async (req) => {
           .filter((t) => libById.has(t.id))
           .map((t) => libById.get(t.id)!)
           .filter((exercise) => library.some((allowed) => allowed.id === exercise.id))
-          .filter((exercise) => !programWorkExerciseViolation({
-            ...exercise,
-            equipment: exercise.equipment ?? null,
-            target_muscle: exercise.target,
-          }, p.category, programMainFormat(p.category, 1)));
+          .filter((exercise) => {
+            // A reused pick is rotated across both week templates, so it must be
+            // legal under EVERY main format the category can run, not just week A.
+            const formats = [1, 2].map((t) => programMainFormat(p.category, t));
+            return formats.every((fmt) => !programWorkExerciseViolation({
+              ...exercise,
+              equipment: exercise.equipment ?? null,
+              target_muscle: exercise.target,
+            }, p.category, fmt));
+          });
+
       const usedQueue = [...reusedValid];
       let reusedUsed = 0;
 
