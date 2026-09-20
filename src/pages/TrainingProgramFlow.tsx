@@ -461,7 +461,7 @@ const TrainingProgramFlow = () => {
                         <CategoryCountBadge
                           count={programCounts[program.id] || 0}
                           size="sm"
-                          className="top-2 left-2"
+                          className="top-1.5 right-1.5 left-auto"
                         />
                       </div>
                       {/* Content section */}
