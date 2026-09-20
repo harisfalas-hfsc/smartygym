@@ -458,9 +458,11 @@ const TrainingProgramFlow = () => {
                             className="w-full h-full object-cover object-[center_top] min-[540px]:object-contain"
                           />
                         )}
-                        <div className="absolute top-2 right-2">
-                          <CategoryCountBadge count={programCounts[program.id] || 0} size="sm" />
-                        </div>
+                        <CategoryCountBadge
+                          count={programCounts[program.id] || 0}
+                          size="sm"
+                          className="top-2 left-2"
+                        />
                       </div>
                       {/* Content section */}
                       <div className="smarty-carousel-content-portrait-tablet flex flex-col justify-center flex-1 px-3 py-3 min-[540px]:p-4 text-center">
