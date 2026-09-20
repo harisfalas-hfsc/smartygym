@@ -61,7 +61,6 @@ const AVAILABLE_FUNCTIONS = [
   'run-system-health-audit',
   'archive-old-wods',
   'verify-wod-rollover',
-  'watchdog-wod-check',
   'refresh-seo-metadata',
   'process-pending-notifications'
 ];

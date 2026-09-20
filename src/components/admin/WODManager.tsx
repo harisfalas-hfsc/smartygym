@@ -37,7 +37,7 @@ import { getCyprusTodayStr } from "@/lib/cyprusDate";
  * 84-day periodization. This panel surfaces:
  *   - Today's active WODs
  *   - The next 7 days planned categories
- *   - Health / Future Ready / Watchdog checks (all library-mode)
+   *   - Health / Future Ready / verification checks (all read-only)
  *   - Periodization view + recent picks history
  */
 export const WODManager = () => {
@@ -116,9 +116,9 @@ export const WODManager = () => {
       if (error) {
         issues.push(`Database error: ${error.message}`);
       } else if (!todayWods || todayWods.length === 0) {
-        issues.push(`No active WODs for today (${today}). Click "WOD Watchdog" to fill from the library now.`);
+        issues.push(`No active WODs for today (${today}). Use Tomorrow's WOD Preview to select from the library.`);
       } else if (todayWods.length < expectedCount) {
-        issues.push(`Only ${todayWods.length}/${expectedCount} slot(s) filled. Click "WOD Watchdog" to fill missing.`);
+        issues.push(`Only ${todayWods.length}/${expectedCount} slot(s) filled. Use Tomorrow's WOD Preview to select from the library.`);
       } else {
         passed.push(`Today's WODs: ${todayWods.length} active for ${today}`);
         const noImg = todayWods.filter((w) => !w.image_url);
@@ -199,7 +199,7 @@ export const WODManager = () => {
   };
 
   // ─────────────────────────────────────────────────────────────────────
-  // WATCHDOG — invoke edge function to fill missing slots from library
+  // READ-ONLY VERIFIER — never selects, generates, or changes workouts
   // ─────────────────────────────────────────────────────────────────────
   const handleRunWatchdog = async () => {
     setIsRunningWatchdog(true);
@@ -207,22 +207,24 @@ export const WODManager = () => {
       const { data, error } = await supabase.functions.invoke("watchdog-wod-check");
       if (error) throw error;
       const r: any = data || {};
-      if (r?.success && (r.still_missing || []).length === 0) {
-        toast.success("WOD Watchdog: all slots OK", {
-          description: `Found: ${(r.found || []).join(", ") || "(none flagged)"}${r.filled?.length ? ` • Filled: ${r.filled.join(", ")}` : ""}`,
+      const issueCount = Array.isArray(r.checks)
+        ? r.checks.reduce((total: number, check: any) => total + (check.issues?.length || 0), 0)
+        : 0;
+      if (r?.success) {
+        toast.success("WOD verification passed", {
+          description: "Today and the next two days contain only valid library selections.",
           duration: 6000,
         });
-      } else if ((r.still_missing || []).length > 0) {
-        toast.warning("WOD Watchdog: gaps remain", {
-          description: `Still missing: ${r.still_missing.join(", ")}. Admin alert dispatched.`,
+      } else if (issueCount > 0) {
+        toast.warning("WOD verification found issues", {
+          description: `${issueCount} issue(s) found. No automatic changes were made.`,
           duration: 8000,
         });
       } else {
-        toast.info("WOD Watchdog ran", { description: JSON.stringify(r).slice(0, 200) });
+        toast.info("WOD verification completed", { description: "No automatic changes were made." });
       }
-      queryClient.invalidateQueries({ queryKey: ["current-wod"] });
     } catch (err: any) {
-      toast.error("WOD Watchdog failed", { description: err?.message || String(err) });
+      toast.error("WOD verification failed", { description: err?.message || String(err) });
     } finally {
       setIsRunningWatchdog(false);
     }
@@ -283,11 +285,11 @@ export const WODManager = () => {
             className="flex items-center gap-1 sm:gap-2 border-cyan-500 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
             disabled={isRunningWatchdog}
             onClick={handleRunWatchdog}
-            title="Fill missing slots from the library and re-kick Stripe/image pipelines"
+            title="Verify library selections without changing workouts"
           >
             {isRunningWatchdog ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4 text-cyan-500" />}
-            <span className="hidden sm:inline">{isRunningWatchdog ? "Running..." : "WOD Watchdog"}</span>
-            <span className="sm:hidden">Watchdog</span>
+            <span className="hidden sm:inline">{isRunningWatchdog ? "Checking..." : "Verify WODs"}</span>
+            <span className="sm:hidden">Verify</span>
           </Button>
 
           <Button
@@ -384,7 +386,7 @@ export const WODManager = () => {
             <div className="text-center py-8 space-y-2">
               <Flame className="h-12 w-12 text-muted-foreground/50 mx-auto" />
               <p className="text-muted-foreground font-medium">No Active WOD</p>
-              <p className="text-sm text-muted-foreground">Click "WOD Watchdog" to fill from the library now.</p>
+              <p className="text-sm text-muted-foreground">Use Tomorrow's WOD Preview to select from the library.</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">

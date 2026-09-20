@@ -8,6 +8,25 @@ const corsHeaders = {
 
 const FREEZE_SETTING_KEY = 'background_frozen';
 const FREEZE_SNAPSHOT_KEY = 'background_freeze_snapshot';
+const RETIRED_WOD_FUNCTIONS = new Set([
+  'generate-workout-of-day',
+  'wod-generation-orchestrator',
+  'backup-wod-generation',
+]);
+const RETIRED_WOD_JOBS = new Set([
+  'generate-workout-of-day',
+  'generate-workout-of-day-daily',
+  'generate-workout-of-day-midnight',
+  'generate-wod-daily',
+  'generate-wod-bodyweight-daily',
+  'generate-wod-equipment-daily',
+  'wod-retry-pass-1',
+  'wod-retry-pass-2',
+  'wod-retry-pass-3',
+  'wod-retry-pass-4',
+  'watchdog-wod-check',
+  'wod-post-generation-audit',
+]);
 
 interface CronJobRequest {
   action: 'list' | 'add' | 'edit' | 'delete' | 'test' | 'sync' | 'freeze' | 'unfreeze' | 'freeze_status';
@@ -82,7 +101,14 @@ function validateEdgeFunctionName(funcName: string): { valid: boolean; error?: s
   if (!/^[a-zA-Z0-9_-]+$/.test(funcName)) {
     return { valid: false, error: 'edge_function_name can only contain letters, numbers, dashes, and underscores' };
   }
+  if (RETIRED_WOD_FUNCTIONS.has(funcName)) {
+    return { valid: false, error: 'This retired Workout of the Day generator cannot be scheduled or invoked' };
+  }
   return { valid: true };
+}
+
+function isRetiredWodJob(jobName: string): boolean {
+  return RETIRED_WOD_JOBS.has(jobName);
 }
 
 /**
@@ -417,6 +443,13 @@ serve(async (req: Request) => {
         );
       }
 
+      if (isRetiredWodJob(job_name)) {
+        return new Response(
+          JSON.stringify({ error: 'This retired Workout of the Day job cannot be recreated' }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       // SECURITY: Validate all inputs before using in SQL
       const jobNameValidation = validateJobName(job_name);
       if (!jobNameValidation.valid) {
@@ -517,6 +550,13 @@ serve(async (req: Request) => {
       if (!job_name) {
         return new Response(
           JSON.stringify({ error: "Missing job_name" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (isRetiredWodJob(job_name)) {
+        return new Response(
+          JSON.stringify({ error: 'This retired Workout of the Day job cannot be reactivated' }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -864,7 +904,7 @@ serve(async (req: Request) => {
       const snapshot = (snapRow?.setting_value || {}) as any;
       const names: string[] = (Array.isArray(snapshot?.jobs) ? snapshot.jobs : [])
         .map((n: any) => String(n))
-        .filter((n: string) => validateJobName(n).valid);
+        .filter((n: string) => validateJobName(n).valid && !isRetiredWodJob(n));
 
       console.log(`🔥 Unfreezing ${names.length} snapshotted jobs`);
 
