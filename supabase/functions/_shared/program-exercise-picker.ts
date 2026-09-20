@@ -691,8 +691,12 @@ export function buildDayBullets(
   const picks = pickExercisesForDay(selectionPool, dayTitle, weekIndex, dayIndex, totalNeeded, category, difficulty);
   const mainPicks = picks.slice(0, counts.main);
   const finisherPicks = picks.slice(counts.main, counts.main + counts.finisher);
-  if (mainPicks.length < 4 && finisherPicks.length) {
+  if (mainPicks.length < 4) {
     mainPicks.push(...finisherPicks.splice(0, 4 - mainPicks.length));
+  }
+  if (mainPicks.length < 4 && mainPicks.length) {
+    const originals = [...mainPicks];
+    while (mainPicks.length < 4) mainPicks.push(originals[mainPicks.length % originals.length]);
   }
 
   const mainTimeWindow = tier === "Beginner" ? "22–28 minutes" : tier === "Advanced" ? "40–50 minutes" : "30–38 minutes";
