@@ -77,6 +77,7 @@ export function auditProgramCompliance(program: ProgramLike, library: PoolExerci
   const equipmentIds = parseProgramEquipmentIds(program.equipment);
   const bodyweightOnly = equipmentIds.length === 0;
   const dayMatches = [...html.matchAll(new RegExp(DAY_RE.source, "gi"))];
+  const weekBStart = html.search(/WEEK B TEMPLATE/i);
   let trainingDays = 0;
   let linkedExercises = 0;
 
@@ -90,7 +91,7 @@ export function auditProgramCompliance(program: ProgramLike, library: PoolExerci
     const dayHtml = html.slice(start, end);
     const mainHtml = sectionHtml(dayHtml, "Main Workout");
     const finisherHtml = sectionHtml(dayHtml, "Finisher");
-    const templateIndex = /WEEK B TEMPLATE/i.test(html.slice(Math.max(0, start - 500), start)) || start > html.search(/WEEK B TEMPLATE/i) ? 2 : 1;
+    const templateIndex = weekBStart >= 0 && start > weekBStart ? 2 : 1;
     const expectedMain = programMainFormat(program.category, templateIndex);
     const actualMain = parseFormat(plain(mainHtml).slice(0, 220), expectedMain);
 

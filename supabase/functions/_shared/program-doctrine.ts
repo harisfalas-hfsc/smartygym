@@ -17,7 +17,7 @@ export type ProgramDoctrine = {
 const PROGRAM_DOCTRINE: Record<string, ProgramDoctrine> = {
   "CARDIO ENDURANCE": {
     workoutCategory: "CARDIO",
-    mainFormats: ["CIRCUIT", "EMOM", "AMRAP"],
+    mainFormats: ["AMRAP", "EMOM", "CIRCUIT"],
     finisherFormat: "FOR TIME",
   },
   "FUNCTIONAL STRENGTH": {
@@ -31,7 +31,7 @@ const PROGRAM_DOCTRINE: Record<string, ProgramDoctrine> = {
     finisherFormat: "REPS & SETS",
   },
   "WEIGHT LOSS": {
-    workoutCategory: "CALORIE BURNING",
+    workoutCategory: "METABOLIC",
     mainFormats: ["CIRCUIT", "TABATA", "EMOM", "AMRAP"],
     finisherFormat: "TABATA",
   },
@@ -94,6 +94,11 @@ export function parseProgramEquipmentIds(equipment: string | null | undefined): 
   if (/trx|suspension/.test(value)) ids.push("trx");
   if (/machine|cable/.test(value)) ids.push("machines");
   if (/medicine ball|slam ball/.test(value)) ids.push("medicineball");
-  if (/treadmill|elliptical|bike|rower|rowing|outdoor|running shoes/.test(value)) ids.push("cardio");
+  if (/treadmill|elliptical|bike|spin|rower|rowing|outdoor|running shoes/.test(value)) ids.push("cardio");
+  if (/stability ball|swiss ball|exercise ball/.test(value)) ids.push("stabilityball");
+  if (/foam roller/.test(value)) ids.push("foamroller");
+  if (/yoga block/.test(value)) ids.push("yogablocks");
+  if (/plyo box|box/.test(value)) ids.push("box");
+  if (/pull-?up bar/.test(value)) ids.push("pullupbar");
   return [...new Set(ids)];
 }

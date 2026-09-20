@@ -14,6 +14,7 @@ import { buildDayBullets, buildExerciseBullet, filterLibraryForProgram, type Lib
 import { normalizeWorkoutHtml } from "../_shared/html-normalizer.ts";
 import { auditProgramCompliance } from "../_shared/program-compliance.ts";
 import { parseProgramEquipmentIds } from "../_shared/program-doctrine.ts";
+import { loadAllExercises } from "../_shared/workout-engine/pool.server.ts";
 import {
   guaranteeAllExercisesLinked,
   rejectNonLibraryExercises,
@@ -89,6 +90,7 @@ Deno.serve(async (req) => {
       from += 1000;
     }
     console.log(`${LOG} Library loaded: ${allExercises.length}`);
+    const complianceLibrary = await loadAllExercises(supabase);
 
     const results: Array<{ id: string; name: string; status: string; bullets: number; reused: number }> = [];
 
@@ -179,7 +181,7 @@ Deno.serve(async (req) => {
         category: p.category,
         equipment: p.equipment,
         weekly_schedule: schedule,
-      }, allExercises as any);
+      }, complianceLibrary);
       if (!audit.passed) {
         results.push({ id: p.id, name: p.name, status: `invalid:${audit.issues.slice(0, 3).map((issue) => issue.code).join(",")}`, bullets: bulletTotal, reused: reusedUsed });
         continue;

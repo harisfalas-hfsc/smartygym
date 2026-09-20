@@ -309,6 +309,23 @@ export const ProgramEditDialog = ({ program, open, onOpenChange, onSave }: Progr
         return;
       }
 
+      const { data: complianceData, error: complianceError } = await supabase.functions.invoke('validate-training-program-compliance', {
+        body: {
+          category: formData.category,
+          equipment: formData.equipment,
+          weekly_schedule: normalizeWorkoutHtml(formData.training_program || ''),
+        },
+      });
+      if (complianceError || !complianceData?.passed) {
+        const firstIssue = complianceData?.issues?.[0]?.message;
+        toast({
+          variant: "destructive",
+          title: "Program needs correction",
+          description: firstIssue || "This program does not yet meet the training rules and was not saved.",
+        });
+        return;
+      }
+
       setIsGeneratingImage(true);
       
       let imageUrl = formData.image_url;
