@@ -119,7 +119,8 @@ Deno.serve(async (req) => {
       const libById = new Map(library.map((e) => [e.id, e]));
       const reusedValid = reusedTokens
         .filter((t) => libById.has(t.id))
-        .map((t) => libById.get(t.id)!);
+        .map((t) => libById.get(t.id)!)
+        .filter((exercise) => library.some((allowed) => allowed.id === exercise.id));
       const usedQueue = [...reusedValid];
       let reusedUsed = 0;
 
