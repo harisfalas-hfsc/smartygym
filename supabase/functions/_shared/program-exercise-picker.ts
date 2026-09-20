@@ -9,10 +9,16 @@
 import { exerciseFamily, isSelectable, selectionTier } from "./exercise-selection.ts";
 import { matchesSelectedEquipment } from "./workout-engine/pool.server.ts";
 import {
+  hasProgramDoctrine,
   programAllowsFinisher,
+  programBodyweightToFailure,
+  programDoctrine,
+  programHasRecoveryCharacter,
+  programLocomotionMode,
   programMainFormat,
   programWorkExerciseViolation,
 } from "./program-doctrine.ts";
+
 
 export interface LibExercise {
   id: string;
