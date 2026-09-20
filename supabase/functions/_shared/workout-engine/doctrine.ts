@@ -274,9 +274,17 @@ export const STRETCH_NATIVE_CATEGORIES: Category[] = [
   "PILATES",
 ];
 
+/**
+ * Mobility positions held for time (deep squat hold, pigeon hold, couch hold).
+ * They are preparation or recovery content, never a dosed work-slot exercise
+ * outside the three mobility-native categories.
+ */
+export const MOBILITY_HOLD_RE =
+  /\b(?:deep squat|squat sit|lizard|pigeon|frog|couch|butterfly|straddle|saddle|child'?s pose|hip flexor|hamstring|calf|quad)\s+hold\b/i;
+
 /** Preparation / recovery vocabulary that is never a work-slot exercise. */
 export const WORK_SLOT_PREP_RE = new RegExp(
-  `${STRETCH_RE.source}|${CONDITIONING_LOW_STIMULUS_RE.source}`,
+  `${STRETCH_RE.source}|${CONDITIONING_LOW_STIMULUS_RE.source}|${MOBILITY_HOLD_RE.source}`,
   "i",
 );
 
@@ -291,7 +299,28 @@ export function workSlotPrepViolation(e: ExerciseLike, category: Category): stri
 }
 
 /**
+ * Motion, not position. In the conditioning family the athlete must keep
+ * moving: true stillness (static holds, wall sits, dead hangs, isometrics,
+ * windmill) is never work, whatever the format. Dynamic seated or lying
+ * movements — sit-ups, leg raises, mountain climbers — remain legal.
+ */
+const CONDITIONING_STILLNESS_RE =
+  /\b(hold|holds|isometric|isometrics|wall sit|dead hang|static|windmill)\b/i;
+
+export function conditioningStillnessViolation(e: ExerciseLike, category: Category): string | null {
+  if (!isConditioningCategory(category)) return null;
+  if (!CONDITIONING_STILLNESS_RE.test(e.name)) return null;
+  return `"${e.name}" is a static hold. ${category} work keeps the athlete moving — stillness belongs in Activation or Cool Down.`;
+}
+
+
+/** Classical Pilates mat repertoire — Pilates content, nothing else. */
+const PILATES_REPERTOIRE_RE =
+  /\b(teaser|control balance|boomerang|swan dive|neck pull|corkscrew|the hundred|open leg rocker|spine twist)\b|\bjack ?knife\b(?!\s*sit)/i;
+
+/**
  * Category-level legality for a single exercise, independent of format.
+
  * Returns a concrete violation string, never a soft preference.
  */
 export function categoryExerciseViolation(e: ExerciseLike, category: Category): string | null {
@@ -307,6 +336,15 @@ export function categoryExerciseViolation(e: ExerciseLike, category: Category): 
     return `"${e.name}" is too intense for a Recovery session.`;
   if (category === "MICRO-WORKOUTS" && (MICRO_BAN_RE.test(t) || HOME_APPARATUS_RE.test(t)))
     return `"${e.name}" needs equipment or a special setup, which a Micro Workout never uses.`;
+  // Classical Pilates mat repertoire is Pilates content. It is control and
+  // breath work, not strength, conditioning or hypertrophy work.
+  if (!STRETCH_NATIVE_CATEGORIES.includes(category) && PILATES_REPERTOIRE_RE.test(name))
+    return `"${e.name}" is classical Pilates mat repertoire and belongs in a Pilates session, not a ${category} work section.`;
+
+
+
+  const stillness = conditioningStillnessViolation(e, category);
+  if (stillness) return stillness;
 
   const conditioning = conditioningSetupViolation(e, category);
   if (conditioning) return conditioning;
