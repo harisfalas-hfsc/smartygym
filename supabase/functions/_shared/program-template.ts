@@ -3,6 +3,11 @@
 // Mirrors supabase/functions/_shared/program-template.ts — keep in sync.
 // Used by the admin editor "Standardized Training Program Format" button.
 // ═══════════════════════════════════════════════════════════════════════════════
+// Category adaptation + progression wording comes from ./program-doctrine.ts —
+// the single rules source shared with the picker and the compliance audit.
+import { programAdaptationRule, programProgressionRule } from "./program-doctrine.ts";
+
+
 
 export type ProgramCategory =
   | "FUNCTIONAL STRENGTH"
