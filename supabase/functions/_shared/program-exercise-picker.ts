@@ -760,7 +760,12 @@ export function filterLibraryForProgram(
   pool = pool.filter(excludesStaticHolds);
   pool = pool.filter((ex) => excludesSkillExercises(ex, difficulty));
   const hasCategoryRule = !!ruleForCategory(category);
-  const categoryPool = categorySelectionPool(pool, category, 1, difficulty);
+  const categoryPool = categorySelectionPool(
+    pool,
+    category,
+    category.toUpperCase().includes("WEIGHT LOSS") ? 24 : 1,
+    difficulty,
+  );
   const intentPool = categoryPool.length ? categoryPool : pool;
   if (!difficulty) return intentPool;
 
