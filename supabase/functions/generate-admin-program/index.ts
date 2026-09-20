@@ -19,6 +19,8 @@ import { requireAdminOrServiceRole } from "../_shared/admin-or-service-auth.ts";
 import { COACH_MINDSET } from "../_shared/exercise-selection.ts";
 import { buildProgramSkeleton, buildPhaseInstructions, buildDefaultTips } from "../_shared/program-template.ts";
 import { buildDayBullets, filterLibraryForProgram, type LibExercise } from "../_shared/program-exercise-picker.ts";
+import { auditProgramCompliance } from "../_shared/program-compliance.ts";
+import { loadAllExercises } from "../_shared/workout-engine/pool.server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -261,6 +263,16 @@ serve(async (req) => {
     fullSchedule = normalizeWorkoutHtml(fullSchedule);
     const description = descriptionRaw ? normalizeWorkoutHtml(descriptionRaw) : "";
     const overview = overviewRaw ? normalizeWorkoutHtml(overviewRaw) : description;
+
+    const complianceLibrary = await loadAllExercises(supabase);
+    const compliance = auditProgramCompliance({
+      category: body.category,
+      equipment,
+      weekly_schedule: fullSchedule,
+    }, complianceLibrary);
+    if (!compliance.passed) {
+      throw new Error(`Generated program failed compliance: ${compliance.issues.slice(0, 5).map((issue) => issue.message).join(" ")}`);
+    }
 
     const draft = {
       // id/serial intentionally omitted — editor allocates them on Save.

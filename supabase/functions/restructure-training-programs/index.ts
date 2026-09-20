@@ -12,6 +12,10 @@ import { requireAdminOrServiceRole } from "../_shared/admin-or-service-auth.ts";
 import { buildProgramSkeleton, buildPhaseInstructions, buildDefaultTips } from "../_shared/program-template.ts";
 import { buildDayBullets, buildExerciseBullet, filterLibraryForProgram, type LibExercise } from "../_shared/program-exercise-picker.ts";
 import { normalizeWorkoutHtml } from "../_shared/html-normalizer.ts";
+import { auditProgramCompliance } from "../_shared/program-compliance.ts";
+import { parseProgramEquipmentIds } from "../_shared/program-doctrine.ts";
+import { loadAllExercises } from "../_shared/workout-engine/pool.server.ts";
+import { programMainFormat, programWorkExerciseViolation } from "../_shared/program-doctrine.ts";
 import {
   guaranteeAllExercisesLinked,
   rejectNonLibraryExercises,
@@ -87,6 +91,7 @@ Deno.serve(async (req) => {
       from += 1000;
     }
     console.log(`${LOG} Library loaded: ${allExercises.length}`);
+    const complianceLibrary = await loadAllExercises(supabase);
 
     const results: Array<{ id: string; name: string; status: string; bullets: number; reused: number }> = [];
 
@@ -100,7 +105,8 @@ Deno.serve(async (req) => {
       const weeks = Number(p.weeks) || 4;
       const daysPerWeek = Number(p.days_per_week) || 4;
       const diff = difficultyText(p.difficulty_stars);
-      const library = filterLibraryForProgram(allExercises, p.equipment || "Equipment", diff, p.category || "");
+      const equipmentIds = parseProgramEquipmentIds(p.equipment);
+      const library = filterLibraryForProgram(allExercises, p.equipment || "Equipment", diff, p.category || "", equipmentIds);
       if (!library.length) {
         results.push({ id: p.id, name: p.name, status: "no-library", bullets: 0, reused: 0 });
         continue;
@@ -112,9 +118,17 @@ Deno.serve(async (req) => {
       );
       // Map by ID — keep only IDs that still exist in the library
       const libById = new Map(library.map((e) => [e.id, e]));
-      const reusedValid = reusedTokens
-        .filter((t) => libById.has(t.id))
-        .map((t) => libById.get(t.id)!);
+      const reusedValid = p.category.toUpperCase().includes("WEIGHT LOSS")
+        ? []
+        : reusedTokens
+          .filter((t) => libById.has(t.id))
+          .map((t) => libById.get(t.id)!)
+          .filter((exercise) => library.some((allowed) => allowed.id === exercise.id))
+          .filter((exercise) => !programWorkExerciseViolation({
+            ...exercise,
+            equipment: exercise.equipment ?? null,
+            target_muscle: exercise.target,
+          }, p.category, programMainFormat(p.category, 1)));
       const usedQueue = [...reusedValid];
       let reusedUsed = 0;
 
@@ -172,7 +186,36 @@ Deno.serve(async (req) => {
       const structure = normalizeWorkoutHtml(buildPhaseInstructions(weeks, p.category));
       const tips = normalizeWorkoutHtml(buildDefaultTips(p.category));
 
+      const audit = auditProgramCompliance({
+        category: p.category,
+        equipment: p.equipment,
+        weekly_schedule: schedule,
+      }, complianceLibrary);
+      if (!audit.passed) {
+        results.push({
+          id: p.id,
+          name: p.name,
+          status: `invalid:${audit.issues.slice(0, 3).map((issue) => issue.code).join(",")}`,
+          issues: audit.issues.slice(0, 3),
+          bullets: bulletTotal,
+          reused: reusedUsed,
+        });
+        continue;
+      }
+
       if (!dryRun) {
+        const { error: backupError } = await supabase.from("training_program_content_backup").insert({
+          program_id: p.id,
+          weekly_schedule: p.weekly_schedule,
+          program_structure: p.program_structure,
+          progression_plan: p.progression_plan,
+          nutrition_tips: p.nutrition_tips,
+          reason: "pre-program-doctrine-repair-2026-09-20",
+        });
+        if (backupError) {
+          results.push({ id: p.id, name: p.name, status: `backup-error:${backupError.message}`, bullets: bulletTotal, reused: reusedUsed });
+          continue;
+        }
         const { error: uErr } = await supabase
           .from("admin_training_programs")
           .update({
