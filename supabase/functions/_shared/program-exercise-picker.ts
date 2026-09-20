@@ -426,7 +426,14 @@ function protocolMainPrescription(style: ProtocolStyle, ex: LibExercise, slotInd
         return `• 3 sets × 20 sec hold ${token} — rest 45 sec`;
       }
       const cat = category.toUpperCase();
-      if (cat.includes("HYPERTROPHY")) return `• 4 sets × 10 reps ${token} — tempo 3-1-1, rest 75 sec`;
+      if (cat.includes("HYPERTROPHY")) {
+        // Bodyweight hypertrophy cannot add load, so the set itself must reach
+        // close to technical failure — that is where the tension comes from.
+        return programBodyweightToFailure(category) && isBodyweightExercise(ex)
+          ? `• 4 sets × max reps ${token} — stop 1 rep short of technical failure (aim 12–20), tempo 3-1-1, rest 75 sec`
+          : `• 4 sets × 10 reps ${token} — tempo 3-1-1, rest 75 sec`;
+      }
+
       if (cat.includes("FUNCTIONAL STRENGTH")) return `• 4 sets × 6 reps ${token} — rest 120 sec`;
       if (cat.includes("LOW BACK")) return `• 3 sets × 10 reps ${token} — pain-free range, rest 60 sec`;
       if (cat.includes("MOBILITY")) return `• 2 sets × 10 reps ${token} — full controlled range, rest 45 sec`;
