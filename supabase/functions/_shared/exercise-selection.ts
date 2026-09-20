@@ -254,7 +254,7 @@ const ELEVATED_SINGLE_LEG_SQUAT_RE =
  * flags, muscle-ups, handstands or pistols, at any level.
  */
 const COMPLEXITY_RE =
-  /\b(front lever|back lever|lever (?:reps|hold|raise|pull)|planche|human flag|flag hold|muscle[- ]?up|handstand|pistol|shrimp squat|iron cross|dragon flag|maltese|victorian|skin the cat|stalder|archer push[- ]?up|clock push[- ]?up|single arm (?:pull[- ]?up|push[- ]?up)|one[- ]arm (?:pull[- ]?up|push[- ]?up)|90 degree push[- ]?up|tiger bend|hefesto|impossible dip)\b/i;
+  /\b(front lever|back lever|lever (?:reps|hold|raise|pull)|planche|human flag|flag hold|muscle[- ]?up|handstand|pistol|shrimp squat|turkish get[- ]?up|nordic hamstring curl|iron cross|dragon flag|maltese|victorian|skin the cat|stalder|archer push[- ]?up|clock push[- ]?up|single arm (?:pull[- ]?up|push[- ]?up)|one[- ]arm (?:pull[- ]?up|push[- ]?up)|90 degree push[- ]?up|tiger bend|hefesto|impossible dip)\b/i;
 
 /** Movements that must never be programmed. */
 export function isForbiddenName(name: string): boolean {
