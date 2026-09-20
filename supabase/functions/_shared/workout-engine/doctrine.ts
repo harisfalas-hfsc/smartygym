@@ -316,7 +316,7 @@ export function conditioningStillnessViolation(e: ExerciseLike, category: Catego
 
 /** Classical Pilates mat repertoire — Pilates content, nothing else. */
 const PILATES_REPERTOIRE_RE =
-  /\b(teaser|control balance|boomerang|swan dive|jack ?knife|neck pull|corkscrew|the hundred|roll ?over|seal|crab|rocking|open leg rocker|spine twist|saw|scissors)\b/i;
+  /\b(teaser|control balance|boomerang|swan dive|neck pull|corkscrew|the hundred|open leg rocker|spine twist)\b|\bjack ?knife\b(?!\s*sit)/i;
 
 /**
  * Category-level legality for a single exercise, independent of format.
