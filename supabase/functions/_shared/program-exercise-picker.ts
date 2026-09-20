@@ -8,6 +8,12 @@
 // ONE selection policy for the whole platform — see ./exercise-selection.ts
 import { isSelectable, selectionTier } from "./exercise-selection.ts";
 import { matchesSelectedEquipment } from "./workout-engine/pool.server.ts";
+import {
+  programAllowsFinisher,
+  programDoctrine,
+  programMainFormat,
+  programWorkExerciseViolation,
+} from "./program-doctrine.ts";
 
 export interface LibExercise {
   id: string;
@@ -249,9 +255,14 @@ function categorySelectionPool(library: LibExercise[], category: string, needed:
     // Coach's permanent bans — bosu loading, unstable surfaces, elevated
     // single-leg squats, lever/gymnastic complexity. Same rules as workouts.
     .filter((ex) => isSelectable(ex.name || ""));
-  if (!ruleForCategory(category)) return safe;
-  const categoryMatched = safe.filter((ex) => matchesCategoryRule(ex, category));
-  return categoryMatched;
+  const format = programMainFormat(category, 1);
+  const doctrineSafe = safe.filter((ex) => !programWorkExerciseViolation({
+    ...ex,
+    target_muscle: ex.target,
+  }, category, format));
+  if (!ruleForCategory(category)) return doctrineSafe;
+  const categoryMatched = doctrineSafe.filter((ex) => matchesCategoryRule(ex, category));
+  return categoryMatched.length >= needed ? categoryMatched : doctrineSafe;
 }
 
 function defaultPrescription(category: string, dayTitle: string): string {
@@ -330,7 +341,7 @@ export function categoryProtocol(category: string, weekIndex: number): CategoryP
               ? "6 rounds × 3 min work / 1 min easy recovery — hold a strong-but-sustainable Zone 3–4 effort."
               : "5 rounds for quality — 60 sec work / 30 sec transition, rest 90 sec after each full round.",
       finisher: "FOR TIME",
-      finisherIntro: "Finisher for time (10-minute cap) — steady aerobic pace, scale reps before scaling form.",
+      finisherIntro: "Finisher for time (5-minute cap) — steady aerobic pace, scale reps before scaling form.",
     };
   }
 
@@ -361,15 +372,11 @@ export function categoryProtocol(category: string, weekIndex: number): CategoryP
   }
 
   if (cat.includes("FUNCTIONAL STRENGTH")) {
-    const main = rotate<ProtocolStyle>(["REPS & SETS", "REPS & SETS", "CIRCUIT"], weekIndex);
     return {
-      main,
-      mainIntro:
-        main === "CIRCUIT"
-          ? "Strength circuit — 4 rounds, perform every exercise back-to-back, rest 90 sec after each full round."
-          : "Sets and reps — heavy compound work, full rest, every rep technically perfect.",
-      finisher: "FOR TIME",
-      finisherIntro: "Finisher for time (8-minute cap) — practical strength density, stop if form breaks.",
+      main: "REPS & SETS",
+      mainIntro: "Sets and reps — practical compound strength, full rest, every rep technically perfect.",
+      finisher: "REPS & SETS",
+      finisherIntro: "Accessory finisher — 3 sets with controlled reps and complete rest; stop if form breaks.",
     };
   }
 
@@ -384,10 +391,10 @@ export function categoryProtocol(category: string, weekIndex: number): CategoryP
 
   if (cat.includes("MOBILITY")) {
     return {
-      main: "HOLDS",
+      main: "REPS & SETS",
       mainIntro: "Sets, reps, and timed holds only — never AMRAP, EMOM, circuit, Tabata, HIIT, burpees, sprints, jumps, or metabolic circuits.",
-      finisher: "HOLDS",
-      finisherIntro: "Cool-down holds — controlled breathing, no forcing depth or speed.",
+      finisher: "REPS & SETS",
+      finisherIntro: "Controlled work only — breathe steadily and never force depth or speed.",
     };
   }
 
@@ -694,6 +701,14 @@ export function buildDayBullets(
     ? finisherPicks.map((ex) => protocolFinisherPrescription(proto.finisher, ex, category))
     : [sessionFinisher(category, dayTitle)];
 
+  const finisherLines = programAllowsFinisher(category)
+    ? [
+        `<strong>💥 Finisher (${proto.finisher}) — 4–5 minutes</strong>`,
+        `<em>${proto.finisherIntro}</em>`,
+        ...finisherBullets,
+      ]
+    : [];
+
   return [
     coachingNote(category, dayTitle, weekIndex, totalWeeks, tier),
     `<strong>Estimated session time: ${sessionDurationFor(tier)}</strong>`,
@@ -704,9 +719,7 @@ export function buildDayBullets(
     `<strong>🏋 Main Workout (${proto.main}) — ${mainTimeWindow}</strong>`,
     `<em>${proto.mainIntro}</em>`,
     ...mainBullets,
-    `<strong>💥 Finisher (${proto.finisher}) — 4–8 minutes</strong>`,
-    `<em>${proto.finisherIntro}</em>`,
-    ...finisherBullets,
+    ...finisherLines,
     "<strong>🧘 Cool Down — 5 minutes</strong>",
     ...coolDownLines(category),
   ];
@@ -731,12 +744,13 @@ export function filterLibraryForProgram(
   if (equipLower.includes("bodyweight") || equipLower === "body weight" || equipLower === "none - running shoes only") {
     pool = pool.filter(isHomeBodyweightFriendly);
   } else {
-    pool = pool.filter((ex) => !isBodyweightExercise(ex));
+    // Equipment is a ceiling, never a requirement: bodyweight always remains
+    // legal alongside the apparatus selected by the coach.
     // When the admin named the exact apparatus, only those are legal — same
     // rule the single-workout engine uses, so the two can never disagree.
     if (equipmentIds.length && !equipmentIds.includes("fullgym")) {
       pool = pool.filter((ex) =>
-        matchesSelectedEquipment(ex as unknown as Parameters<typeof matchesSelectedEquipment>[0], equipmentIds),
+        isBodyweightExercise(ex) || matchesSelectedEquipment(ex as unknown as Parameters<typeof matchesSelectedEquipment>[0], equipmentIds),
       );
     }
   }
