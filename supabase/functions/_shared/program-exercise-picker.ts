@@ -10,7 +10,6 @@ import { isSelectable, selectionTier } from "./exercise-selection.ts";
 import { matchesSelectedEquipment } from "./workout-engine/pool.server.ts";
 import {
   programAllowsFinisher,
-  programDoctrine,
   programMainFormat,
   programWorkExerciseViolation,
 } from "./program-doctrine.ts";
