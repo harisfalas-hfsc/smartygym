@@ -483,7 +483,12 @@ export function pickExercisesForDay(
   difficulty?: string | null,
 ): LibExercise[] {
   if (!library.length) return [];
-  const categoryPool = categorySelectionPool(library, category, n, difficulty);
+  const categoryPool = categorySelectionPool(
+    library,
+    category,
+    category.toUpperCase().includes("WEIGHT LOSS") ? 24 : n,
+    difficulty,
+  );
   const matched = categoryPool.filter((ex) => matchesFocus(ex, dayTitle));
   const fallbackPool = categoryPool.length ? categoryPool : library.filter((ex) => excludesSkillExercises(ex, difficulty));
   const pool = matched.length > 0 ? matched : fallbackPool;
