@@ -3,11 +3,14 @@ import {
   programAllowsFinisher,
   programDoctrine,
   programFinisherSizeViolation,
+  programHasRecoveryCharacter,
+  programLocomotionMode,
   programMainFormat,
   programWorkExerciseViolation,
 } from "./program-doctrine.ts";
 import { matchesSelectedEquipment, type PoolExercise } from "./workout-engine/pool.server.ts";
 import type { Format } from "./workout-engine/spec.ts";
+
 
 export type ProgramAuditIssue = {
   code: string;
