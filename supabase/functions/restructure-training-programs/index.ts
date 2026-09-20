@@ -118,15 +118,17 @@ Deno.serve(async (req) => {
       );
       // Map by ID — keep only IDs that still exist in the library
       const libById = new Map(library.map((e) => [e.id, e]));
-      const reusedValid = reusedTokens
-        .filter((t) => libById.has(t.id))
-        .map((t) => libById.get(t.id)!)
-        .filter((exercise) => library.some((allowed) => allowed.id === exercise.id))
-        .filter((exercise) => !programWorkExerciseViolation({
-          ...exercise,
-          equipment: exercise.equipment ?? null,
-          target_muscle: exercise.target,
-        }, p.category, programMainFormat(p.category, 1)));
+      const reusedValid = p.category.toUpperCase().includes("WEIGHT LOSS")
+        ? []
+        : reusedTokens
+          .filter((t) => libById.has(t.id))
+          .map((t) => libById.get(t.id)!)
+          .filter((exercise) => library.some((allowed) => allowed.id === exercise.id))
+          .filter((exercise) => !programWorkExerciseViolation({
+            ...exercise,
+            equipment: exercise.equipment ?? null,
+            target_muscle: exercise.target,
+          }, p.category, programMainFormat(p.category, 1)));
       const usedQueue = [...reusedValid];
       let reusedUsed = 0;
 
