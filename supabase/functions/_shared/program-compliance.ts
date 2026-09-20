@@ -81,8 +81,21 @@ export function auditProgramCompliance(program: ProgramLike, library: PoolExerci
   const bodyweightOnly = equipmentIds.length === 0;
   const dayMatches = [...html.matchAll(new RegExp(DAY_RE.source, "gi"))];
   const weekBStart = html.search(/WEEK B TEMPLATE/i);
+  const templateCount = (html.match(/WEEK\s+[A-Z]\s+TEMPLATE/gi) || []).length;
+  const locomotion = programLocomotionMode(program.category);
+  const needsRecoveryCharacter = programHasRecoveryCharacter(program.category);
   let trainingDays = 0;
   let linkedExercises = 0;
+
+  if (templateCount > 2) {
+    issues.push({
+      code: "TEMPLATE_COUNT",
+      day: "Program",
+      section: "Program",
+      message: `A program may only contain Week A and Week B templates — ${templateCount} week templates were found.`,
+    });
+  }
+
 
   for (let index = 0; index < dayMatches.length; index += 1) {
     const match = dayMatches[index];
