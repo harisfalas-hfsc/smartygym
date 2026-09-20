@@ -20,6 +20,12 @@ import { COACH_MINDSET } from "../_shared/exercise-selection.ts";
 import { buildProgramSkeleton, buildPhaseInstructions, buildDefaultTips } from "../_shared/program-template.ts";
 import { buildDayBullets, filterLibraryForProgram, type LibExercise } from "../_shared/program-exercise-picker.ts";
 import { auditProgramCompliance } from "../_shared/program-compliance.ts";
+import {
+  programAdaptationRule,
+  programPhilosophy,
+  programProgressionRule,
+} from "../_shared/program-doctrine.ts";
+
 import { loadAllExercises } from "../_shared/workout-engine/pool.server.ts";
 
 const corsHeaders = {
