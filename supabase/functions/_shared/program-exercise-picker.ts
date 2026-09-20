@@ -262,7 +262,7 @@ function categorySelectionPool(library: LibExercise[], category: string, needed:
   }, category, format));
   if (!ruleForCategory(category)) return doctrineSafe;
   const categoryMatched = doctrineSafe.filter((ex) => matchesCategoryRule(ex, category));
-  return categoryMatched.length >= needed ? categoryMatched : doctrineSafe;
+  return categoryMatched.length ? categoryMatched : doctrineSafe;
 }
 
 function defaultPrescription(category: string, dayTitle: string): string {
