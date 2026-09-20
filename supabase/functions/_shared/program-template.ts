@@ -3,6 +3,11 @@
 // Mirrors supabase/functions/_shared/program-template.ts — keep in sync.
 // Used by the admin editor "Standardized Training Program Format" button.
 // ═══════════════════════════════════════════════════════════════════════════════
+// Category adaptation + progression wording comes from ./program-doctrine.ts —
+// the single rules source shared with the picker and the compliance audit.
+import { programAdaptationRule, programProgressionRule } from "./program-doctrine.ts";
+
+
 
 export type ProgramCategory =
   | "FUNCTIONAL STRENGTH"
@@ -141,63 +146,71 @@ function templateDefinitions(totalWeeks: number): Array<{ key: "A" | "B"; range:
 }
 
 function categoryProgressionRule(category: string): string {
-  const cat = category.toUpperCase();
-  if (cat.includes("HYPERTROPHY")) return "Progress primarily by load: Week 1 uses about 65% 1RM, Week 2 about 70%, Week 3 about 75%, Week 4 about 80%; later weeks repeat Week B with small load, set, or rep increases without breaking tempo.";
-  if (cat.includes("WEIGHT LOSS")) return "Progress primarily by density: increase work periods by about 10%, reduce rest by about 10%, then add one round or choose the harder listed variation while keeping movement quality realistic.";
-  if (cat.includes("CARDIO")) return "Progress primarily by aerobic volume and interval quality: extend work intervals, reduce recovery slightly, or add one interval while preserving sustainable pacing.";
-  if (cat.includes("FUNCTIONAL STRENGTH")) return "Progress primarily by load and movement quality: add 2–5% load when all reps are clean, then add one set or carry distance before increasing complexity.";
-  if (cat.includes("LOW BACK")) return "Progress only through pain-free control: increase range, time under tension, and stability demand before adding load; never chase fatigue or pain.";
-  if (cat.includes("MOBILITY")) return "Progress through range, control, hold duration, and balance complexity; never force depth or speed.";
-  return "Progress by repeating the same templates and applying small weekly increases in load, volume, density, or movement quality.";
+  return programProgressionRule(category);
 }
 
 function categoryAdaptationRule(category: string): string {
+  return programAdaptationRule(category);
+}
+
+
+/**
+ * Only Week A and Week B are ever generated. Every other calendar week is a
+ * written progression note that states exactly which lever rises that week.
+ */
+function weeklyLever(category: string, week: number, template: "A" | "B", totalWeeks: number): string {
   const cat = category.toUpperCase();
-  if (cat.includes("CARDIO")) return "Adaptation target: aerobic capacity, stamina, pacing, and sustained work. Exercise selection must favor locomotion, step-ups, simple calisthenics, intervals, AMRAPs, EMOMs, and circuits — never maximal strength or elite skill work.";
-  if (cat.includes("WEIGHT LOSS")) return "Adaptation target: caloric expenditure, continuous movement, work capacity, and elevated heart rate. Exercise selection must favor squats, lunges, push-ups, step-ups, mountain climbers, jumping jacks, burpees, high knees, bear crawls, bridges, dead bugs, and planks — never complex skill work or heavy strength protocols.";
-  if (cat.includes("FUNCTIONAL STRENGTH")) return "Adaptation target: practical force production and movement quality. Exercise selection must favor presses, rows, squats, hinges, carries, split squats, planks, pull-ups/chin-ups/dips when equipment and level allow — not endless cardio circuits.";
-  if (cat.includes("HYPERTROPHY")) return "Adaptation target: muscle size through mechanical tension and training volume. Exercise selection must favor 6–15 rep strength/hypertrophy movements, compounds, and accessories — not Tabata, EMOM, or long cardio circuits.";
-  if (cat.includes("LOW BACK")) return "Adaptation target: pain reduction, spinal stability, core control, and movement confidence. Exercise selection must favor dead bug, bird dog, McGill curl-up, glute bridge, Pallof press, side plank, cat-camel, hip mobility, and breathing work; use sets/reps only, never HIIT or explosive work.";
-  if (cat.includes("MOBILITY")) return "Adaptation target: mobility, joint control, balance, and movement quality. Exercise selection must favor controlled mobility/stability drills with sets, reps, and holds only — never AMRAP, EMOM, Tabata, HIIT, sprints, burpees, or jump training.";
-  return "Adaptation target comes first: identify the desired training adaptation, then select only exercises that directly create that adaptation.";
+  const repeat = `Repeat Week ${template}`;
+  const last = week === totalWeeks;
+
+  if (cat.includes("HYPERTROPHY")) {
+    const load = [65, 70, 75, 80, 80, 82.5, 85, 85][Math.min(week, 8) - 1];
+    if (week === 1) return `• Week 1 — Perform Week A as written at roughly 65% 1RM. Set your baseline loads and tempo.`;
+    return `• Week ${week} — ${repeat} at roughly ${load}% 1RM. ${last ? "Final week: add one controlled set to the first movement of each day, then deload and retest." : "Add load first; if load cannot rise, add one rep per set without breaking the 3-1-1 tempo."} On bodyweight days add reps to failure instead of load.`;
+  }
+
+  if (cat.includes("WEIGHT LOSS")) {
+    if (week === 1) return `• Week 1 — Perform Week A as written. Learn the circuits and finish every round.`;
+    return `• Week ${week} — ${repeat}; raise work periods by about 10% or cut rest by about 10%. ${last ? "Final week: add one full round to each main circuit." : "Add a round only once the current density feels repeatable."}`;
+  }
+
+  if (cat.includes("CARDIO")) {
+    if (week === 1) return `• Week 1 — Perform Week A as written. Record your distance, time, and average pace on every locomotion block.`;
+    return `• Week ${week} — ${repeat}; extend the main run or interval distance by about 10%, ${last ? "then hold that distance at your strongest sustainable pace and test the full distance at the end of the week." : "hold the same pace, and only trim recovery once the extra distance feels easy."}`;
+  }
+
+  if (cat.includes("FUNCTIONAL STRENGTH")) {
+    if (week === 1) return `• Week 1 — Perform Week A as written. Establish clean technique and conservative working loads.`;
+    return `• Week ${week} — ${repeat}; add 2–5% load when every rep of the previous week was clean, otherwise repeat the same load. ${last ? "Final week: add one set or extend carry distance rather than chasing a maximum." : "Add sets or carry distance before adding complexity."}`;
+  }
+
+  if (cat.includes("LOW BACK")) {
+    if (week === 1) return `• Week 1 — Perform Week A as written. Every rep must be completely pain-free.`;
+    return `• Week ${week} — ${repeat}; increase range, hold time, or number of controlled reps only while everything stays pain-free. ${last ? "Final week: hold the full prescribed volume comfortably, then continue at maintenance." : "Never add load to chase progress."}`;
+  }
+
+  if (cat.includes("MOBILITY")) {
+    if (week === 1) return `• Week 1 — Perform Week A as written. Find your true pain-free end range on every drill.`;
+    return `• Week ${week} — ${repeat}; add 5–10 sec to each hold or one controlled rep per set, and progress balance drills only when the previous version is steady. ${last ? "Final week: hold the longest prescribed durations with full control." : ""}`.trim();
+  }
+
+  if (week === 1) return `• Week 1 — Perform Week A exactly as written. Learn pacing, technique, and baseline loads.`;
+  return `• Week ${week} — ${repeat}; apply a small increase in load, reps, time under tension, or density where quality stays high.`;
 }
 
 function progressionLines(totalWeeks: number, category: string): string[] {
-  const cat = category.toUpperCase();
-  const hypertrophy = cat.includes("HYPERTROPHY");
-  const weightLoss = cat.includes("WEIGHT LOSS");
-  const base = [
-    "• Week 1 — Perform Week A exactly as written. Learn pacing, technique, and baseline loads.",
-    hypertrophy
-      ? "• Week 2 — Repeat Week A with load raised toward 70% 1RM where form allows."
-      : weightLoss
-        ? "• Week 2 — Repeat Week A; increase work periods by 10% or reduce rest by 10%."
-        : "• Week 2 — Repeat Week A; add a small load, rep, time, or control increase only where quality stays high.",
-    hypertrophy
-      ? "• Week 3 — Move to Week B at roughly 75% 1RM on the main lifts."
-      : "• Week 3 — Move to Week B. New workouts, same professional session structure.",
-    hypertrophy
-      ? "• Week 4 — Repeat Week B at roughly 80% 1RM or add one controlled set to the first main movement."
-      : weightLoss
-        ? "• Week 4 — Repeat Week B; add one round to each main circuit or reduce rest slightly."
-        : "• Week 4 — Repeat Week B; progress load, total reps, time under tension, or density.",
-  ];
-  if (totalWeeks >= 6) {
-    base.push(weightLoss
-      ? "• Week 5 — Repeat Week B with harder-but-realistic variations or another small density increase."
-      : "• Week 5 — Repeat Week B with advanced progression: add one set, add 2–5% load, or increase the hardest safe variation.");
-    base.push("• Week 6 — Repeat Week B as peak week: complete the maximum planned volume without technical failure.");
-  }
-  if (totalWeeks > 6) {
-    for (let week = 7; week <= totalWeeks; week++) {
-      const finalWeek = week === totalWeeks;
-      base.push(finalWeek
-        ? `• Week ${week} — Repeat Week B as final peak/testing week, then evaluate results after recovery.`
-        : `• Week ${week} — Repeat Week B with the strongest sustainable progression; reduce volume if recovery drops.`);
+  const lines: string[] = [];
+  for (let week = 1; week <= totalWeeks; week++) {
+    const template: "A" | "B" = week <= 2 ? "A" : "B";
+    if (week === 3) {
+      lines.push(`• Week 3 — Move to Week B. Same session structure, second set of workouts.`);
+      continue;
     }
+    lines.push(weeklyLever(category, week, template, totalWeeks));
   }
-  return base;
+  return lines;
 }
+
 
 /**
  * Build the standardized program skeleton.

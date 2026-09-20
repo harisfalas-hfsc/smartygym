@@ -3,11 +3,14 @@ import {
   programAllowsFinisher,
   programDoctrine,
   programFinisherSizeViolation,
+  programHasRecoveryCharacter,
+  programLocomotionMode,
   programMainFormat,
   programWorkExerciseViolation,
 } from "./program-doctrine.ts";
 import { matchesSelectedEquipment, type PoolExercise } from "./workout-engine/pool.server.ts";
 import type { Format } from "./workout-engine/spec.ts";
+
 
 export type ProgramAuditIssue = {
   code: string;
@@ -78,8 +81,21 @@ export function auditProgramCompliance(program: ProgramLike, library: PoolExerci
   const bodyweightOnly = equipmentIds.length === 0;
   const dayMatches = [...html.matchAll(new RegExp(DAY_RE.source, "gi"))];
   const weekBStart = html.search(/WEEK B TEMPLATE/i);
+  const templateCount = (html.match(/WEEK\s+[A-Z]\s+TEMPLATE/gi) || []).length;
+  const locomotion = programLocomotionMode(program.category);
+  const needsRecoveryCharacter = programHasRecoveryCharacter(program.category);
   let trainingDays = 0;
   let linkedExercises = 0;
+
+  if (templateCount > 2) {
+    issues.push({
+      code: "TEMPLATE_COUNT",
+      day: "Program",
+      section: "Program",
+      message: `A program may only contain Week A and Week B templates — ${templateCount} week templates were found.`,
+    });
+  }
+
 
   for (let index = 0; index < dayMatches.length; index += 1) {
     const match = dayMatches[index];
@@ -89,7 +105,25 @@ export function auditProgramCompliance(program: ProgramLike, library: PoolExerci
     if (/active recovery|rest/i.test(match[2])) continue;
     trainingDays += 1;
     const dayHtml = html.slice(start, end);
+    const dayText = plain(dayHtml);
+    if (locomotion === "required" && !/locomotion/i.test(dayText)) {
+      issues.push({
+        code: "LOCOMOTION_MISSING",
+        day: dayName,
+        section: "Main Workout",
+        message: "Cardio Endurance days must carry real locomotion (run, walk-run, intervals, shuttles, or the machine equivalent).",
+      });
+    }
+    if (needsRecoveryCharacter && !/(breathing|down-?regulat|constructive rest)/i.test(dayText)) {
+      issues.push({
+        code: "RECOVERY_CHARACTER_MISSING",
+        day: dayName,
+        section: "Program",
+        message: `${program.category} days must include breathing / down-regulation work.`,
+      });
+    }
     const mainHtml = sectionHtml(dayHtml, "Main Workout");
+
     const finisherHtml = sectionHtml(dayHtml, "Finisher");
     const templateIndex = weekBStart >= 0 && start > weekBStart ? 2 : 1;
     const expectedMain = programMainFormat(program.category, templateIndex);

@@ -1,6 +1,6 @@
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { buildExerciseReferenceList, repairStaticHoldPrescriptions, removeStaticHoldsFromMomentumSections } from "./exercise-matching.ts";
-import { buildExerciseBullet, filterLibraryForProgram, pickExercisesForDay, type LibExercise } from "./program-exercise-picker.ts";
+import { buildDayBullets, buildExerciseBullet, filterLibraryForProgram, pickExercisesForDay, type LibExercise } from "./program-exercise-picker.ts";
 
 const LIBRARY: LibExercise[] = [
   { id: "bw-adv-push", name: "push-up", body_part: "chest", equipment: "body weight", target: "pectorals", difficulty: "Advanced" },
@@ -76,7 +76,9 @@ Deno.test("program picker: category-first rules keep weight-loss work realistic 
   ];
   const pool = filterLibraryForProgram(library, "Bodyweight", "Advanced", "WEIGHT LOSS");
 
-  assertEquals(pool.map((ex) => ex.id).sort(), ["wl-1"]);
+  // Skills are rejected; continuous-movement and glute/core staples stay legal.
+  assertEquals(pool.map((ex) => ex.id).sort(), ["wl-1", "wl-2"]);
+
 });
 
 Deno.test("exercise matching: post-processing repairs static hold prescriptions only", () => {
@@ -96,4 +98,19 @@ Deno.test("exercise matching: static holds are removed from Main Workout momentu
   assert(result.processedContent.includes("20 sec {{exercise:forearm-plank:Forearm Plank}}"));
   assertEquals(result.processedContent.includes("30 sec {{exercise:forearm-plank:Forearm Plank}}"), false);
   assert(result.processedContent.includes("12 reps {{exercise:0662:push-up}}"));
+});
+Deno.test("program picker: cardio days carry real locomotion, mobility days carry down-regulation", () => {
+  const library: LibExercise[] = [
+    { id: "c1", name: "mountain climber", body_part: "cardio", equipment: "body weight", target: "cardiovascular system", difficulty: "Intermediate" },
+    { id: "c2", name: "high knee", body_part: "cardio", equipment: "body weight", target: "cardiovascular system", difficulty: "Intermediate" },
+    { id: "c3", name: "jumping jack", body_part: "cardio", equipment: "body weight", target: "cardiovascular system", difficulty: "Intermediate" },
+    { id: "c4", name: "squat", body_part: "upper legs", equipment: "body weight", target: "quads", difficulty: "Intermediate" },
+  ];
+  const cardio = buildDayBullets(library, "CARDIO ENDURANCE", "Interval Training", 1, 1, 4, "Intermediate", 6, []);
+  assert(cardio.some((line) => line.includes("Locomotion")), "cardio day must contain a locomotion block");
+  assert(cardio.some((line) => /400 m/.test(line)), "interval day must prescribe distance intervals");
+
+  const mobility = buildDayBullets(library, "LOW BACK PAIN", "Core Control", 1, 1, 4, "Beginner", 6, []);
+  assert(mobility.some((line) => /breathing/i.test(line)), "low back day must include breathing work");
+  assert(!mobility.some((line) => line.includes("Locomotion")), "mobility day must not prescribe running");
 });

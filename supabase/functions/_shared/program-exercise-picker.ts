@@ -9,10 +9,16 @@
 import { exerciseFamily, isSelectable, selectionTier } from "./exercise-selection.ts";
 import { matchesSelectedEquipment } from "./workout-engine/pool.server.ts";
 import {
+  hasProgramDoctrine,
   programAllowsFinisher,
+  programBodyweightToFailure,
+  programDoctrine,
+  programHasRecoveryCharacter,
+  programLocomotionMode,
   programMainFormat,
   programWorkExerciseViolation,
 } from "./program-doctrine.ts";
+
 
 export interface LibExercise {
   id: string;
@@ -68,6 +74,8 @@ const ABSOLUTE_SKILL_PATTERNS: RegExp[] = [
 
 const CONDITIONAL_ADVANCED_SKILL_PATTERNS: RegExp[] = [/pistol|one\s*leg\s*squat/i];
 
+// Category intent filters live in ./program-doctrine.ts — ONE rules source for
+// the picker, the generator prose and the compliance audit.
 type CategoryRule = {
   preferred: RegExp[];
   forbidden: RegExp[];
@@ -75,38 +83,6 @@ type CategoryRule = {
   rejectCardioBodyPart?: boolean;
 };
 
-const CATEGORY_RULES: Record<string, CategoryRule> = {
-  "CARDIO ENDURANCE": {
-    allowCardioBodyPart: true,
-    preferred: [/walk|run|jog|step|jump\s*rope|rope|mountain\s*climber|jumping\s*jack|high\s*knee|burpee|bear\s*crawl|squat|lunge|push\s*up|skater|fast\s*feet|bike|row|elliptical|ski\s*erg|cardio/i],
-    forbidden: [/sissy\s*squat|pistol|one\s*leg\s*squat|bench\s*press|deadlift|max|heavy|curl|triceps?\s*extension|calf\s*raise/i],
-  },
-  "WEIGHT LOSS": {
-    allowCardioBodyPart: true,
-    preferred: [/squat|lunge|push\s*up|incline\s*push|step|mountain\s*climber|jumping\s*jack|jack\s*jump|star\s*jump|scissor\s*jump|high\s*knee|butt\s*kick|burpee|bear\s*crawl|dead\s*bug|glute\s*bridge|plank|skater|fast\s*feet|walk|run|jog|bike|row|swing|thruster|crawl/i],
-    forbidden: [/sissy\s*squat|pistol|one\s*leg\s*squat|max|heavy|one\s*rep|bench\s*press|leg\s*press|preacher\s*curl|concentration\s*curl|step[ -]?up/i],
-  },
-  "FUNCTIONAL STRENGTH": {
-    rejectCardioBodyPart: true,
-    preferred: [/push\s*up|pull\s*up|chin\s*up|\bdip\b|split\s*squat|lunge|single\s*leg\s*rdl|rdl|deadlift|plank|side\s*plank|bear\s*crawl|goblet\s*squat|kettlebell|dumbbell\s*row|row|bench\s*press|floor\s*press|shoulder\s*press|farmer|carry|squat|press|hinge/i],
-    forbidden: [/jumping\s*jack|high\s*knee|mountain\s*climber|burpee|skater|fast\s*feet|run|jog|elliptical|bike/i],
-  },
-  "MUSCLE HYPERTROPHY": {
-    rejectCardioBodyPart: true,
-    preferred: [/press|bench|row|pulldown|pull\s*up|chin\s*up|\bdip\b|squat|split\s*squat|bulgarian|rdl|deadlift|leg\s*press|shoulder\s*press|curl|extension|raise|fly|glute\s*bridge|push\s*up|lat|chest|biceps|triceps|quad|hamstring/i],
-    forbidden: [/tabata|amrap|emom|burpee|jumping\s*jack|high\s*knee|mountain\s*climber|skater|fast\s*feet|run|jog|bike|elliptical|pistol|one\s*leg\s*squat/i],
-  },
-  "LOW BACK PAIN": {
-    rejectCardioBodyPart: true,
-    preferred: [/dead\s*bug|bird\s*dog|mcgill|curl\s*up|glute\s*bridge|pallof|side\s*plank|cat\s*camel|cat\s*cow|hip|breathing|plank|stability|mobility|stretch|pelvic|child/i],
-    forbidden: [/burpee|jump|sprint|run|box|thruster|snatch|clean|swing|high\s*knee|mountain\s*climber|jack|heavy|deadlift|good\s*morning|hyperextension/i],
-  },
-  "MOBILITY & STABILITY": {
-    rejectCardioBodyPart: true,
-    preferred: [/world.?s\s*greatest\s*stretch|90\/?90|thoracic|rotation|deep\s*squat|single\s*leg\s*balance|bird\s*dog|dead\s*bug|hip\s*airplane|shoulder|ankle|mobility|stretch|balance|cat\s*cow|cat\s*camel|circle|cars?|plank|stability/i],
-    forbidden: [/burpee|sprint|run|jump|box|thruster|snatch|clean|swing|high\s*knee|mountain\s*climber|jack|heavy/i],
-  },
-};
 
 const DAY_FOCUS_KEYWORDS: Record<string, { body_part?: string[]; target?: string[]; name?: string[] }> = {
   "lower body": { body_part: ["upper legs", "lower legs", "legs", "hips"] },
@@ -231,10 +207,16 @@ function excludesSkillExercises(ex: LibExercise, difficulty?: string | null): bo
 }
 
 function ruleForCategory(category: string): CategoryRule | null {
-  const cat = (category || "").toUpperCase();
-  const key = Object.keys(CATEGORY_RULES).find((k) => cat.includes(k));
-  return key ? CATEGORY_RULES[key] : null;
+  if (!hasProgramDoctrine(category)) return null;
+  const doctrine = programDoctrine(category);
+  return {
+    preferred: doctrine.preferred,
+    forbidden: doctrine.forbidden,
+    allowCardioBodyPart: doctrine.allowCardioBodyPart,
+    rejectCardioBodyPart: doctrine.rejectCardioBodyPart,
+  };
 }
+
 
 function exerciseSearchText(ex: LibExercise): string {
   return `${ex.name || ""} ${ex.body_part || ""} ${ex.target || ""} ${ex.description || ""}`;
@@ -444,7 +426,14 @@ function protocolMainPrescription(style: ProtocolStyle, ex: LibExercise, slotInd
         return `• 3 sets × 20 sec hold ${token} — rest 45 sec`;
       }
       const cat = category.toUpperCase();
-      if (cat.includes("HYPERTROPHY")) return `• 4 sets × 10 reps ${token} — tempo 3-1-1, rest 75 sec`;
+      if (cat.includes("HYPERTROPHY")) {
+        // Bodyweight hypertrophy cannot add load, so the set itself must reach
+        // close to technical failure — that is where the tension comes from.
+        return programBodyweightToFailure(category) && isBodyweightExercise(ex)
+          ? `• 4 sets × max reps ${token} — stop 1 rep short of technical failure (aim 12–20), tempo 3-1-1, rest 75 sec`
+          : `• 4 sets × 10 reps ${token} — tempo 3-1-1, rest 75 sec`;
+      }
+
       if (cat.includes("FUNCTIONAL STRENGTH")) return `• 4 sets × 6 reps ${token} — rest 120 sec`;
       if (cat.includes("LOW BACK")) return `• 3 sets × 10 reps ${token} — pain-free range, rest 60 sec`;
       if (cat.includes("MOBILITY")) return `• 2 sets × 10 reps ${token} — full controlled range, rest 45 sec`;
@@ -662,6 +651,101 @@ function coachingNote(category: string, dayTitle: string, weekIndex: number, tot
   return `<em>${phase} — ${dayTitle}. ${focus} ${avoid}</em>`;
 }
 
+/** Marker used by the compliance audit to prove a cardio day carries real locomotion. */
+export const LOCOMOTION_HEADER = "🏃 Locomotion";
+
+function locomotionModality(equipmentIds: string[]): string {
+  if (equipmentIds.includes("cardio") || equipmentIds.includes("fullgym")) {
+    return "outdoors, on a treadmill, bike, rower, or elliptical — keep the same effort whichever you choose";
+  }
+  return "outdoors on flat ground or a track — walk the recovery portions whenever pace drops";
+}
+
+/**
+ * Real endurance content. A cardio program is not a list of calisthenics: every
+ * day carries timed or distance locomotion — continuous runs, walk-run
+ * intervals, tempo efforts, or shuttle runs — with the machine equivalent when
+ * the athlete has one.
+ */
+function locomotionLines(
+  category: string,
+  dayTitle: string,
+  weekIndex: number,
+  dayIndex: number,
+  difficulty: DifficultyTier,
+  equipmentIds: string[],
+): string[] {
+  const mode = programLocomotionMode(category);
+  if (mode === "none") return [];
+  if (mode === "optional" && (weekIndex + dayIndex) % 2 === 0) return [];
+
+  const where = locomotionModality(equipmentIds);
+  const scale = difficulty === "Beginner" ? 0 : difficulty === "Advanced" ? 2 : 1;
+  const title = dayTitle.toLowerCase();
+
+  const plan = (() => {
+    if (mode === "optional") {
+      const minutes = [8, 10, 12][scale];
+      return [
+        `• ${minutes} min easy continuous locomotion — walk-jog ${where}. Conversational pace only.`,
+      ];
+    }
+    if (title.includes("interval")) {
+      const reps = [5, 6, 8][scale];
+      return [
+        `• ${reps} × 400 m at a strong-but-repeatable pace — 90 sec easy walk-jog recovery between reps, ${where}.`,
+        `• Hold every rep within 5 sec of the first. If you slow more than that, stop the last rep.`,
+      ];
+    }
+    if (title.includes("tempo")) {
+      const minutes = [12, 16, 20][scale];
+      return [
+        `• ${minutes} min continuous tempo effort — comfortably hard, 3–4 word answers only, ${where}.`,
+        `• 5 min easy jog or brisk walk to close the block.`,
+      ];
+    }
+    if (title.includes("long")) {
+      const minutes = [25, 35, 45][scale];
+      return [
+        `• ${minutes} min continuous easy-pace locomotion — Zone 2, full sentences possible throughout, ${where}.`,
+      ];
+    }
+    if (title.includes("recovery")) {
+      const minutes = [15, 20, 25][scale];
+      return [
+        `• ${minutes} min very easy recovery locomotion — nasal breathing only, ${where}.`,
+      ];
+    }
+    if (title.includes("mixed") || title.includes("modal") || title.includes("conditioning")) {
+      const rounds = [6, 8, 10][scale];
+      return [
+        `• ${rounds} × 20 m shuttle runs — turn on both feet, 40 sec easy walk between shuttles, ${where}.`,
+        `• 5 min steady jog to finish the block at a controlled pace.`,
+      ];
+    }
+    const minutes = [15, 20, 25][scale];
+    return [
+      `• ${minutes} min continuous aerobic base run or walk-run — even pacing, ${where}.`,
+      `• Every 5 min, check that you can still speak a full sentence; slow down if you cannot.`,
+    ];
+  })();
+
+  const window = mode === "optional" ? "8–12 minutes" : difficulty === "Advanced" ? "25–45 minutes" : "15–30 minutes";
+  return [`<strong>${LOCOMOTION_HEADER} — ${window}</strong>`, ...plan];
+}
+
+/** Marker used by the compliance audit for recovery-character categories. */
+export const DOWN_REGULATION_HEADER = "🌬 Recovery & Down-Regulation";
+
+function downRegulationLines(category: string): string[] {
+  if (!programHasRecoveryCharacter(category)) return [];
+  return [
+    `<strong>${DOWN_REGULATION_HEADER} — 3–4 minutes</strong>`,
+    "• Supine 90/90 breathing × 8 slow cycles — 4-sec inhale, 6-sec exhale, ribs down",
+    "• Constructive rest position × 2 min — let the low back settle, no stretching, no effort",
+  ];
+}
+
 /**
  * Build the bullet lines for one training day, including `{{exercise:ID:Name}}`
  * tokens (eye icon) and a default sets×reps prescription.
@@ -675,7 +759,9 @@ export function buildDayBullets(
   count = 5,
   difficulty?: string | null,
   totalWeeks: number = 8,
+  equipmentIds: string[] = [],
 ): string[] {
+
   const tier = tierOf(difficulty);
   const counts = exerciseCountsFor(tier);
   const totalNeeded = counts.main + counts.finisher;
@@ -729,11 +815,14 @@ export function buildDayBullets(
     ...activationLines(category, dayTitle),
     `<strong>🏋 Main Workout (${proto.main}) — ${mainTimeWindow}</strong>`,
     `<em>${proto.mainIntro}</em>`,
+    ...locomotionLines(category, dayTitle, weekIndex, dayIndex, tier, equipmentIds),
     ...mainBullets,
     ...finisherLines,
+    ...downRegulationLines(category),
     "<strong>🧘 Cool Down — 5 minutes</strong>",
     ...coolDownLines(category),
   ];
+
 }
 
 /**
