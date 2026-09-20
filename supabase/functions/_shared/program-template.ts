@@ -141,26 +141,13 @@ function templateDefinitions(totalWeeks: number): Array<{ key: "A" | "B"; range:
 }
 
 function categoryProgressionRule(category: string): string {
-  const cat = category.toUpperCase();
-  if (cat.includes("HYPERTROPHY")) return "Progress primarily by load: Week 1 uses about 65% 1RM, Week 2 about 70%, Week 3 about 75%, Week 4 about 80%; later weeks repeat Week B with small load, set, or rep increases without breaking tempo.";
-  if (cat.includes("WEIGHT LOSS")) return "Progress primarily by density: increase work periods by about 10%, reduce rest by about 10%, then add one round or choose the harder listed variation while keeping movement quality realistic.";
-  if (cat.includes("CARDIO")) return "Progress primarily by aerobic volume and interval quality: extend work intervals, reduce recovery slightly, or add one interval while preserving sustainable pacing.";
-  if (cat.includes("FUNCTIONAL STRENGTH")) return "Progress primarily by load and movement quality: add 2–5% load when all reps are clean, then add one set or carry distance before increasing complexity.";
-  if (cat.includes("LOW BACK")) return "Progress only through pain-free control: increase range, time under tension, and stability demand before adding load; never chase fatigue or pain.";
-  if (cat.includes("MOBILITY")) return "Progress through range, control, hold duration, and balance complexity; never force depth or speed.";
-  return "Progress by repeating the same templates and applying small weekly increases in load, volume, density, or movement quality.";
+  return programProgressionRule(category);
 }
 
 function categoryAdaptationRule(category: string): string {
-  const cat = category.toUpperCase();
-  if (cat.includes("CARDIO")) return "Adaptation target: aerobic capacity, stamina, pacing, and sustained work. Exercise selection must favor locomotion, step-ups, simple calisthenics, intervals, AMRAPs, EMOMs, and circuits — never maximal strength or elite skill work.";
-  if (cat.includes("WEIGHT LOSS")) return "Adaptation target: caloric expenditure, continuous movement, work capacity, and elevated heart rate. Exercise selection must favor squats, lunges, push-ups, step-ups, mountain climbers, jumping jacks, burpees, high knees, bear crawls, bridges, dead bugs, and planks — never complex skill work or heavy strength protocols.";
-  if (cat.includes("FUNCTIONAL STRENGTH")) return "Adaptation target: practical force production and movement quality. Exercise selection must favor presses, rows, squats, hinges, carries, split squats, planks, pull-ups/chin-ups/dips when equipment and level allow — not endless cardio circuits.";
-  if (cat.includes("HYPERTROPHY")) return "Adaptation target: muscle size through mechanical tension and training volume. Exercise selection must favor 6–15 rep strength/hypertrophy movements, compounds, and accessories — not Tabata, EMOM, or long cardio circuits.";
-  if (cat.includes("LOW BACK")) return "Adaptation target: pain reduction, spinal stability, core control, and movement confidence. Exercise selection must favor dead bug, bird dog, McGill curl-up, glute bridge, Pallof press, side plank, cat-camel, hip mobility, and breathing work; use sets/reps only, never HIIT or explosive work.";
-  if (cat.includes("MOBILITY")) return "Adaptation target: mobility, joint control, balance, and movement quality. Exercise selection must favor controlled mobility/stability drills with sets, reps, and holds only — never AMRAP, EMOM, Tabata, HIIT, sprints, burpees, or jump training.";
-  return "Adaptation target comes first: identify the desired training adaptation, then select only exercises that directly create that adaptation.";
+  return programAdaptationRule(category);
 }
+
 
 function progressionLines(totalWeeks: number, category: string): string[] {
   const cat = category.toUpperCase();
