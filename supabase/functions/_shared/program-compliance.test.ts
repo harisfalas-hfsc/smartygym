@@ -26,6 +26,8 @@ const library: PoolExercise[] = [
   exercise("climber", "mountain climber", "body weight", "cardio", "cardiovascular system"),
   exercise("jack", "jumping jack", "body weight", "cardio", "cardiovascular system"),
   exercise("pullover", "dumbbell pullover", "dumbbell", "back", "lats"),
+  exercise("one-arm-dip", "one arm dip", "body weight", "upper arms", "triceps"),
+  exercise("unstable-curl", "dumbbell seated one arm bicep curl on exercise ball with leg raised", "dumbbell", "upper arms", "biceps"),
 ];
 
 const token = (id: string, name: string) => `{{exercise:${id}:${name}}}`;
@@ -42,6 +44,11 @@ Deno.test("program doctrine maps all six program categories", () => {
 Deno.test("conditioning program doctrine rejects fixed-position lifting", () => {
   const issue = programWorkExerciseViolation(library[4], "WEIGHT LOSS", "CIRCUIT");
   assert(issue?.includes("fixed bench, lying or seated position"));
+});
+
+Deno.test("program doctrine applies shared permanent movement bans", () => {
+  assert(programWorkExerciseViolation(library[5], "MUSCLE HYPERTROPHY", "REPS & SETS")?.includes("shared exercise-selection policy"));
+  assert(programWorkExerciseViolation(library[6], "MUSCLE HYPERTROPHY", "REPS & SETS")?.includes("shared exercise-selection policy"));
 });
 
 Deno.test("program compliance passes a linked, prescribed conditioning day", () => {

@@ -31,6 +31,8 @@ Deno.test("priority vocabulary remains preference rather than permission", () =>
   assertEquals(isSelectable("pistol squat"), false);
   assertEquals(isSelectable("Turkish get-up"), false);
   assertEquals(isSelectable("Nordic hamstring curl"), false);
+  assertEquals(isSelectable("one arm dip"), false);
+  assertEquals(isSelectable("dumbbell seated one arm bicep curl on exercise ball with leg raised"), false);
 });
 
 Deno.test("equipment-aware pools distinguish functional kit and machines", () => {
