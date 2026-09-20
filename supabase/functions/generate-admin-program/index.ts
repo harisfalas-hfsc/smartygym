@@ -231,7 +231,7 @@ serve(async (req) => {
       const wk: string[][] = [];
       for (let d = 1; d <= daysPerWeek; d++) {
         const title = dayTitlesByCategory[d - 1] || "Training Day";
-        wk.push(buildDayBullets(library, body.category, title, w, d, 6, difficultyText, weeks));
+        wk.push(buildDayBullets(library, body.category, title, w, d, 6, difficultyText, weeks, equipmentIds));
       }
       exercisesPerDay.push(wk);
     }

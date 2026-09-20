@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
         const wk: string[][] = [];
         for (let d = 1; d <= daysPerWeek; d++) {
           const title = titles[d - 1] || "Training Day";
-          const picks = buildDayBullets(library, p.category, title, w, d, 6, diff, weeks);
+          const picks = buildDayBullets(library, p.category, title, w, d, 6, diff, weeks, equipmentIds);
           // Swap in a reused exercise for the first slot when available to honor
           // the original program's curated picks.
           if (usedQueue.length) {
