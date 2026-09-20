@@ -43,71 +43,84 @@ This is the first instruction the system reads, before the general rules, philos
 
 Before the system evaluates exercise category, format, difficulty level, equipment, or time available, it must first operate from the mindset of Haris Falas, a professional fitness trainer and sports scientist, designing for real people — not professional athletes. The people using this system are parents, working people, individuals managing health conditions, people who are tired from work, stressed from family or financial pressures, and who are giving up one hour of their day to feel better. They come to Smarty Gym to feel healthier, to build strength gradually, to lose weight, to prevent injury, to enjoy time with themselves, and to feel better mentally and physically — not to prove anything or to be pushed like athletes.
 
-This means every decision the system makes about exercise selection, category, format, and difficulty must be filtered through professional judgment: safety, health, and quality of the workout come before intensity, novelty, or volume. Choosing "advanced" does not mean adding more exercises — it means the trainer applies more load or more demanding variations within the same safe, simple, well-structured framework, so the person leaves appropriately fatigued and challenged, not overwhelmed or at risk. Choosing "beginner" or a shorter time window does not mean giving the person less value or an incomplete session — it means the trainer still designs a properly structured, professional, complete workout suited to that constraint. People are trusting the system with their time and their money, and the system must always deliver a real, well-designed training experience in return, never a lazy or token one, regardless of the level or time selected.
+This means every decision the system makes about exercise selection, category, format, and difficulty must be filtered through professional judgment: safety, health, and quality of the workout come before intensity, novelty, or volume. Choosing "advanced" does not mean complicated: it means progressing familiar, safe movements through load, volume, density, tempo, range, rest, exercise combinations and programming — never adding circus-level skills merely to look advanced. Choosing "beginner" or a shorter time window does not mean giving the person less value or an incomplete session — it means the trainer still designs a properly structured, professional, complete workout suited to that constraint. People are trusting the system with their time and their money, and the system must always deliver a real, well-designed training experience in return, never a lazy or token one, regardless of the level or time selected.
 
 This mindset is the first filter applied to every generation, before any category, format, difficulty, or equipment logic runs. All the rules that follow exist to serve this: care for the person first, then build the workout.`;
 
 export const PRIORITY_MACHINE = [
-  // Stations / equipment
-  "leg extension machine", "leg curl machine", "leg press", "hack squat machine",
-  "smith machine", "squat rack", "power rack", "chest press machine", "pec deck",
-  "butterfly machine", "lat pulldown machine", "seated row machine",
-  "cable crossover machine", "shoulder press machine", "lateral raise machine",
-  "assisted pull-up machine", "assisted dip machine", "dip station", "pull-up bar",
-  "hip abductor machine", "hip adductor machine", "glute kickback machine",
-  "hip thrust machine", "calf raise machine", "preacher curl bench",
-  "triceps pushdown cable station", "roman chair", "back extension bench",
-  "abdominal crunch machine",
-  // Machine-based exercises
-  "leg extension", "single-leg extension", "lying leg curl", "seated leg curl",
-  "single-leg press", "hack squat", "smith machine squat", "smith machine lunge",
-  "smith machine bench press", "smith machine incline press",
-  "smith machine shoulder press", "barbell back squat", "front squat",
-  "overhead press", "flat bench press", "incline bench press", "decline bench press",
-  "close-grip bench press", "wide-grip bench press", "machine chest press",
-  "pec deck fly", "cable crossover", "cable crossover high to low",
-  "cable crossover low to high", "lat pulldown", "wide grip lat pulldown",
-  "close grip lat pulldown", "reverse grip lat pulldown", "seated cable row",
-  "standing cable row", "single-arm cable row", "machine shoulder press",
-  "machine lateral raise", "cable lateral raise", "cable face pull",
+  // Lower push / lower pull
+  "leg press", "leg extension", "hack squat", "smith machine squat",
+  "smith machine split squat", "smith machine lunge", "seated calf raise",
+  "standing calf raise", "seated leg curl", "lying leg curl", "standing leg curl",
+  "glute machine", "hip thrust machine", "back extension machine",
+  "cable pull-through", "cable glute kickback",
+  // Upper push / upper pull
+  "chest press machine", "incline chest press machine", "pec deck",
+  "shoulder press machine", "cable chest press", "cable chest fly",
+  "cable crossover", "cable lateral raise", "lat pulldown", "seated cable row",
+  "machine row", "chest-supported row machine", "assisted pull-up machine",
+  "high row machine", "cable straight-arm pulldown", "cable face pull",
+  // Arms / core / full body
+  "cable triceps pushdown", "cable overhead triceps extension",
+  "machine triceps extension", "cable biceps curl", "cable hammer curl",
+  "preacher curl machine", "biceps curl machine", "triceps dip machine",
+  "cable crunch", "ab crunch machine", "rotary torso machine", "back extension",
+  "cable wood chop", "cable pallof press", "smith machine romanian deadlift",
+  "cable squat", "cable row to press", "sled push",
+  // Conventional aliases already used by the live library.
+  "machine chest press", "machine shoulder press", "machine lateral raise",
   "rear delt machine fly", "assisted pull-up", "assisted dip", "machine dip",
-  "hip abduction", "hip adduction", "glute kickback", "hip thrust machine press",
-  "standing calf raise", "seated calf raise", "machine preacher curl",
-  "cable bicep curl", "cable triceps pushdown", "cable overhead triceps extension",
-  "machine ab crunch", "back extension",
+  "hip abduction", "hip adduction", "glute kickback", "machine preacher curl",
 ];
 
 export const PRIORITY_FREE_WEIGHT = [
-  "barbell deadlift", "sumo deadlift", "romanian deadlift",
-  "dumbbell romanian deadlift", "kettlebell deadlift", "barbell back squat",
-  "barbell front squat", "goblet squat", "dumbbell squat", "kettlebell squat",
-  "barbell bench press", "dumbbell bench press", "incline dumbbell press",
-  "barbell overhead press", "dumbbell shoulder press", "kettlebell push press",
-  "barbell bent-over row", "dumbbell bent-over row", "kettlebell bent-over row",
-  "single-arm dumbbell row", "pendlay row", "barbell upright row",
-  "dumbbell upright row", "barbell curl", "dumbbell curl", "hammer curl",
-  "kettlebell curl", "skull crusher", "dumbbell overhead triceps extension",
-  "barbell hip thrust", "dumbbell lunge", "barbell lunge", "walking lunge",
-  "bulgarian split squat", "kettlebell swing", "kettlebell snatch",
-  "dumbbell snatch", "ground to overhead", "kettlebell clean",
-  "dumbbell clean and press", "barbell clean and jerk", "barbell power clean",
-  "turkish get-up", "dumbbell lateral raise", "dumbbell front raise",
-  "dumbbell rear delt fly", "farmer's carry", "dumbbell pullover",
-  "kettlebell halo", "renegade row", "shrug", "dumbbell fly",
+  // Upper push / pull
+  "dumbbell bench press", "dumbbell floor press", "dumbbell shoulder press",
+  "single-arm dumbbell shoulder press", "dumbbell arnold press", "dumbbell chest fly",
+  "dumbbell incline press", "trx push-up", "trx chest press", "dumbbell push press",
+  "dumbbell bent-over row", "single-arm dumbbell row", "dumbbell renegade row",
+  "dumbbell upright row", "trx row", "trx high row", "trx face pull",
+  "kettlebell row", "single-arm kettlebell row", "dumbbell rear delt fly",
+  // Lower push / posterior chain
+  "dumbbell goblet squat", "dumbbell squat", "dumbbell front squat",
+  "dumbbell reverse lunge", "dumbbell forward lunge", "dumbbell walking lunge",
+  "dumbbell bulgarian split squat", "dumbbell step-up", "kettlebell goblet squat",
+  "kettlebell front squat", "dumbbell romanian deadlift",
+  "single-leg dumbbell romanian deadlift", "dumbbell deadlift", "kettlebell deadlift",
+  "kettlebell romanian deadlift", "kettlebell swing", "two-hand kettlebell swing",
+  "single-arm kettlebell swing", "dumbbell hip thrust", "trx hamstring curl",
+  // Full body / power / conditioning
+  "dumbbell thruster", "single-arm dumbbell thruster", "kettlebell thruster",
+  "single-arm kettlebell thruster", "kettlebell clean", "kettlebell clean and press",
+  "medicine ball slam", "medicine ball chest pass", "medicine ball rotational throw",
+  "medicine ball squat to press",
+  // Conventional barbell fundamentals remain available in the same shared pool.
+  "barbell deadlift", "sumo deadlift", "romanian deadlift", "barbell back squat",
+  "barbell front squat", "barbell bench press", "barbell overhead press",
+  "barbell bent-over row", "barbell hip thrust", "barbell lunge", "barbell curl",
+  "dumbbell curl", "hammer curl", "dumbbell lateral raise", "farmer's carry",
 ];
 
 export const PRIORITY_BODYWEIGHT = [
-  "bodyweight squat", "jump squat", "walking lunge", "reverse lunge",
-  "forward lunge", "lateral lunge", "bulgarian split squat", "step-up", "push-up",
-  "wide-grip push-up", "diamond push-up", "decline push-up", "incline push-up",
-  "pike push-up", "pull-up", "chin-up", "inverted row", "dip", "plank",
-  "side plank", "sit-up", "crunch", "bicycle crunch", "russian twist",
-  "leg raise", "hanging leg raise", "v-up", "mountain climber", "flutter kick",
-  "toe touches", "glute bridge", "single-leg glute bridge", "superman",
-  "bird dog", "burpee", "jumping jack", "high knees", "wall sit", "calf raise",
-  "box jump", "broad jump", "lateral bound", "bear crawl", "crab walk",
-  "skater jump", "shoulder tap plank", "plank to push-up", "donkey kick",
-  "fire hydrant", "tuck jump",
+  // Upper push / pull
+  "push-up", "wide push-up", "close-grip push-up", "diamond push-up",
+  "incline push-up", "decline push-up", "kneeling push-up", "pike push-up",
+  "bench dip", "box dip", "shoulder tap", "pull-up", "chin-up",
+  "neutral-grip pull-up", "inverted row", "trx bodyweight row",
+  "scapular pull-up", "prone y raise", "prone t raise",
+  // Lower push / posterior chain
+  "bodyweight squat", "air squat", "sumo squat", "split squat", "forward lunge",
+  "reverse lunge", "walking lunge", "lateral lunge", "curtsy lunge", "step-up",
+  "bulgarian split squat", "wall sit", "squat pulse", "glute bridge",
+  "single-leg glute bridge", "hip thrust", "single-leg hip thrust",
+  "bodyweight good morning", "hamstring walkout",
+  "single-leg romanian deadlift bodyweight", "nordic hamstring curl",
+  // Core
+  "sit-up", "crunch", "bicycle crunch", "reverse crunch", "leg raise", "dead bug",
+  "bird dog", "plank", "side plank", "mountain climber",
+  // Conditioning / full body and immediately available common alternatives.
+  "burpee", "jumping jack", "high knees", "butt kicks", "skipping",
+  "skater jump", "commando", "bear crawl", "squat jump",
 ];
 
 export const PRIORITY_PILATES = [
@@ -184,6 +197,15 @@ const SYNONYMS: [RegExp, string][] = [
   [/\bmilitary press\b/g, "overhead press"],
   [/\bsplit jump\b/g, "jump squat"],
   [/\bpress up\b/g, "push up"],
+  [/\bair squats?\b/g, "bodyweight squat"],
+  [/\bsuspension trainer\b|\bsuspension\b/g, "trx"],
+  [/\bslam ball\b/g, "medicine ball"],
+  [/\bbutt kickers?\b/g, "butt kicks"],
+  [/\bskipping in place\b|\bjump rope\b/g, "skipping"],
+  [/\bplank to push up\b|\bup down plank\b/g, "commando"],
+  [/\bneutral grip chin up\b/g, "neutral grip pull up"],
+  [/\bstraight arm cable pulldown\b/g, "cable straight arm pulldown"],
+  [/\bpallof hold\b/g, "pallof press"],
   [/\bswiss ball\b|\bexercise ball\b|\bphysio ball\b/g, "stability ball"],
   [/\bget ?up\b/g, "get up"],
   [/\bflutter kicks\b/g, "flutter kick"],
