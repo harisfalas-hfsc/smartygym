@@ -332,6 +332,9 @@ export function categoryExerciseViolation(e: ExerciseLike, category: Category): 
   if (category === "MICRO-WORKOUTS" && (MICRO_BAN_RE.test(t) || HOME_APPARATUS_RE.test(t)))
     return `"${e.name}" needs equipment or a special setup, which a Micro Workout never uses.`;
 
+  const stillness = conditioningStillnessViolation(e, category);
+  if (stillness) return stillness;
+
   const conditioning = conditioningSetupViolation(e, category);
   if (conditioning) return conditioning;
 
