@@ -651,6 +651,101 @@ function coachingNote(category: string, dayTitle: string, weekIndex: number, tot
   return `<em>${phase} — ${dayTitle}. ${focus} ${avoid}</em>`;
 }
 
+/** Marker used by the compliance audit to prove a cardio day carries real locomotion. */
+export const LOCOMOTION_HEADER = "🏃 Locomotion";
+
+function locomotionModality(equipmentIds: string[]): string {
+  if (equipmentIds.includes("cardio") || equipmentIds.includes("fullgym")) {
+    return "outdoors, on a treadmill, bike, rower, or elliptical — keep the same effort whichever you choose";
+  }
+  return "outdoors on flat ground or a track — walk the recovery portions whenever pace drops";
+}
+
+/**
+ * Real endurance content. A cardio program is not a list of calisthenics: every
+ * day carries timed or distance locomotion — continuous runs, walk-run
+ * intervals, tempo efforts, or shuttle runs — with the machine equivalent when
+ * the athlete has one.
+ */
+function locomotionLines(
+  category: string,
+  dayTitle: string,
+  weekIndex: number,
+  dayIndex: number,
+  difficulty: DifficultyTier,
+  equipmentIds: string[],
+): string[] {
+  const mode = programLocomotionMode(category);
+  if (mode === "none") return [];
+  if (mode === "optional" && (weekIndex + dayIndex) % 2 === 0) return [];
+
+  const where = locomotionModality(equipmentIds);
+  const scale = difficulty === "Beginner" ? 0 : difficulty === "Advanced" ? 2 : 1;
+  const title = dayTitle.toLowerCase();
+
+  const plan = (() => {
+    if (mode === "optional") {
+      const minutes = [8, 10, 12][scale];
+      return [
+        `• ${minutes} min easy continuous locomotion — walk-jog ${where}. Conversational pace only.`,
+      ];
+    }
+    if (title.includes("interval")) {
+      const reps = [5, 6, 8][scale];
+      return [
+        `• ${reps} × 400 m at a strong-but-repeatable pace — 90 sec easy walk-jog recovery between reps, ${where}.`,
+        `• Hold every rep within 5 sec of the first. If you slow more than that, stop the last rep.`,
+      ];
+    }
+    if (title.includes("tempo")) {
+      const minutes = [12, 16, 20][scale];
+      return [
+        `• ${minutes} min continuous tempo effort — comfortably hard, 3–4 word answers only, ${where}.`,
+        `• 5 min easy jog or brisk walk to close the block.`,
+      ];
+    }
+    if (title.includes("long")) {
+      const minutes = [25, 35, 45][scale];
+      return [
+        `• ${minutes} min continuous easy-pace locomotion — Zone 2, full sentences possible throughout, ${where}.`,
+      ];
+    }
+    if (title.includes("recovery")) {
+      const minutes = [15, 20, 25][scale];
+      return [
+        `• ${minutes} min very easy recovery locomotion — nasal breathing only, ${where}.`,
+      ];
+    }
+    if (title.includes("mixed") || title.includes("modal") || title.includes("conditioning")) {
+      const rounds = [6, 8, 10][scale];
+      return [
+        `• ${rounds} × 20 m shuttle runs — turn on both feet, 40 sec easy walk between shuttles, ${where}.`,
+        `• 5 min steady jog to finish the block at a controlled pace.`,
+      ];
+    }
+    const minutes = [15, 20, 25][scale];
+    return [
+      `• ${minutes} min continuous aerobic base run or walk-run — even pacing, ${where}.`,
+      `• Every 5 min, check that you can still speak a full sentence; slow down if you cannot.`,
+    ];
+  })();
+
+  const window = mode === "optional" ? "8–12 minutes" : difficulty === "Advanced" ? "25–45 minutes" : "15–30 minutes";
+  return [`<strong>${LOCOMOTION_HEADER} — ${window}</strong>`, ...plan];
+}
+
+/** Marker used by the compliance audit for recovery-character categories. */
+export const DOWN_REGULATION_HEADER = "🌬 Recovery & Down-Regulation";
+
+function downRegulationLines(category: string): string[] {
+  if (!programHasRecoveryCharacter(category)) return [];
+  return [
+    `<strong>${DOWN_REGULATION_HEADER} — 3–4 minutes</strong>`,
+    "• Supine 90/90 breathing × 8 slow cycles — 4-sec inhale, 6-sec exhale, ribs down",
+    "• Constructive rest position × 2 min — let the low back settle, no stretching, no effort",
+  ];
+}
+
 /**
  * Build the bullet lines for one training day, including `{{exercise:ID:Name}}`
  * tokens (eye icon) and a default sets×reps prescription.
@@ -664,7 +759,9 @@ export function buildDayBullets(
   count = 5,
   difficulty?: string | null,
   totalWeeks: number = 8,
+  equipmentIds: string[] = [],
 ): string[] {
+
   const tier = tierOf(difficulty);
   const counts = exerciseCountsFor(tier);
   const totalNeeded = counts.main + counts.finisher;
