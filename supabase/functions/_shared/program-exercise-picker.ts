@@ -206,6 +206,8 @@ function isStaticHoldExercise(ex: LibExercise): boolean {
     /\bforearm\s+plank\b/i,
     /^bodyweight\s+incline\s+side\s+plank$/i,
     /\bisometric\s+chest\s+squeeze\b/i,
+    // Anything whose name ends in "hold" is a position, not a set of reps.
+    /\bhold$/i,
   ].some((pattern) => pattern.test(name));
 }
 
