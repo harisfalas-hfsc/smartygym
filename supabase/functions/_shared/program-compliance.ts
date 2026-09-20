@@ -105,7 +105,25 @@ export function auditProgramCompliance(program: ProgramLike, library: PoolExerci
     if (/active recovery|rest/i.test(match[2])) continue;
     trainingDays += 1;
     const dayHtml = html.slice(start, end);
+    const dayText = plain(dayHtml);
+    if (locomotion === "required" && !/locomotion/i.test(dayText)) {
+      issues.push({
+        code: "LOCOMOTION_MISSING",
+        day: dayName,
+        section: "Main Workout",
+        message: "Cardio Endurance days must carry real locomotion (run, walk-run, intervals, shuttles, or the machine equivalent).",
+      });
+    }
+    if (needsRecoveryCharacter && !/(breathing|down-?regulat|constructive rest)/i.test(dayText)) {
+      issues.push({
+        code: "RECOVERY_CHARACTER_MISSING",
+        day: dayName,
+        section: "Program",
+        message: `${program.category} days must include breathing / down-regulation work.`,
+      });
+    }
     const mainHtml = sectionHtml(dayHtml, "Main Workout");
+
     const finisherHtml = sectionHtml(dayHtml, "Finisher");
     const templateIndex = weekBStart >= 0 && start > weekBStart ? 2 : 1;
     const expectedMain = programMainFormat(program.category, templateIndex);
