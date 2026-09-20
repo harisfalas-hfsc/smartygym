@@ -174,7 +174,7 @@ const norm = (s: string) =>
  * and "farmers walk" all resolve to their priority movement.
  */
 const SYNONYMS: [RegExp, string][] = [
-  [/\blever\b|\bleverage\b|\bmachine\b|\bsled\b(?= )/g, " "],
+  [/\blever\b|\bleverage\b|\bmachine\b/g, " "],
   [/\bsmith\b/g, "smith machine"],
   [/\bfarmers?\s+(walk|carry)\b/g, "farmer s carry"],
   [/\blying tricep(s)? extension\b/g, "skull crusher"],
