@@ -15,6 +15,7 @@ import { normalizeWorkoutHtml } from "../_shared/html-normalizer.ts";
 import { auditProgramCompliance } from "../_shared/program-compliance.ts";
 import { parseProgramEquipmentIds } from "../_shared/program-doctrine.ts";
 import { loadAllExercises } from "../_shared/workout-engine/pool.server.ts";
+import { programMainFormat, programWorkExerciseViolation } from "../_shared/program-doctrine.ts";
 import {
   guaranteeAllExercisesLinked,
   rejectNonLibraryExercises,
@@ -120,7 +121,12 @@ Deno.serve(async (req) => {
       const reusedValid = reusedTokens
         .filter((t) => libById.has(t.id))
         .map((t) => libById.get(t.id)!)
-        .filter((exercise) => library.some((allowed) => allowed.id === exercise.id));
+        .filter((exercise) => library.some((allowed) => allowed.id === exercise.id))
+        .filter((exercise) => !programWorkExerciseViolation({
+          ...exercise,
+          equipment: exercise.equipment ?? null,
+          target_muscle: exercise.target,
+        }, p.category, programMainFormat(p.category, 1)));
       const usedQueue = [...reusedValid];
       let reusedUsed = 0;
 
