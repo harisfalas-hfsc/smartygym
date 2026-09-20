@@ -31,7 +31,7 @@ const PROGRAM_DOCTRINE: Record<string, ProgramDoctrine> = {
     finisherFormat: "REPS & SETS",
   },
   "WEIGHT LOSS": {
-    workoutCategory: "METABOLIC",
+    workoutCategory: "CALORIE BURNING",
     mainFormats: ["CIRCUIT", "TABATA", "EMOM", "AMRAP"],
     finisherFormat: "TABATA",
   },
