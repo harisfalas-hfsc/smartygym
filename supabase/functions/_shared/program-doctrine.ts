@@ -7,6 +7,7 @@ import {
   type ExerciseLike,
 } from "./workout-engine/doctrine.ts";
 import type { Category, Format } from "./workout-engine/spec.ts";
+import { isSelectable } from "./exercise-selection.ts";
 
 export type ProgramDoctrine = {
   workoutCategory: Category;
@@ -69,6 +70,7 @@ export function programWorkExerciseViolation(
 ): string | null {
   const category = programDoctrine(programCategory).workoutCategory;
   return (
+    (!isSelectable(exercise.name) ? `"${exercise.name}" is excluded by the shared exercise-selection policy.` : null) ||
     humanRealismViolation(exercise) ||
     categoryExerciseViolation(exercise, category) ||
     dynamicExerciseViolation(exercise, category, format) ||

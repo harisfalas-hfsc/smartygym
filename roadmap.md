@@ -1,9 +1,10 @@
 ## Active tasks
-- [ ] Map all training-program categories into the shared workout doctrine
-- [ ] Add full day-level training-program compliance auditing and backups
-- [ ] Deterministically repair all affected programs without AI credits
-- [ ] Gate future Admin program drafts on the same compliance audit
-- [ ] Verify 32/32 programs, player links, metadata, pricing, Stripe, and progress integrity
+- [x] Map all training-program categories into the shared workout doctrine
+- [x] Add full day-level training-program compliance auditing and backups
+- [x] Deterministically repair all affected programs without AI credits
+- [x] Gate future Admin program drafts on the same compliance audit
+- [x] Verify 32/32 programs, player links, metadata, pricing, Stripe, and progress integrity
+- [ ] Apply the final training-program recheck's two confirmed movement repairs and verify 32/32 again
 - [x] Read-only reliability review of Admin workout creation and member Create Your Own Workout; no live generations or AI-credit use
 - [x] Diagnose why category-incompatible exercises passed generation and compliance checks
 - [x] Harden Calorie Burning so only simple, continuous, low-setup movements pass

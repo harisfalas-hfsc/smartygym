@@ -254,7 +254,7 @@ const ELEVATED_SINGLE_LEG_SQUAT_RE =
  * flags, muscle-ups, handstands or pistols, at any level.
  */
 const COMPLEXITY_RE =
-  /\b(front lever|back lever|lever (?:reps|hold|raise|pull)|planche|human flag|flag hold|muscle[- ]?up|handstand|pistol|shrimp squat|turkish get[- ]?up|nordic hamstring curl|iron cross|dragon flag|maltese|victorian|skin the cat|stalder|archer push[- ]?up|clock push[- ]?up|single arm (?:pull[- ]?up|push[- ]?up|chin[- ]?up)|one[- ]arm (?:pull[- ]?up|push[- ]?up|chin[- ]?up)|90 degree push[- ]?up|tiger bend|hefesto|impossible dips?)\b/i;
+  /\b(front lever|back lever|lever (?:reps|hold|raise|pull)|planche|human flag|flag hold|muscle[- ]?up|handstand|pistol|shrimp squat|turkish get[- ]?up|nordic hamstring curl|iron cross|dragon flag|maltese|victorian|skin the cat|stalder|archer push[- ]?up|clock push[- ]?up|single arm (?:pull[- ]?up|push[- ]?up|chin[- ]?up|dips?)|one[- ]arm (?:pull[- ]?up|push[- ]?up|chin[- ]?up|dips?)|90 degree push[- ]?up|tiger bend|hefesto|impossible dips?)\b/i;
 
 /**
  * Loaded or unsupported single-limb squatting and single-arm barbell lifting.
@@ -264,6 +264,10 @@ const COMPLEXITY_RE =
 const SINGLE_LIMB_SKILL_RE =
   /\b(?:single|one)[- ](?:leg|arm)\b[^.]*\b(?:squat|side deadlift)\b|\b(?:squat|side deadlift)\b[^.]*\b(?:single|one)[- ](?:leg|arm)\b/i;
 
+/** Unstable multi-task variations that add balance complexity without useful training benefit. */
+const UNSTABLE_MULTI_TASK_RE =
+  /\b(?:exercise|stability|swiss) ball\b[^.]*\b(?:leg raised|raised leg|one leg|single leg)\b|\b(?:leg raised|raised leg|one leg|single leg)\b[^.]*\b(?:exercise|stability|swiss) ball\b/i;
+
 /** Movements that must never be programmed. */
 export function isForbiddenName(name: string): boolean {
   // Do not confuse the ordinary supine mobility drill with the rings skill.
@@ -271,6 +275,7 @@ export function isForbiddenName(name: string): boolean {
   if (COMPLEXITY_RE.test(name) || FORBIDDEN_RE.test(name)) return true;
   if (ELEVATED_SINGLE_LEG_SQUAT_RE.test(canonical(name))) return true;
   if (SINGLE_LIMB_SKILL_RE.test(canonical(name))) return true;
+  if (UNSTABLE_MULTI_TASK_RE.test(canonical(name))) return true;
 
   // Unstable-surface variations are banned unless the reference list asks for
   // that exact item (e.g. the stability-ball Pilates exercises).
