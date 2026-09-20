@@ -904,7 +904,7 @@ serve(async (req: Request) => {
       const snapshot = (snapRow?.setting_value || {}) as any;
       const names: string[] = (Array.isArray(snapshot?.jobs) ? snapshot.jobs : [])
         .map((n: any) => String(n))
-        .filter((n: string) => validateJobName(n).valid);
+        .filter((n: string) => validateJobName(n).valid && !isRetiredWodJob(n));
 
       console.log(`🔥 Unfreezing ${names.length} snapshotted jobs`);
 
