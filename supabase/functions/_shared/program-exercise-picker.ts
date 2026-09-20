@@ -207,10 +207,16 @@ function excludesSkillExercises(ex: LibExercise, difficulty?: string | null): bo
 }
 
 function ruleForCategory(category: string): CategoryRule | null {
-  const cat = (category || "").toUpperCase();
-  const key = Object.keys(CATEGORY_RULES).find((k) => cat.includes(k));
-  return key ? CATEGORY_RULES[key] : null;
+  if (!hasProgramDoctrine(category)) return null;
+  const doctrine = programDoctrine(category);
+  return {
+    preferred: doctrine.preferred,
+    forbidden: doctrine.forbidden,
+    allowCardioBodyPart: doctrine.allowCardioBodyPart,
+    rejectCardioBodyPart: doctrine.rejectCardioBodyPart,
+  };
 }
+
 
 function exerciseSearchText(ex: LibExercise): string {
   return `${ex.name || ""} ${ex.body_part || ""} ${ex.target || ""} ${ex.description || ""}`;
