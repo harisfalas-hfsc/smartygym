@@ -257,6 +257,7 @@ function categorySelectionPool(library: LibExercise[], category: string, needed:
   const format = programMainFormat(category, 1);
   const doctrineSafe = safe.filter((ex) => !programWorkExerciseViolation({
     ...ex,
+    equipment: ex.equipment ?? null,
     target_muscle: ex.target,
   }, category, format));
   if (!ruleForCategory(category)) return doctrineSafe;

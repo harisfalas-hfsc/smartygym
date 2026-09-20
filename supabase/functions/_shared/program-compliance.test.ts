@@ -3,12 +3,29 @@ import { auditProgramCompliance } from "./program-compliance.ts";
 import { programDoctrine, programWorkExerciseViolation } from "./program-doctrine.ts";
 import type { PoolExercise } from "./workout-engine/pool.server.ts";
 
+const exercise = (id: string, name: string, equipment: string, bodyPart: string, target: string): PoolExercise => ({
+  id,
+  name,
+  equipment,
+  body_part: bodyPart,
+  target_muscle: target,
+  secondary_muscles: [],
+  category: "",
+  difficulty: "intermediate",
+  movement_pattern: null,
+  body_region: null,
+  gif_path: null,
+  cue: null,
+  description: "",
+  instructions: [],
+});
+
 const library: PoolExercise[] = [
-  { id: "push", name: "push-up", equipment: "body weight", body_part: "chest", target_muscle: "pectorals", difficulty: "intermediate", description: "", instructions: [] },
-  { id: "squat", name: "bodyweight squat", equipment: "body weight", body_part: "upper legs", target_muscle: "quadriceps", difficulty: "intermediate", description: "", instructions: [] },
-  { id: "climber", name: "mountain climber", equipment: "body weight", body_part: "cardio", target_muscle: "cardiovascular system", difficulty: "intermediate", description: "", instructions: [] },
-  { id: "jack", name: "jumping jack", equipment: "body weight", body_part: "cardio", target_muscle: "cardiovascular system", difficulty: "intermediate", description: "", instructions: [] },
-  { id: "pullover", name: "dumbbell pullover", equipment: "dumbbell", body_part: "back", target_muscle: "lats", difficulty: "intermediate", description: "", instructions: [] },
+  exercise("push", "push-up", "body weight", "chest", "pectorals"),
+  exercise("squat", "bodyweight squat", "body weight", "upper legs", "quadriceps"),
+  exercise("climber", "mountain climber", "body weight", "cardio", "cardiovascular system"),
+  exercise("jack", "jumping jack", "body weight", "cardio", "cardiovascular system"),
+  exercise("pullover", "dumbbell pullover", "dumbbell", "back", "lats"),
 ];
 
 const token = (id: string, name: string) => `{{exercise:${id}:${name}}}`;
