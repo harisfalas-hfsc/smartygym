@@ -26,3 +26,6 @@
 - [x] Member workout states: My Own Workouts shows Building/Failed, blocks incomplete player/actions, and refreshes until completion.
 - [x] Completion delivery: one in-app ready message plus preference- and suppression-aware email after a successful custom workout build.
 - [x] No-credit verification: 25 generation/doctrine tests, 4 player-format tests, frontend lint, Edge type checks, and migration checks passed.
+
+- [x] Research downloadable animation candidates for all 65 priority exercises missing GIFs
+- [x] Build and visually verify a review workbook and candidate media bundle; make no library uploads
