@@ -410,11 +410,12 @@ export function UserDetailModal({
           <Separator className="my-4" />
 
           <Tabs defaultValue="subscription" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="subscription">Subscription</TabsTrigger>
-              <TabsTrigger value="purchases">Purchases</TabsTrigger>
-              <TabsTrigger value="parq">PAR-Q</TabsTrigger>
-              <TabsTrigger value="actions">Actions</TabsTrigger>
+            <TabsList className="grid w-full h-auto grid-cols-2 gap-1 p-1 sm:grid-cols-5">
+              <TabsTrigger value="subscription" className="text-xs whitespace-normal px-2 py-1.5 sm:text-sm">Subscription</TabsTrigger>
+              <TabsTrigger value="purchases" className="text-xs whitespace-normal px-2 py-1.5 sm:text-sm">Purchases</TabsTrigger>
+              <TabsTrigger value="workouts" className="text-xs whitespace-normal px-2 py-1.5 sm:text-sm">Workouts</TabsTrigger>
+              <TabsTrigger value="parq" className="text-xs whitespace-normal px-2 py-1.5 sm:text-sm">PAR-Q</TabsTrigger>
+              <TabsTrigger value="actions" className="text-xs whitespace-normal px-2 py-1.5 sm:text-sm">Actions</TabsTrigger>
             </TabsList>
 
             {/* Subscription Tab */}
