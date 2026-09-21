@@ -769,32 +769,56 @@ export function UsersManager() {
             </Select>
           </div>
 
-          {/* Stats */}
+          {/* Stats — each card applies the matching filter */}
           <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-6">
-            <div className="bg-muted/50 p-3 rounded-lg">
+            <button
+              type="button"
+              onClick={() => { setPlanFilter("all"); setStatusFilter("all"); setRoleFilter("all"); setSourceFilter("all"); }}
+              className="bg-muted/50 p-3 rounded-lg text-left hover:ring-2 hover:ring-primary/40 transition"
+            >
               <p className="text-xs text-muted-foreground">Total Users</p>
               <p className="text-2xl font-bold">{stats.total}</p>
-            </div>
-            <div className="bg-green-50 dark:bg-green-950/30 p-3 rounded-lg">
+            </button>
+            <button
+              type="button"
+              onClick={() => { setPlanFilter("paid_premium"); setStatusFilter("all"); setRoleFilter("all"); setSourceFilter("all"); }}
+              className="bg-green-50 dark:bg-green-950/30 p-3 rounded-lg text-left hover:ring-2 hover:ring-primary/40 transition"
+            >
               <p className="text-xs text-muted-foreground">Paid Premium</p>
               <p className="text-2xl font-bold text-green-600">{stats.paidPremium}</p>
-            </div>
-            <div className="bg-purple-50 dark:bg-purple-950/30 p-3 rounded-lg">
+            </button>
+            <button
+              type="button"
+              onClick={() => { setPlanFilter("manual_access"); setStatusFilter("all"); setRoleFilter("all"); setSourceFilter("all"); }}
+              className="bg-purple-50 dark:bg-purple-950/30 p-3 rounded-lg text-left hover:ring-2 hover:ring-primary/40 transition"
+            >
               <p className="text-xs text-muted-foreground">Manual Access</p>
               <p className="text-2xl font-bold text-purple-600">{stats.manualAccess}</p>
-            </div>
-            <div className="bg-muted/50 p-3 rounded-lg">
-              <p className="text-xs text-muted-foreground">Premium</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setPlanFilter("premium"); setStatusFilter("all"); setRoleFilter("all"); setSourceFilter("all"); }}
+              className="bg-muted/50 p-3 rounded-lg text-left hover:ring-2 hover:ring-primary/40 transition"
+            >
+              <p className="text-xs text-muted-foreground">Premium total (paid + manual)</p>
               <p className="text-2xl font-bold">{stats.premium}</p>
-            </div>
-            <div className="bg-muted/50 p-3 rounded-lg">
+            </button>
+            <button
+              type="button"
+              onClick={() => { setPlanFilter("purchase"); setStatusFilter("all"); setRoleFilter("all"); setSourceFilter("all"); }}
+              className="bg-muted/50 p-3 rounded-lg text-left hover:ring-2 hover:ring-primary/40 transition"
+            >
               <p className="text-xs text-muted-foreground">Purchases</p>
               <p className="text-2xl font-bold">{stats.purchases}</p>
-            </div>
-            <div className="bg-muted/50 p-3 rounded-lg">
+            </button>
+            <button
+              type="button"
+              onClick={() => { setRoleFilter("admins"); setPlanFilter("all"); setStatusFilter("all"); setSourceFilter("all"); }}
+              className="bg-muted/50 p-3 rounded-lg text-left hover:ring-2 hover:ring-primary/40 transition"
+            >
               <p className="text-xs text-muted-foreground">Admins</p>
               <p className="text-2xl font-bold">{stats.admins}</p>
-            </div>
+            </button>
           </div>
 
           {/* Users Cards */}
