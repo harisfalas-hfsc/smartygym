@@ -103,7 +103,16 @@ function toPoolExercise(row: LibraryRow): PoolExercise {
 }
 
 
-/** Loads the whole exercises table, paginated 1000 rows at a time. */
+/** An exercise is only programmable when the member can watch the movement. */
+export const hasAnimation = (e: PoolExercise) => !!(e.gif_path ?? "").trim();
+
+/**
+ * Loads the whole exercises table, paginated 1000 rows at a time.
+ *
+ * ANIMATION RULE (hard, platform-wide): only exercises that carry a library
+ * animation ever enter any pool — member workouts, Smarty Coach and the admin
+ * generator alike. A movement a member cannot watch is never prescribed.
+ */
 // deno-lint-ignore no-explicit-any
 export async function loadAllExercises(supabase: any): Promise<PoolExercise[]> {
   const rows: PoolExercise[] = [];
@@ -112,6 +121,8 @@ export async function loadAllExercises(supabase: any): Promise<PoolExercise[]> {
     const { data, error } = await supabase
       .from("exercises")
       .select(SELECT)
+      .not("gif_url", "is", null)
+      .neq("gif_url", "")
       .order("id", { ascending: true })
       .range(from, from + 999);
     if (error) throw new Error(error.message);
@@ -119,7 +130,7 @@ export async function loadAllExercises(supabase: any): Promise<PoolExercise[]> {
     rows.push(...batch);
     if (batch.length < 1000) break;
   }
-  return rows;
+  return rows.filter(hasAnimation);
 }
 
 const text = (e: PoolExercise) =>

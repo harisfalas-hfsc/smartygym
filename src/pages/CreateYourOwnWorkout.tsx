@@ -260,9 +260,8 @@ const CreateYourOwnWorkout = () => {
       const ready = await waitForSession(String(data.id));
       localStorage.removeItem(activeJobKey);
       setBuiltToday((n) => (n ?? 0) + 1);
-      if (ready.review_warnings?.length) {
-        toast({ title: "A note from Smarty Coach", description: ready.review_warnings[0] });
-      }
+      // Build notes are internal (admin review only) — never surfaced to the member.
+
       if (!leftGenerationScreen.current) navigate(`/my-workouts/${data.id}`);
     } catch (e) {
       localStorage.removeItem(activeJobKey);
