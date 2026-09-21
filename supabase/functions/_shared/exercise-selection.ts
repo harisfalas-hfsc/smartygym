@@ -114,7 +114,7 @@ export const PRIORITY_BODYWEIGHT = [
   "bulgarian split squat", "wall sit", "squat pulse", "glute bridge",
   "single-leg glute bridge", "hip thrust", "single-leg hip thrust",
   "bodyweight good morning", "hamstring walkout",
-  "single-leg romanian deadlift bodyweight", "nordic hamstring curl",
+  "single-leg romanian deadlift bodyweight",
   // Core
   "sit-up", "crunch", "bicycle crunch", "reverse crunch", "leg raise", "dead bug",
   "bird dog", "plank", "side plank", "mountain climber",
