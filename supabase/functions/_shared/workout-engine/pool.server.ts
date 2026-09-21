@@ -746,7 +746,7 @@ export function capMovementFamilies(
       out.push(e);
       continue;
     }
-    const key = `${movementKey(e.name)}|${(e.equipment ?? "").toLowerCase()}`;
+    const key = movementKey(e.name);
     const n = count.get(key) ?? 0;
     if (n >= perFamily) continue;
     count.set(key, n + 1);
@@ -776,7 +776,7 @@ export function samplePool(
   // VARIETY RULE: a member wants a session, not eight angles of one bench.
   // At most two variations of the same movement family survive the sample, so
   // the model physically cannot build the whole workout out of one lift.
-  pool = capMovementFamilies(pool, favoriteIds, 2);
+  pool = capMovementFamilies(pool, favoriteIds, 3);
   if (pool.length <= max) return pool;
   const favourites = favoriteIds.length
     ? pool.filter((e) => favoriteIds.includes(e.id))
