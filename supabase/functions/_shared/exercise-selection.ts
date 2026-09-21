@@ -68,7 +68,7 @@ export const PRIORITY_MACHINE = [
   "cable wood chop", "cable pallof press", "smith machine romanian deadlift",
   "cable squat", "cable row to press", "sled push",
   // Conventional aliases already used by the live library.
-  "machine chest press", "machine shoulder press", "machine lateral raise",
+  "machine chest press", "machine lateral raise",
   "rear delt machine fly", "assisted pull-up", "assisted dip", "machine dip",
   "hip abduction", "hip adduction", "glute kickback", "machine preacher curl",
 ];
