@@ -744,6 +744,10 @@ export function samplePool(
     const fresh = pool.filter((e) => !recent.has(e.id) || favoriteIds.includes(e.id));
     if (fresh.length >= Math.max(60, Math.floor(max * 0.6))) pool = fresh;
   }
+  // VARIETY RULE: a member wants a session, not eight angles of one bench.
+  // At most two variations of the same movement family survive the sample, so
+  // the model physically cannot build the whole workout out of one lift.
+  pool = capMovementFamilies(pool, favoriteIds, 2);
   if (pool.length <= max) return pool;
   const favourites = favoriteIds.length
     ? pool.filter((e) => favoriteIds.includes(e.id))
