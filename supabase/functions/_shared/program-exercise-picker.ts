@@ -866,6 +866,20 @@ export function filterLibraryForProgram(
   const intentPool = categoryPool.length ? categoryPool : pool;
   if (!difficulty) return intentPool;
 
+  // Difficulty source by category (doctrine §16, shared with the workout engine):
+  // strength / hypertrophy / conditioning express difficulty through load, sets,
+  // reps, tempo, rest and density — so the common movements (bench press, chest
+  // press machine, pec deck, lat pulldown, squat, row) stay legal at every tier
+  // and Advanced sees everything at or below it. Harder is never pushed down.
+  const workoutCategory = hasProgramDoctrine(category)
+    ? programDoctrine(category).workoutCategory
+    : category;
+  if (!difficultyFiltersSelection(workoutCategory)) {
+    const allowed = new Set(allowedDifficultyTiers(difficulty, workoutCategory));
+    const tiered = intentPool.filter((ex) => allowed.has((ex.difficulty || "").toLowerCase()));
+    return tiered.length ? tiered : intentPool;
+  }
+
   const targetDiff = difficulty.toLowerCase();
   const exactDifficultyPool = intentPool.filter((ex) => (ex.difficulty || "").toLowerCase() === targetDiff);
   if (!hasCategoryRule) return exactDifficultyPool;
