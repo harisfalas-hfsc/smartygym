@@ -40,15 +40,15 @@ function checkStructure(w: CustomWorkoutRow) {
   const html = w.main_workout ? normalizeWorkoutHtml(w.main_workout) : "";
   const text = html.replace(/<[^>]+>/g, " ");
   const missing = REQUIRED_SECTIONS.filter((s) => !s.match.test(text)).map((s) => s.label);
-  const exerciseLinks = (html.match(/href="\/exercise/g) || []).length;
-  const unresolvedTokens = (html.match(/\{\{exercise:/g) || []).length;
+  // Exercises are stored as library references ({{exercise:ID:Name}}) and are
+  // turned into links when the workout is displayed — both forms count.
+  const exerciseLinks =
+    (html.match(/\{\{exercise:/g) || []).length + (html.match(/href="\/exercise/g) || []).length;
   const issues: string[] = [];
   if (!html.trim()) issues.push("No workout content saved");
-  if (missing.length) issues.push(`Missing sections: ${missing.join(", ")}`);
-  if (html.trim() && exerciseLinks === 0) issues.push("No exercises linked to the library");
-  if (unresolvedTokens > 0) issues.push(`${unresolvedTokens} unresolved exercise reference(s)`);
-  if (w.needs_review) issues.push(...(w.review_warnings || ["Flagged for review"]));
-  if (w.generation_error) issues.push(w.generation_error);
+  else if (missing.length) issues.push(`Missing sections: ${missing.join(", ")}`);
+  else if (exerciseLinks === 0) issues.push("No exercises from the library");
+  if (w.status === "failed" && w.generation_error) issues.push(w.generation_error);
   return { html, issues, exerciseLinks };
 }
 
