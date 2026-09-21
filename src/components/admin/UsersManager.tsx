@@ -848,7 +848,7 @@ export function UsersManager() {
                         ) : (
                           <>
                             <Badge variant={getPlanBadgeVariant(user.plan_type)} className="text-xs">{getPlanLabel(user.plan_type)}</Badge>
-                            {user.subscription_source === 'admin_grant' && (
+                            {user.subscription_source === 'admin_grant' && statusLabel !== 'Manual Access' && (
                               <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">Manual Access</Badge>
                             )}
                             {user.stripe_subscription_id && (
