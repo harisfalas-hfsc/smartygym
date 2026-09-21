@@ -1,5 +1,5 @@
 import type { PoolExercise } from "./pool.server.ts";
-import { COACH_MINDSET, isPriorityName } from "../exercise-selection.ts";
+import { COACH_MINDSET, difficultyFiltersSelection, isPriorityName } from "../exercise-selection.ts";
 import { planPrompt, type SessionPlan } from "./programming.ts";
 import { ageDirective } from "./doctrine.ts";
 import {
@@ -333,6 +333,11 @@ Category (DECIDE THE SESSION FROM THIS FIRST): ${input.category}
 Equipment the athlete HAS today (a ceiling, not a shopping list): ${[...input.selectedEquipment.filter((x) => x !== "other"), ...(input.customEquipment ?? [])].join(", ")}
 Never use any apparatus outside this list, even during Activation or Cool Down. You are never obliged to use all of it — use only what the category genuinely calls for, and use the athlete's own bodyweight freely wherever it serves the session better.
 Difficulty: ${input.stars} of 3 stars (${input.level.toUpperCase()}) — one star is one level, do not mix levels
+${
+  difficultyFiltersSelection(input.category)
+    ? "In this category difficulty IS the movement: pick variations that genuinely match the level."
+    : "In this category difficulty is a PRESCRIPTION variable, NOT an excuse for exotic movements. Programme the standard, recognisable lifts and stations (bench press, chest press machine, pec deck, cable fly, lat pulldown, row, squat, leg press, overhead press, running, skipping) and express the level through load, sets, reps, tempo, rest and density. An advanced session is heavier, denser and more demanding on the SAME familiar movements — never a guillotine press, a fly on a stability ball or a one-arm circus variation."
+}
 Intensity within the level: ${intensityNote(input.stars)}
 Format: ${input.format}
 Duration: ${input.duration}${input.focus ? `\nFocus: ${input.focus}` : ""}

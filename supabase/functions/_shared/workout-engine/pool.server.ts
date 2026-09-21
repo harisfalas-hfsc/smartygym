@@ -20,6 +20,8 @@ import {
 } from "./doctrine.ts";
 // ONE selection policy for the whole platform — see ../exercise-selection.ts
 import {
+  allowedDifficultyTiers,
+  difficultyFiltersSelection,
   isSelectable,
   matchesCategoryPool,
   orderBySelectionPolicy,
@@ -467,22 +469,34 @@ function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   if (f.format)
     pool = pool.filter((e) => !dynamicExerciseViolation(e, f.category, f.format!));
 
-  // 3. Difficulty (§16). The requested tier is programmed as-is. A thin tier is
-  //    only ever filled from EASIER material: Beginner never inherits Advanced
-  //    or Intermediate movements, Intermediate may borrow Beginner variations
-  //    and Advanced may borrow Intermediate ones. Difficulty is expressed as
-  //    variation complexity, volume and loading — never as harder vocabulary
-  //    handed to an athlete who did not ask for it.
+  // 3. Difficulty (§16). Harder material is NEVER pushed onto an athlete who
+  //    did not ask for it. Where it comes from depends on the category:
+  //    - STRENGTH / MUSCLE BUILDING / CARDIO / METABOLIC / CALORIE BURNING /
+  //      CHALLENGE: difficulty is a PRESCRIPTION variable (load, sets, reps,
+  //      tempo, rest, density). The common vocabulary — bench press, chest
+  //      press machine, pec deck, lat pulldown, squat, row — stays legal at
+  //      every tier, and Advanced sees the whole legal pool. The priority
+  //      ordering then puts the recognisable stations in front.
+  //    - PILATES / MOBILITY & STABILITY / RECOVERY / MICRO-WORKOUTS:
+  //      difficulty IS the movement, so the tag still filters the tier.
   if (f.level !== "all") {
+    const tiers = allowedDifficultyTiers(f.level, f.category);
     const at = (lvl: string) => pool.filter((e) => (e.difficulty ?? "").toLowerCase() === lvl);
-    const strict = at(f.level);
-    const easier: string[] =
-      f.level === "advanced" ? ["intermediate", "beginner"] : f.level === "intermediate" ? ["beginner"] : [];
-    if (strict.length >= 12 || !easier.length) {
-      if (strict.length) pool = strict;
-    } else {
-      const widened = [...strict, ...easier.flatMap(at)];
-      if (widened.length) pool = widened;
+    if (!difficultyFiltersSelection(f.category)) {
+      // Prescription-driven: keep the requested tier AND everything easier, always.
+      const allowed = new Set(tiers);
+      const kept = pool.filter((e) => allowed.has((e.difficulty ?? "").toLowerCase()));
+      if (kept.length) pool = kept;
+    } else if (tiers.length) {
+      const strict = at(tiers[0]!);
+      const easier: string[] =
+        f.level === "advanced" ? ["intermediate", "beginner"] : f.level === "intermediate" ? ["beginner"] : [];
+      if (strict.length >= 12 || !easier.length) {
+        if (strict.length) pool = strict;
+      } else {
+        const widened = [...strict, ...easier.flatMap(at)];
+        if (widened.length) pool = widened;
+      }
     }
   }
 
