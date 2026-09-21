@@ -1348,6 +1348,33 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_rename_backups: {
+        Row: {
+          batch: string
+          created_at: string
+          exercise_id: string
+          id: string
+          new_name: string
+          old_name: string
+        }
+        Insert: {
+          batch?: string
+          created_at?: string
+          exercise_id: string
+          id?: string
+          new_name: string
+          old_name: string
+        }
+        Update: {
+          batch?: string
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          new_name?: string
+          old_name?: string
+        }
+        Relationships: []
+      }
       exercises: {
         Row: {
           body_part: string
