@@ -1,5 +1,5 @@
 import type { PoolExercise } from "./pool.server.ts";
-import { COACH_MINDSET, isPriorityName } from "../exercise-selection.ts";
+import { COACH_MINDSET, difficultyFiltersSelection, isPriorityName } from "../exercise-selection.ts";
 import { planPrompt, type SessionPlan } from "./programming.ts";
 import { ageDirective } from "./doctrine.ts";
 import {
