@@ -371,6 +371,8 @@ QUALITY GATE (your workout is rejected if it fails)
 - Main Workout at least ${input.plan ? input.plan.mainCount[0] : 4} exercises; ${input.plan && !input.plan.finisher ? "no Finisher section at all" : `Finisher at least ${input.plan ? input.plan.finisherCount[0] : 3}`}.
 - Activation exactly 4 token lines from the ACTIVATION LIST; Cool Down exactly 3 token lines from the COOL DOWN LIST.
 - Every token line in 💪 and ⚡ carries a dose BEFORE the token.
+- No exercise id repeats anywhere in the session, and no movement family appears more than twice across 💪 and ⚡ combined.
+- In a gym session with mixed kit available: at least three different implements across 💪 and ⚡, including a machine or cable station for STRENGTH / MUSCLE BUILDING.
 - The protocol structure (minutes, rounds, cap, ladder, 20/10 x 8) must be declared in writing.
 - Advertised duration counts 💪 Main + ⚡ Finisher only and must reach the requested "${input.duration}".
 - DO THE ARITHMETIC BEFORE YOU WRITE: add up (sets × work time) + (sets × rest) for every 💪 and ⚡ line. That total MUST land within ±10% of the requested "${input.duration}" — not under it, not over it. Too short and too long are both automatic rejections: add sets or exercises when short, remove sets or shorten rest when long.
