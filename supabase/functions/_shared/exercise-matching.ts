@@ -1470,6 +1470,9 @@ export async function fetchAndBuildExerciseReference(
     const { data, error } = await supabaseClient
       .from("exercises")
       .select("id, name, category, body_part, equipment, target, difficulty")
+      // ANIMATION RULE: never programme an exercise the member cannot watch.
+      .not("gif_url", "is", null)
+      .neq("gif_url", "")
       .range(from, from + pageSize - 1);
     
     if (error) {

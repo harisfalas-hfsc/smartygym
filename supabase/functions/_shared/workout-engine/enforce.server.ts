@@ -3,6 +3,7 @@ import { EXERCISE_TOKEN_RE, findTokens, isLibraryId, stripHtml } from "./tokens.
 import { pickPrep, STRETCH_RE, type PoolExercise } from "./pool.server.ts";
 import { parseStepTiming, parseWorkoutSteps } from "./parse-steps.ts";
 import { categoryAllowsFinisher } from "./doctrine.ts";
+import { movementKey } from "../exercise-selection.ts";
 
 
 export type EnforceResult = {
@@ -134,6 +135,10 @@ export function enforceWorkout(
     return { html, warnings, errors };
   }
 
+  // Variety bookkeeping shared by Main Workout and Finisher.
+  const seenWorkIds = new Set<string>();
+  const seenWorkFamilies = new Map<string, number>();
+
   sections = sections.map((section) => {
     let body = section.body;
 
@@ -215,6 +220,28 @@ export function enforceWorkout(
     const isWork = section.name === "Main Workout" || section.name === "Finisher";
     if (isWork && opts.category === "CHALLENGE") {
       body = dropListItems(body, (item) => STRETCH_RE.test(stripHtml(item)));
+    }
+
+    // ---- Layer 3b: VARIETY — no repeated exercise, no third angle of the same
+    //      movement across Main Workout + Finisher (§bench-press-monotony).
+    if (isWork) {
+      body = dropListItems(body, (item) => {
+        const tokens = findTokens(item);
+        if (!tokens.length) return false;
+        const id = tokens[0]!.id;
+        const family = movementKey(tokens[0]!.name);
+        if (seenWorkIds.has(id)) {
+          warnings.push(`Removed a repeated exercise ("${tokens[0]!.name}").`);
+          return true;
+        }
+        if ((seenWorkFamilies.get(family) ?? 0) >= 2) {
+          warnings.push(`Removed a third variation of the same movement ("${tokens[0]!.name}").`);
+          return true;
+        }
+        seenWorkIds.add(id);
+        seenWorkFamilies.set(family, (seenWorkFamilies.get(family) ?? 0) + 1);
+        return false;
+      });
     }
 
     // ---- Layer 4: prescription checks ---------------------------------------

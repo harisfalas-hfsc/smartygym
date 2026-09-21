@@ -24,6 +24,7 @@ import {
   difficultyFiltersSelection,
   isSelectable,
   matchesCategoryPool,
+  movementKey,
   orderBySelectionPolicy,
   selectionTier,
 } from "../exercise-selection.ts";
@@ -103,7 +104,16 @@ function toPoolExercise(row: LibraryRow): PoolExercise {
 }
 
 
-/** Loads the whole exercises table, paginated 1000 rows at a time. */
+/** An exercise is only programmable when the member can watch the movement. */
+export const hasAnimation = (e: PoolExercise) => !!(e.gif_path ?? "").trim();
+
+/**
+ * Loads the whole exercises table, paginated 1000 rows at a time.
+ *
+ * ANIMATION RULE (hard, platform-wide): only exercises that carry a library
+ * animation ever enter any pool — member workouts, Smarty Coach and the admin
+ * generator alike. A movement a member cannot watch is never prescribed.
+ */
 // deno-lint-ignore no-explicit-any
 export async function loadAllExercises(supabase: any): Promise<PoolExercise[]> {
   const rows: PoolExercise[] = [];
@@ -112,6 +122,8 @@ export async function loadAllExercises(supabase: any): Promise<PoolExercise[]> {
     const { data, error } = await supabase
       .from("exercises")
       .select(SELECT)
+      .not("gif_url", "is", null)
+      .neq("gif_url", "")
       .order("id", { ascending: true })
       .range(from, from + 999);
     if (error) throw new Error(error.message);
@@ -119,7 +131,7 @@ export async function loadAllExercises(supabase: any): Promise<PoolExercise[]> {
     rows.push(...batch);
     if (batch.length < 1000) break;
   }
-  return rows;
+  return rows.filter(hasAnimation);
 }
 
 const text = (e: PoolExercise) =>
@@ -716,6 +728,34 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 /**
+ * Keeps at most `perFamily` variations of the same movement (bench press,
+ * incline bench press, decline bench press, guillotine press ... are one
+ * family). The simplest, most recognisable variations are kept first, and the
+ * athlete's favourites are never dropped.
+ */
+export function capMovementFamilies(
+  pool: PoolExercise[],
+  favoriteIds: string[] = [],
+  perFamily = 2,
+): PoolExercise[] {
+  const favourite = new Set(favoriteIds);
+  const count = new Map<string, number>();
+  const out: PoolExercise[] = [];
+  for (const e of orderBySelectionPolicy(pool)) {
+    if (favourite.has(e.id)) {
+      out.push(e);
+      continue;
+    }
+    const key = movementKey(e.name);
+    const n = count.get(key) ?? 0;
+    if (n >= perFamily) continue;
+    count.set(key, n + 1);
+    out.push(e);
+  }
+  return out;
+}
+
+/**
  * Balanced sample so every body part is represented in the prompt vocabulary.
  * Favourite ids are always carried through, whatever the sample size, and the
  * coach's PRIORITY vocabulary is sorted to the front of every body part so the
@@ -733,6 +773,10 @@ export function samplePool(
     const fresh = pool.filter((e) => !recent.has(e.id) || favoriteIds.includes(e.id));
     if (fresh.length >= Math.max(60, Math.floor(max * 0.6))) pool = fresh;
   }
+  // VARIETY RULE: a member wants a session, not eight angles of one bench.
+  // At most three variations of the same movement family survive the sample, so
+  // the model physically cannot build the whole workout out of one lift.
+  pool = capMovementFamilies(pool, favoriteIds, 3);
   if (pool.length <= max) return pool;
   const favourites = favoriteIds.length
     ? pool.filter((e) => favoriteIds.includes(e.id))
