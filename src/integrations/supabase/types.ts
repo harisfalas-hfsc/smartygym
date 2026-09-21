@@ -1348,6 +1348,47 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_media_backups: {
+        Row: {
+          batch: string
+          created_at: string
+          exercise_id: string
+          id: string
+          new_gif_url: string
+          old_frame_end_url: string | null
+          old_frame_start_url: string | null
+          old_gif_url: string | null
+        }
+        Insert: {
+          batch: string
+          created_at?: string
+          exercise_id: string
+          id?: string
+          new_gif_url: string
+          old_frame_end_url?: string | null
+          old_frame_start_url?: string | null
+          old_gif_url?: string | null
+        }
+        Update: {
+          batch?: string
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          new_gif_url?: string
+          old_frame_end_url?: string | null
+          old_frame_start_url?: string | null
+          old_gif_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_media_backups_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercise_rename_backups: {
         Row: {
           batch: string
