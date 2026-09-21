@@ -50,18 +50,21 @@ interface CustomWorkoutDetail {
 
 const MyOwnWorkoutDetail = () => {
   const { id } = useParams<{ id: string }>();
+  // Production serves direct deep links with an .html suffix. The stored
+  // workout ID is the UUID itself, so normalize the route before querying.
+  const workoutId = id?.replace(/\.html$/i, "");
   const navigate = useNavigate();
   const [readerOpen, setReaderOpen] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
 
   const { data: workout, isLoading } = useQuery({
-    queryKey: ["my-own-workout", id],
-    enabled: !!id,
+    queryKey: ["my-own-workout", workoutId],
+    enabled: !!workoutId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("user_custom_workouts")
         .select("*")
-        .eq("id", id ?? "")
+        .eq("id", workoutId ?? "")
         .maybeSingle();
       if (error) throw error;
       return (data as CustomWorkoutDetail) ?? null;
