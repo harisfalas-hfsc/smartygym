@@ -159,7 +159,12 @@ export function UserWorkoutsTab({ userId }: { userId: string }) {
                 {html ? (
                   <div
                     className="workout-content prose prose-sm max-w-none dark:prose-invert text-sm break-words"
-                    dangerouslySetInnerHTML={{ __html: html }}
+                    dangerouslySetInnerHTML={{
+                      __html: html.replace(
+                        /\{\{exercise:[^:}]+:([^}]*)\}\}/gi,
+                        (_m, name) => `<strong>${String(name).trim()}</strong>`,
+                      ),
+                    }}
                   />
                 ) : (
                   <p className="text-xs text-muted-foreground">No content saved for this workout.</p>
