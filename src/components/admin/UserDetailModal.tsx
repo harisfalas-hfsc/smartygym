@@ -32,6 +32,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { UserParQHistoryTab } from "./UserParQHistoryTab";
+import { UserWorkoutsTab } from "./UserWorkoutsTab";
 import { isCurrentPremiumAccess, normalizePlanLabel } from "@/lib/admin-analytics";
 
 interface UserData {
