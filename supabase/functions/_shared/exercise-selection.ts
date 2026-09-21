@@ -109,11 +109,11 @@ export const PRIORITY_BODYWEIGHT = [
   "neutral-grip pull-up", "inverted row", "trx bodyweight row",
   "scapular pull-up", "prone y raise", "prone t raise",
   // Lower push / posterior chain
-  "bodyweight squat", "air squat", "sumo squat", "split squat", "forward lunge",
+  "squat", "sumo squat", "split squat", "forward lunge",
   "reverse lunge", "walking lunge", "lateral lunge", "curtsy lunge", "step-up",
   "bulgarian split squat", "wall sit", "squat pulse", "glute bridge",
   "single-leg glute bridge", "hip thrust", "single-leg hip thrust",
-  "bodyweight good morning", "hamstring walkout",
+  "good morning", "hamstring walkout",
   "single-leg romanian deadlift bodyweight",
   // Core
   "sit-up", "crunch", "bicycle crunch", "reverse crunch", "leg raise", "dead bug",
