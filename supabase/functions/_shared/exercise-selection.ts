@@ -58,17 +58,17 @@ export const PRIORITY_MACHINE = [
   "chest press machine", "incline chest press machine", "pec deck",
   "shoulder press machine", "cable chest press", "cable chest fly",
   "cable crossover", "cable lateral raise", "lat pulldown", "seated cable row",
-  "machine row", "chest-supported row machine", "assisted pull-up machine",
-  "high row machine", "cable straight-arm pulldown", "cable face pull",
+  "row machine", "chest-supported row machine", "assisted pull-up machine",
+  "high row machine", "cable straight-arm pulldown", "face pull",
   // Arms / core / full body
-  "cable triceps pushdown", "cable overhead triceps extension",
-  "machine triceps extension", "cable biceps curl", "cable hammer curl",
+  "triceps pushdown", "cable overhead triceps extension",
+  "machine triceps extension", "biceps curl", "cable hammer curl",
   "preacher curl machine", "biceps curl machine", "triceps dip machine",
   "cable crunch", "ab crunch machine", "rotary torso machine", "back extension",
   "cable wood chop", "cable pallof press", "smith machine romanian deadlift",
   "cable squat", "cable row to press", "sled push",
   // Conventional aliases already used by the live library.
-  "machine chest press", "machine shoulder press", "machine lateral raise",
+  "machine chest press", "machine lateral raise",
   "rear delt machine fly", "assisted pull-up", "assisted dip", "machine dip",
   "hip abduction", "hip adduction", "glute kickback", "machine preacher curl",
 ];
@@ -95,8 +95,8 @@ export const PRIORITY_FREE_WEIGHT = [
   "medicine ball slam", "medicine ball chest pass", "medicine ball rotational throw",
   "medicine ball squat to press",
   // Conventional barbell fundamentals remain available in the same shared pool.
-  "barbell deadlift", "sumo deadlift", "romanian deadlift", "barbell back squat",
-  "barbell front squat", "barbell bench press", "barbell overhead press",
+  "deadlift", "sumo deadlift", "romanian deadlift", "back squat",
+  "front squat", "bench press", "overhead press",
   "barbell bent-over row", "barbell hip thrust", "barbell lunge", "barbell curl",
   "dumbbell curl", "hammer curl", "dumbbell lateral raise", "farmer's carry",
 ];
@@ -109,11 +109,11 @@ export const PRIORITY_BODYWEIGHT = [
   "neutral-grip pull-up", "inverted row", "trx bodyweight row",
   "scapular pull-up", "prone y raise", "prone t raise",
   // Lower push / posterior chain
-  "bodyweight squat", "air squat", "sumo squat", "split squat", "forward lunge",
+  "squat", "sumo squat", "split squat", "forward lunge",
   "reverse lunge", "walking lunge", "lateral lunge", "curtsy lunge", "step-up",
   "bulgarian split squat", "wall sit", "squat pulse", "glute bridge",
   "single-leg glute bridge", "hip thrust", "single-leg hip thrust",
-  "bodyweight good morning", "hamstring walkout",
+  "good morning", "hamstring walkout",
   "single-leg romanian deadlift bodyweight",
   // Core
   "sit-up", "crunch", "bicycle crunch", "reverse crunch", "leg raise", "dead bug",
@@ -197,7 +197,9 @@ const SYNONYMS: [RegExp, string][] = [
   [/\bmilitary press\b/g, "overhead press"],
   [/\bsplit jump\b/g, "jump squat"],
   [/\bpress up\b/g, "push up"],
-  [/\bair squats?\b/g, "bodyweight squat"],
+  [/\bair squats?\b/g, "squat"],
+  [/\bbodyweight squat\b/g, "squat"],
+  [/\bbodyweight good morning\b/g, "good morning"],
   [/\bsuspension trainer\b|\bsuspension\b/g, "trx"],
   [/\bslam ball\b/g, "medicine ball"],
   [/\bbutt kickers?\b/g, "butt kicks"],
