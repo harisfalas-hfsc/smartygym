@@ -236,15 +236,8 @@ const MyOwnWorkoutDetail = () => {
         </Card>
       ) : null}
 
-      {workout.needs_review && workout.review_warnings?.length ? (
-        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-          <div>
-            <p className="font-semibold text-foreground">A note on this session</p>
-            <p className="mt-1">{workout.review_warnings[0]}</p>
-          </div>
-        </div>
-      ) : null}
+      {/* Internal build notes stay internal — admin only, never shown to members. */}
+
 
       <ReaderModeDialog
         open={readerOpen}
