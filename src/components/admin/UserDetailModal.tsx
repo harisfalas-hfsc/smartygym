@@ -600,6 +600,18 @@ export function UserDetailModal({
               </Card>
             </TabsContent>
 
+            {/* Workouts Tab */}
+            <TabsContent value="workouts" className="mt-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Workouts created by this member</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <UserWorkoutsTab userId={user.user_id} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             {/* PAR-Q Tab */}
             <TabsContent value="parq" className="mt-4">
               <Card>
