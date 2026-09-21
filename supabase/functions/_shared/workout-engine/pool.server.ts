@@ -479,10 +479,16 @@ function filterPoolAtLevel(all: PoolExercise[], f: PoolFilter): PoolExercise[] {
   //      difficulty IS the movement, so the tag still filters the tier.
   if (f.level !== "all") {
     const tiers = allowedDifficultyTiers(f.level, f.category);
-    if (tiers.length) {
-      const at = (lvl: string) => pool.filter((e) => (e.difficulty ?? "").toLowerCase() === lvl);
+    const at = (lvl: string) => pool.filter((e) => (e.difficulty ?? "").toLowerCase() === lvl);
+    if (!difficultyFiltersSelection(f.category)) {
+      // Prescription-driven: keep the requested tier AND everything easier, always.
+      const allowed = new Set(tiers);
+      const kept = pool.filter((e) => allowed.has((e.difficulty ?? "").toLowerCase()));
+      if (kept.length) pool = kept;
+    } else if (tiers.length) {
       const strict = at(tiers[0]!);
-      const easier = tiers.slice(1);
+      const easier: string[] =
+        f.level === "advanced" ? ["intermediate", "beginner"] : f.level === "intermediate" ? ["beginner"] : [];
       if (strict.length >= 12 || !easier.length) {
         if (strict.length) pool = strict;
       } else {
