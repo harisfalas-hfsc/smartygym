@@ -433,6 +433,57 @@ export const CATEGORY_POOLS: Record<string, PriorityPool[]> = {
   "MICRO-WORKOUTS": ["BODYWEIGHT"],
 };
 
+/**
+ * ── WHERE DIFFICULTY LIVES (doctrine §16) ───────────────────────────────────
+ * In these categories difficulty is a PRESCRIPTION variable — load, sets, reps,
+ * tempo, rest, density and progression — NOT a licence to hand the athlete
+ * exotic library variations. A bench press, a chest press machine, a pec deck
+ * or a lat pulldown are correct at every level; what changes is how they are
+ * loaded and dosed. So the library's per-exercise difficulty tag must never
+ * strip the common, recognisable movements out of the pool here: the requested
+ * tier keeps everything at or below it, and Advanced sees the whole legal pool.
+ *
+ * Everywhere else (PILATES, MOBILITY & STABILITY, RECOVERY, MICRO-WORKOUTS)
+ * difficulty IS expressed through the movement itself, so the tag still filters.
+ *
+ * Harder material is never pushed downward in any category: a Beginner never
+ * inherits Intermediate or Advanced vocabulary.
+ */
+export const PRESCRIPTION_DIFFICULTY_CATEGORIES = new Set<string>([
+  "STRENGTH",
+  "MUSCLE BUILDING",
+  "CARDIO",
+  "METABOLIC",
+  "CALORIE BURNING",
+  "CHALLENGE",
+]);
+
+/**
+ * True when the library difficulty tag is allowed to REMOVE movements from the
+ * pool for this category. False = difficulty is programmed, not filtered.
+ */
+export function difficultyFiltersSelection(category?: string | null): boolean {
+  return !PRESCRIPTION_DIFFICULTY_CATEGORIES.has((category ?? "").toUpperCase());
+}
+
+/** Tiers legal for a requested level — never harder than what was asked for. */
+export function allowedDifficultyTiers(
+  level: string,
+  category?: string | null,
+): string[] {
+  const l = (level || "").toLowerCase();
+  if (!l || l === "all") return [];
+  const atOrBelow =
+    l === "advanced"
+      ? ["advanced", "intermediate", "beginner"]
+      : l === "intermediate"
+        ? ["intermediate", "beginner"]
+        : ["beginner"];
+  // Prescription-driven categories always keep the easier, common vocabulary.
+  if (!difficultyFiltersSelection(category)) return atOrBelow;
+  return [l];
+}
+
 /** Equipment wording fallback when a name matches no reference entry. */
 const EQUIP_POOL_RE: [PriorityPool, RegExp][] = [
   ["RECOVERY", /\b(stretch|mobility|foam roll|cars|pose|cat[- ]cow|breath)\b/i],
