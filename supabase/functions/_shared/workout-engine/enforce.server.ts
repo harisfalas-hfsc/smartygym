@@ -3,6 +3,7 @@ import { EXERCISE_TOKEN_RE, findTokens, isLibraryId, stripHtml } from "./tokens.
 import { pickPrep, STRETCH_RE, type PoolExercise } from "./pool.server.ts";
 import { parseStepTiming, parseWorkoutSteps } from "./parse-steps.ts";
 import { categoryAllowsFinisher } from "./doctrine.ts";
+import { movementKey } from "../exercise-selection.ts";
 
 
 export type EnforceResult = {
