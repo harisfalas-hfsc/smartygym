@@ -20,6 +20,8 @@ import {
 } from "./doctrine.ts";
 // ONE selection policy for the whole platform — see ../exercise-selection.ts
 import {
+  allowedDifficultyTiers,
+  difficultyFiltersSelection,
   isSelectable,
   matchesCategoryPool,
   orderBySelectionPolicy,
