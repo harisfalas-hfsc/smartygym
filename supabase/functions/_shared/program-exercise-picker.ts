@@ -6,7 +6,13 @@
 // to enforce equipment + difficulty constraints WITHOUT relying on the model.
 // ═══════════════════════════════════════════════════════════════════════════════
 // ONE selection policy for the whole platform — see ./exercise-selection.ts
-import { exerciseFamily, isSelectable, selectionTier } from "./exercise-selection.ts";
+import {
+  allowedDifficultyTiers,
+  difficultyFiltersSelection,
+  exerciseFamily,
+  isSelectable,
+  selectionTier,
+} from "./exercise-selection.ts";
 import { matchesSelectedEquipment } from "./workout-engine/pool.server.ts";
 import {
   hasProgramDoctrine,
