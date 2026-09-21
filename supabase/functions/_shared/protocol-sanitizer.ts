@@ -50,6 +50,7 @@ const COMMON_BARE_EXERCISE_NAMES = [
   "Lying Quad Stretch",
   "Lying Quads Stretch",
   "Cat-Cow Stretch",
+  "Cat-cow",
   "Cat Cow",
   "Air Squats",
   "Push-Up",
