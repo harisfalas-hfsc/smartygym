@@ -95,8 +95,8 @@ export const PRIORITY_FREE_WEIGHT = [
   "medicine ball slam", "medicine ball chest pass", "medicine ball rotational throw",
   "medicine ball squat to press",
   // Conventional barbell fundamentals remain available in the same shared pool.
-  "barbell deadlift", "sumo deadlift", "romanian deadlift", "barbell back squat",
-  "barbell front squat", "barbell bench press", "barbell overhead press",
+  "deadlift", "sumo deadlift", "romanian deadlift", "back squat",
+  "front squat", "bench press", "overhead press",
   "barbell bent-over row", "barbell hip thrust", "barbell lunge", "barbell curl",
   "dumbbell curl", "hammer curl", "dumbbell lateral raise", "farmer's carry",
 ];
