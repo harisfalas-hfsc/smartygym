@@ -24,6 +24,7 @@ import {
   difficultyFiltersSelection,
   isSelectable,
   matchesCategoryPool,
+  movementKey,
   orderBySelectionPolicy,
   selectionTier,
 } from "../exercise-selection.ts";
@@ -724,6 +725,34 @@ function shuffle<T>(arr: T[]): T[] {
     [a[i], a[j]] = [a[j]!, a[i]!];
   }
   return a;
+}
+
+/**
+ * Keeps at most `perFamily` variations of the same movement (bench press,
+ * incline bench press, decline bench press, guillotine press ... are one
+ * family). The simplest, most recognisable variations are kept first, and the
+ * athlete's favourites are never dropped.
+ */
+export function capMovementFamilies(
+  pool: PoolExercise[],
+  favoriteIds: string[] = [],
+  perFamily = 2,
+): PoolExercise[] {
+  const favourite = new Set(favoriteIds);
+  const count = new Map<string, number>();
+  const out: PoolExercise[] = [];
+  for (const e of orderBySelectionPolicy(pool)) {
+    if (favourite.has(e.id)) {
+      out.push(e);
+      continue;
+    }
+    const key = `${movementKey(e.name)}|${(e.equipment ?? "").toLowerCase()}`;
+    const n = count.get(key) ?? 0;
+    if (n >= perFamily) continue;
+    count.set(key, n + 1);
+    out.push(e);
+  }
+  return out;
 }
 
 /**
