@@ -67,3 +67,19 @@ Deno.test("shared policy puts common safe variants before exotic legal variants"
   ], "STRENGTH");
   assertEquals(ordered[0]?.name, "dumbbell goblet squat");
 });
+// ── Difficulty source by category (doctrine §16) ────────────────────────────
+Deno.test("difficulty is programmed, not filtered, in strength/hypertrophy/conditioning", () => {
+  for (const c of ["STRENGTH", "MUSCLE BUILDING", "CARDIO", "METABOLIC", "CALORIE BURNING", "CHALLENGE"]) {
+    assertEquals(difficultyFiltersSelection(c), false);
+    // Advanced keeps the common vocabulary; harder is never pushed downward.
+    assertEquals(allowedDifficultyTiers("advanced", c), ["advanced", "intermediate", "beginner"]);
+    assertEquals(allowedDifficultyTiers("beginner", c), ["beginner"]);
+  }
+});
+
+Deno.test("difficulty still filters the movement in mobility-native categories", () => {
+  for (const c of ["PILATES", "MOBILITY & STABILITY", "RECOVERY", "MICRO-WORKOUTS"]) {
+    assertEquals(difficultyFiltersSelection(c), true);
+    assertEquals(allowedDifficultyTiers("advanced", c), ["advanced"]);
+  }
+});
