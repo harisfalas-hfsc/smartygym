@@ -87,7 +87,7 @@ const AdminExerciseDatabase = () => {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        allData.push(...data);
+        allData.push(...(data as unknown as Record<string, string | null>[]));
         hasMore = data.length === pageSize;
         page++;
       } else {
