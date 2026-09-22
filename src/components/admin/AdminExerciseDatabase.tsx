@@ -72,7 +72,7 @@ const AdminExerciseDatabase = () => {
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   const fetchAllRows = async (column: string) => {
-    const allData: any[] = [];
+    const allData: Record<string, string | null>[] = [];
     let page = 0;
     const pageSize = 1000;
     let hasMore = true;
@@ -191,11 +191,11 @@ const AdminExerciseDatabase = () => {
 
       setExercises((data || []) as Exercise[]);
       setResultCount(data?.length || 0);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching exercises:", error);
       toast({
         title: "Error loading exercises",
-        description: error.message || "Failed to fetch exercises",
+        description: error instanceof Error ? error.message : "Failed to fetch exercises",
         variant: "destructive",
       });
       setExercises([]);
@@ -545,7 +545,7 @@ const AdminExerciseDatabase = () => {
         </div>
       )}
 
-      <ExerciseDetailModal exercise={selectedExercise as any} open={modalOpen} onOpenChange={setModalOpen} />
+      <ExerciseDetailModal exercise={selectedExercise} open={modalOpen} onOpenChange={setModalOpen} />
 
       <AlertDialog open={bulkTarget !== null} onOpenChange={(open) => !open && setBulkTarget(null)}>
         <AlertDialogContent>
