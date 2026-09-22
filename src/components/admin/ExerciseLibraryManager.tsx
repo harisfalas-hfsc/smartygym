@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Pencil, Trash2, Video, ExternalLink, Upload, Database, Image, FileSpreadsheet, Search, AlertTriangle } from "lucide-react";
 import MismatchedExercises from "./MismatchedExercises";
+import AdminExerciseDatabase from "./AdminExerciseDatabase";
 import { toast } from "sonner";
 import { extractYouTubeId, getYouTubeThumbnail, isValidYouTubeUrl, getRestrictedEmbedUrl } from "@/utils/youtube";
 import { MUSCLE_CATEGORIES, MUSCLE_GROUPS, WORKOUT_CATEGORIES, PROGRAM_CATEGORIES, WORKOUT_PHASES } from "@/constants/exerciseCategories";
