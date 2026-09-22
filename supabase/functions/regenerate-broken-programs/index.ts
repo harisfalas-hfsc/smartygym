@@ -180,6 +180,7 @@ Deno.serve(async (req) => {
       const { data, error: libErr } = await supabase
         .from("exercises")
         .select("id, name, body_part, equipment, target")
+        .eq("is_generation_enabled", true)
         .range(exFrom, exFrom + exPageSize - 1);
       if (libErr || !data || data.length === 0) break;
       allExercises.push(...(data as ExerciseBasic[]));

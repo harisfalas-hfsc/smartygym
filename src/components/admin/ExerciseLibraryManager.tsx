@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Pencil, Trash2, Video, ExternalLink, Upload, Database, Image, FileSpreadsheet, Search, AlertTriangle } from "lucide-react";
 import MismatchedExercises from "./MismatchedExercises";
+import AdminExerciseDatabase from "./AdminExerciseDatabase";
 import { toast } from "sonner";
 import { extractYouTubeId, getYouTubeThumbnail, isValidYouTubeUrl, getRestrictedEmbedUrl } from "@/utils/youtube";
 import { MUSCLE_CATEGORIES, MUSCLE_GROUPS, WORKOUT_CATEGORIES, PROGRAM_CATEGORIES, WORKOUT_PHASES } from "@/constants/exerciseCategories";
@@ -621,109 +622,16 @@ const ExerciseLibraryManager = () => {
             </CardContent>
           </Card>
 
-          {/* Exercises List Card */}
+          {/* Exercises Card — same look as the public Exercise Library, plus the use/don't-use switch */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Database className="h-5 w-5" />
-                Exercises ({filteredExercises.length} of {exercises?.length || 0})
+                Exercises
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Filters */}
-              <div className="flex flex-wrap gap-4 mb-4">
-                <div className="flex-1 min-w-[200px]">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search exercises..."
-                      value={exerciseSearch}
-                      onChange={(e) => setExerciseSearch(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                <Select value={bodyPartFilter} onValueChange={setBodyPartFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Body Part" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Body Parts</SelectItem>
-                    {bodyParts.map(bp => (
-                      <SelectItem key={bp} value={bp}>{bp}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Equipment" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Equipment</SelectItem>
-                    {equipmentList.map(eq => (
-                      <SelectItem key={eq} value={eq}>{eq}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {exercisesLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading exercises...</div>
-              ) : !exercises || exercises.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Database className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No exercises in database.</p>
-                  <p className="text-sm">Upload a CSV file to get started.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>GIF</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Body Part</TableHead>
-                        <TableHead>Target</TableHead>
-                        <TableHead>Equipment</TableHead>
-                        <TableHead>Difficulty</TableHead>
-                        <TableHead>ID</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredExercises.slice(0, 100).map((exercise) => (
-                        <TableRow key={exercise.id}>
-                          <TableCell>
-                            {exercise.gif_url ? (
-                              <img
-                                src={exercise.gif_url}
-                                alt={exercise.name}
-                                className="w-16 h-16 object-cover rounded"
-                              />
-                            ) : (
-                              <div className="w-16 h-16 bg-muted rounded flex items-center justify-center">
-                                <Image className="h-6 w-6 text-muted-foreground" />
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell className="font-medium max-w-[200px]">
-                            <p className="line-clamp-2">{exercise.name}</p>
-                          </TableCell>
-                          <TableCell className="capitalize">{exercise.body_part}</TableCell>
-                          <TableCell className="capitalize">{exercise.target}</TableCell>
-                          <TableCell className="capitalize">{exercise.equipment}</TableCell>
-                          <TableCell className="capitalize text-xs">{exercise.difficulty || '-'}</TableCell>
-                          <TableCell className="font-mono text-xs text-muted-foreground">{exercise.id}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  {filteredExercises.length > 100 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      Showing first 100 of {filteredExercises.length} exercises. Use search to narrow results.
-                    </p>
-                  )}
-                </div>
-              )}
+              <AdminExerciseDatabase />
             </CardContent>
           </Card>
         </TabsContent>

@@ -122,6 +122,8 @@ export async function loadAllExercises(supabase: any): Promise<PoolExercise[]> {
     const { data, error } = await supabase
       .from("exercises")
       .select(SELECT)
+      // ADMIN SWITCH: only exercises the admin left "in use" may be programmed.
+      .eq("is_generation_enabled", true)
       .not("gif_url", "is", null)
       .neq("gif_url", "")
       .order("id", { ascending: true })

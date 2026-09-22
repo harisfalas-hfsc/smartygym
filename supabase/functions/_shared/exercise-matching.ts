@@ -1470,6 +1470,8 @@ export async function fetchAndBuildExerciseReference(
     const { data, error } = await supabaseClient
       .from("exercises")
       .select("id, name, category, body_part, equipment, target, difficulty")
+      // ADMIN SWITCH: only exercises the admin left "in use" may be programmed.
+      .eq("is_generation_enabled", true)
       // ANIMATION RULE: never programme an exercise the member cannot watch.
       .not("gif_url", "is", null)
       .neq("gif_url", "")

@@ -1429,6 +1429,7 @@ export type Database = {
           gif_url: string | null
           id: string
           instructions: string[] | null
+          is_generation_enabled: boolean
           name: string
           secondary_muscles: string[] | null
           target: string
@@ -1445,6 +1446,7 @@ export type Database = {
           gif_url?: string | null
           id: string
           instructions?: string[] | null
+          is_generation_enabled?: boolean
           name: string
           secondary_muscles?: string[] | null
           target: string
@@ -1461,6 +1463,7 @@ export type Database = {
           gif_url?: string | null
           id?: string
           instructions?: string[] | null
+          is_generation_enabled?: boolean
           name?: string
           secondary_muscles?: string[] | null
           target?: string

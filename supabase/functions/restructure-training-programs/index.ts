@@ -83,6 +83,7 @@ Deno.serve(async (req) => {
       const { data, error } = await supabase
         .from("exercises")
         .select("id, name, body_part, equipment, target, difficulty, description")
+        .eq("is_generation_enabled", true)
         .range(from, from + 999);
       if (error) throw error;
       if (!data || !data.length) break;
