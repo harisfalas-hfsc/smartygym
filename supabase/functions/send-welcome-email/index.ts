@@ -6,6 +6,7 @@ import { MESSAGE_TYPES } from "../_shared/notification-types.ts";
 import { logEmailDelivery } from "../_shared/email-log.ts";
 import { requireServiceRole } from "../_shared/cron-auth.ts";
 import { freezeGuard } from "../_shared/system-freeze.ts";
+import { getAdminNotificationEmail } from "../_shared/admin-settings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -424,6 +425,48 @@ serve(async (req) => {
           });
         }
       }
+    }
+
+    // ADMIN ALERT: notify admin inbox of every new member (free or paid)
+    try {
+      const resendKey = Deno.env.get("RESEND_API_KEY");
+      if (resendKey) {
+        const adminEmail = await getAdminNotificationEmail(supabaseAdmin);
+        const { data: prof } = await supabaseAdmin
+          .from("profiles").select("full_name, nickname, created_at")
+          .eq("user_id", record.user_id).maybeSingle();
+        const u: any = userData.user;
+        const meta = u.user_metadata || {};
+        const fullName = (prof as any)?.full_name || meta.full_name || meta.name || "—";
+        const provider = u.app_metadata?.provider || "email";
+        const esc = (s: any) => String(s ?? "—").replace(/[&<>"]/g, (c: string) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" } as any)[c]);
+        const row = (k: string, v: any) => `<tr><td style="padding:6px 12px;color:#64748b">${k}</td><td style="padding:6px 12px;font-weight:600">${esc(v)}</td></tr>`;
+        const adminResult = await new Resend(resendKey).emails.send({
+          from: "SmartyGym Alerts <notifications@smartygym.com>",
+          to: [adminEmail],
+          subject: `🆕 New SmartyGym member: ${fullName}`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:560px">
+            <h2 style="color:#0F172A">New member signed up</h2>
+            <table style="border-collapse:collapse;background:#f8fafc;width:100%">
+              ${row("Name", fullName)}
+              ${row("Email", userEmail)}
+              ${row("Sign-up method", provider)}
+              ${row("Registered", new Date(u.created_at).toLocaleString("en-GB", { timeZone: "Asia/Nicosia" }) + " (Cyprus)")}
+              ${row("Email confirmed", new Date(u.email_confirmed_at).toLocaleString("en-GB", { timeZone: "Asia/Nicosia" }) + " (Cyprus)")}
+              ${row("Plan", "Free (paid purchases are notified by Stripe)")}
+              ${row("User ID", record.user_id)}
+            </table>
+            <p><a href="https://smartygym.com/admin" style="color:#29B6D2">Open Admin Panel → Users</a></p>
+          </div>`,
+        });
+        await logEmailDelivery({
+          userId: record.user_id, toEmail: adminEmail, messageType: "admin_alert",
+          status: "sent", resendId: adminResult?.data?.id ?? null,
+          metadata: { alert: "new_member", member_email: userEmail },
+        });
+      }
+    } catch (adminErr: any) {
+      logStep("Admin new-member alert failed", { error: adminErr?.message || String(adminErr) });
     }
 
     // Update automation rule execution count

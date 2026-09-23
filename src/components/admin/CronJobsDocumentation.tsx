@@ -205,6 +205,7 @@ export const CronJobsDocumentation = () => {
                 <li>• Email sender: notifications@smartygym.com</li>
                 <li>• Reply-to: smartygym@outlook.com</li>
                 <li>• Always-on (no opt-out): welcome, purchases, renewals, holidays, security</li>
+                <li>• New-member admin alert: instant (not a cron) — fires with the Welcome message when a new member confirms their account; emails name, email, sign-up method, dates and user ID to the admin notification email. Logged in Email Delivery as "admin_alert".</li>
               </ul>
             </div>
             <div className="text-right">
