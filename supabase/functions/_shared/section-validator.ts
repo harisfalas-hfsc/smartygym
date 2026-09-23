@@ -237,7 +237,11 @@ export function validateWodSections(
     };
   }
 
-  const required = isRecovery ? RECOVERY_REQUIRED : NON_RECOVERY_REQUIRED;
+  // PILATES (like RECOVERY) may legitimately have no Finisher section.
+  const finisherOptional =
+    isRecovery ||
+    ((category || "").toUpperCase() === "PILATES" && !mainWorkoutHtml.includes(SECTION_ICONS.FINISHER));
+  const required = finisherOptional ? RECOVERY_REQUIRED : NON_RECOVERY_REQUIRED;
   const foundIcons: string[] = [];
   const missingIcons: string[] = [];
   const missingSections: string[] = [];
@@ -255,10 +259,10 @@ export function validateWodSections(
   const mainWorkoutExerciseCount = countExerciseTagsBetween(
     mainWorkoutHtml,
     SECTION_ICONS.MAIN_WORKOUT,
-    isRecovery ? SECTION_ICONS.COOL_DOWN : SECTION_ICONS.FINISHER
+    finisherOptional ? SECTION_ICONS.COOL_DOWN : SECTION_ICONS.FINISHER
   );
 
-  const finisherExerciseCount = isRecovery
+  const finisherExerciseCount = finisherOptional
     ? 0 // Recovery WODs don't require a finisher
     : countExerciseTagsBetween(
         mainWorkoutHtml,
@@ -275,7 +279,7 @@ export function validateWodSections(
     );
   }
 
-  if (!isRecovery && finisherExerciseCount < MIN_FINISHER_EXERCISES) {
+  if (!finisherOptional && finisherExerciseCount < MIN_FINISHER_EXERCISES) {
     exerciseContentIssues.push(
       `Finisher has only ${finisherExerciseCount} exercise(s), minimum is ${MIN_FINISHER_EXERCISES}`
     );
