@@ -174,6 +174,7 @@ serve(async (req) => {
 
     // Send email as well
     let emailSent = false;
+    let userEmail = "";
     try {
       // Get user email
       const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
@@ -181,7 +182,7 @@ serve(async (req) => {
       if (userError || !userData?.user?.email) {
         console.error('[SEND-SYSTEM-MESSAGE] Could not fetch user email:', userError);
       } else {
-        const userEmail = userData.user.email;
+        userEmail = userData.user.email;
         
         // Check notification preferences from profiles table
         const { data: profile } = await supabaseAdmin
@@ -233,7 +234,7 @@ serve(async (req) => {
       try {
         await logEmailDelivery({
           userId,
-          toEmail: (typeof userEmail !== "undefined" ? userEmail : ""),
+          toEmail: userEmail,
           messageType,
           status: "failed",
           errorMessage: emailError instanceof Error ? emailError.message : String(emailError),
