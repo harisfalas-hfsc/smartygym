@@ -103,11 +103,26 @@ serve(async (req) => {
     // Check user's dashboard notification preferences before inserting
     const { data: profileForDashboard } = await supabaseAdmin
       .from('profiles')
-      .select('notification_preferences')
+      .select('notification_preferences, full_name')
       .eq('user_id', userId)
       .single();
 
     const dashPrefs = profileForDashboard?.notification_preferences as Record<string, any> || {};
+
+    // Personalisation: replace {{name}} / {{first_name}} / {{full_name}} placeholders
+    // with the member's real name (graceful fallback when we have no name on file).
+    {
+      const fullName = (profileForDashboard?.full_name as string | null)?.trim() || "";
+      const firstName = fullName ? fullName.split(/\s+/)[0] : "";
+      const nameFallback = firstName || "there";
+      const replaceNames = (text: string) =>
+        text
+          .replace(/\{\{\s*first_name\s*\}\}/gi, nameFallback)
+          .replace(/\{\{\s*full_name\s*\}\}/gi, fullName || nameFallback)
+          .replace(/\{\{\s*name\s*\}\}/gi, nameFallback);
+      subject = replaceNames(subject);
+      content = replaceNames(content);
+    }
 
     const automationKey = OPTIONAL_AUTOMATION_BY_MESSAGE_TYPE[messageType];
     const shouldSendDashboard = automationKey ? canSend(dashPrefs, automationKey, "dashboard") : true;
@@ -159,6 +174,7 @@ serve(async (req) => {
 
     // Send email as well
     let emailSent = false;
+    let userEmail = "";
     try {
       // Get user email
       const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
@@ -166,7 +182,7 @@ serve(async (req) => {
       if (userError || !userData?.user?.email) {
         console.error('[SEND-SYSTEM-MESSAGE] Could not fetch user email:', userError);
       } else {
-        const userEmail = userData.user.email;
+        userEmail = userData.user.email;
         
         // Check notification preferences from profiles table
         const { data: profile } = await supabaseAdmin
@@ -218,7 +234,7 @@ serve(async (req) => {
       try {
         await logEmailDelivery({
           userId,
-          toEmail: (typeof userEmail !== "undefined" ? userEmail : ""),
+          toEmail: userEmail,
           messageType,
           status: "failed",
           errorMessage: emailError instanceof Error ? emailError.message : String(emailError),
