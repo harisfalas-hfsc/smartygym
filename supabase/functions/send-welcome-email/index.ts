@@ -433,7 +433,7 @@ serve(async (req) => {
       if (resendKey) {
         const adminEmail = await getAdminNotificationEmail(supabaseAdmin);
         const { data: prof } = await supabaseAdmin
-          .from("profiles").select("full_name, nickname, created_at")
+          .from("profiles").select("full_name")
           .eq("user_id", record.user_id).maybeSingle();
         const u: any = userData.user;
         const meta = u.user_metadata || {};
