@@ -1313,6 +1313,8 @@ async function handleInvoicePaymentFailed(
   const render = (s: string) =>
     (s || '')
       .replaceAll('{{name}}', name)
+      .replaceAll('{{first_name}}', name)
+      .replaceAll('{{full_name}}', profile?.full_name || name)
       .replaceAll('{{attempt}}', String(attempt))
       .replaceAll('{{next_retry}}', nextRetry);
 
