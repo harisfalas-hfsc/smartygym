@@ -2,8 +2,11 @@
 
 Competitors: Fitness Blender, Darebee, Les Mills, Nike Training Club, Freeletics, FIIT, FitOn, BetterMe, Peloton.
 
-## What members will see
-Nothing changes. Pages, design, text, routes and navigation all stay as they are, and no new pages are added. Your existing SEO setup is kept, and every change adds to it without replacing it.
+## What members will see: nothing, on desktop or mobile
+- Zero visible changes across the whole website, desktop and mobile. Layouts, design, styles, visible text, images, buttons, menus, routes and navigation all stay exactly as they are.
+- No new pages, no new sections, no new links or banners.
+- Everything added is hidden and read only by search engines and AI tools: page head tags, structured data, hidden crawler-only text, and the files AI tools read.
+- Your existing SEO setup is kept. Every change only adds to it and never replaces anything.
 
 ## Step 1: Research (read-only, no changes)
 - For each competitor, use Semrush to pull their top Google keywords and the gaps: keywords they rank for that SmartyGym doesn't.
@@ -22,7 +25,7 @@ Nothing changes. Pages, design, text, routes and navigation all stay as they are
 
 ## Checks after the changes
 - All structured data parses correctly, and the code check and tests pass.
-- Before-and-after screenshots of the home, workouts, programs and blog pages are identical.
+- Before-and-after screenshots of the home, workouts, programs and blog pages, on both desktop and mobile, are identical. If anything visible differs, it gets rolled back.
 - None of this reaches Google until you publish.
 
 ## Technical details
