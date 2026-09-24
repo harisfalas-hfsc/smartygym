@@ -35,9 +35,9 @@ Professional fitness coaching with expert-designed workouts and training program
 ## Keywords (iOS only, 100 characters max)
 
 ```
-fitness,workout,gym,training,exercise,strength,personal trainer,HIIT,muscle,weight loss
+smartgym,smart gym,fitness,workout,training,exercise,strength,HIIT,muscle,weight loss,trainer
 ```
-*(90 characters)*
+*(92 characters — includes the common misspellings "smartgym" / "smart gym" of our own brand)*
 
 **Keyword Strategy:**
 - Primary: fitness, workout, gym, training

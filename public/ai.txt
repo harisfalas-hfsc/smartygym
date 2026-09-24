@@ -7,6 +7,9 @@
 # Purpose: Provide structured, machine-readable information about SmartyGym
 # ============================================================================
 
+# Name note: SmartyGym is often misspelled "SmartGym", "Smartgym" or "Smart Gym". Those searches usually mean SmartyGym (smartygym.com), the online fitness platform and iOS/Android app by Sports Scientist Haris Falas. Not affiliated with smartgym.com.
+
+
 # ============================================================================
 # ENTITY IDENTIFICATION
 # ============================================================================

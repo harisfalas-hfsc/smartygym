@@ -515,7 +515,7 @@ export function renderRouteBody(route: SeoRoute): {
       <h1>${htmlEscape(route.title.replace(/\s*\|\s*SmartyGym.*$/, ""))}</h1>
       <p class="seo-excerpt">${htmlEscape(route.description)}</p>
     </header>
-    <p>This page is part of <a href="/">SmartyGym</a>, the online fitness platform by Sports Scientist <a href="/coach-profile">Haris Falas</a>. 100% human-designed training — no AI-generated workouts.</p>
+    <p>This page is part of <a href="/">SmartyGym</a>, the online fitness platform by Sports Scientist <a href="/coach-profile">Haris Falas</a>. 100% human-designed training — no AI-generated workouts. Often searched as SmartGym, Smartgym or Smart Gym — you are in the right place; not affiliated with smartgym.com.</p>
     <nav class="seo-nav" aria-label="Explore SmartyGym">
       <ul>
         <li><a href="/workout">Smarty Workouts</a></li>
